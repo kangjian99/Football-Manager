@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Team, Match, MatchEvent } from '../types';
-import { Play, FastForward, SkipForward, Timer } from 'lucide-react';
+import { Play, FastForward, SkipForward, Timer, Volume2, VolumeX } from 'lucide-react';
 import { simulateMatch } from '../services/gameEngine';
+import { playWhistle, playGoalSound, resumeAudio } from '../services/audioService';
 
 interface MatchViewProps {
   homeTeam: Team;
@@ -11,16 +12,21 @@ interface MatchViewProps {
   matchId: string;
   userTeamId: string;
   onMatchComplete: (matchResult: Match) => void;
+  initialSoundEnabled: boolean;
 }
 
-const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchComplete }) => {
+const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchComplete, initialSoundEnabled }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [minute, setMinute] = useState(0);
   const [events, setEvents] = useState<MatchEvent[]>([]);
   const [speed, setSpeed] = useState(100); // ms per tick
   const [matchResult, setMatchResult] = useState<Match | null>(null);
   const [isFinished, setIsFinished] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(initialSoundEnabled);
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Keep track of events we've already processed for sound to avoid double playing
+  const processedEventsRef = useRef<Set<number>>(new Set());
 
   // Simulate immediately on mount (calculation), but don't show result yet
   useEffect(() => {
@@ -28,6 +34,11 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
     const result = simulateMatch(homeTeam, awayTeam, week, matchId);
     setMatchResult(result);
   }, [homeTeam, awayTeam, week, matchId]);
+
+  const handleStartMatch = () => {
+    resumeAudio(); // Initialize audio context on user interaction
+    setHasStarted(true);
+  };
 
   // Playback loop
   useEffect(() => {
@@ -47,15 +58,30 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
     return () => clearInterval(interval);
   }, [hasStarted, speed, matchResult, isFinished]);
 
-  // Update visible events
+  // Update visible events and Play Sounds
   useEffect(() => {
     if (matchResult && hasStarted) {
       const currentEvents = matchResult.events.filter(e => e.minute === minute);
+      
       if (currentEvents.length > 0) {
         setEvents(prev => [...prev, ...currentEvents]);
+        
+        // Sound Logic
+        if (soundEnabled) {
+            currentEvents.forEach(evt => {
+                // Whistle for Kickoff (1) and Half Time (46)
+                if (evt.type === 'whistle') {
+                    playWhistle();
+                }
+                // Goal
+                if (evt.type === 'goal') {
+                    playGoalSound();
+                }
+            });
+        }
       }
     }
-  }, [minute, matchResult, hasStarted]);
+  }, [minute, matchResult, hasStarted, soundEnabled]);
 
   // Auto scroll
   useEffect(() => {
@@ -122,7 +148,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                 </div>
 
                 <button 
-                    onClick={() => setHasStarted(true)}
+                    onClick={handleStartMatch}
                     className="group relative bg-green-600 hover:bg-green-500 text-white px-16 py-5 rounded-full font-bold text-2xl shadow-lg shadow-green-900/50 transition-all transform hover:scale-105"
                 >
                     <span className="flex items-center gap-3">
@@ -267,7 +293,15 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
       {/* Footer Controls */}
       {!isFinished && (
-          <div className="bg-gray-800 p-4 border-t border-gray-700 flex justify-center gap-6 z-20">
+          <div className="bg-gray-800 p-4 border-t border-gray-700 flex justify-center items-center gap-6 z-20">
+                <button 
+                    onClick={() => setSoundEnabled(!soundEnabled)} 
+                    className={`p-3 rounded-full transition-all ${soundEnabled ? 'text-blue-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-700'}`}
+                    title="Toggle Sound"
+                >
+                    {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                </button>
+                <div className="h-8 w-px bg-gray-700"></div>
                 <button onClick={() => setSpeed(200)} className={`p-3 rounded-full transition-all ${speed === 200 ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}>
                     <Play size={20} fill="currentColor" />
                 </button>

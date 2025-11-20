@@ -42,50 +42,47 @@ const getRandomTemplate = (templates: string[], player: Player): string => {
   return t.replace("{player}", player.name);
 };
 
+// Fisher-Yates Shuffle
+const shuffleArray = <T>(array: T[]): T[] => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
 /**
  * Selects a player based on weights.
- * Goal logic: FWD > MID > DEF > GK. Rating acts as multiplier.
- * Card logic: DEF > MID > FWD > GK.
- * Excludes players in the excludedIds set (e.g., Red Cards).
  */
 const selectPlayer = (team: Team, type: 'GOAL' | 'CARD' | 'CHANCE', excludedIds: Set<string> = new Set()): Player => {
   let candidates = team.players;
   
-  // Filter out excluded players (e.g. Red Cards)
   if (excludedIds.size > 0) {
     candidates = candidates.filter(p => !excludedIds.has(p.id));
   }
 
-  // Fallback if everyone is sent off (highly unlikely safety check)
   if (candidates.length === 0) return team.players[0];
   
-  // Calculate weight for each player
   const weightedList: { player: Player, weight: number }[] = candidates.map(p => {
     let weight = 1;
     
     if (type === 'GOAL' || type === 'CHANCE') {
-      // Position bias
       if (p.position === 'FWD') weight = 12;
       else if (p.position === 'MID') weight = 6;
       else if (p.position === 'DEF') weight = 1;
-      else weight = 0.1; // GK
-
-      // Rating bias (exponential to favor stars)
+      else weight = 0.1;
       weight *= Math.pow(p.rating / 50, 3); 
     } else if (type === 'CARD') {
-      // Position bias
       if (p.position === 'DEF') weight = 10;
       else if (p.position === 'MID') weight = 6;
       else if (p.position === 'FWD') weight = 2;
       else weight = 0.5;
-      
-      // Inverse rating bias (worse players maybe foul more? or aggressive ones. keeping simple)
     }
 
     return { player: p, weight };
   });
 
-  // Weighted Random selection
   const totalWeight = weightedList.reduce((sum, item) => sum + item.weight, 0);
   let random = Math.random() * totalWeight;
   
@@ -103,25 +100,36 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   const events: MatchEvent[] = [];
   let homeGoals = 0;
   let awayGoals = 0;
-  const sentOffPlayers = new Set<string>(); // Track players who received a red card
+  const sentOffPlayers = new Set<string>(); 
 
-  // 1. Calculate Team Strengths
-  // Home Advantage adds to control
-  const homeControl = (home.mid * 1.5 + home.def + home.att) / 3.5 + 5; 
-  const awayControl = (away.mid * 1.5 + away.def + away.att) / 3.5;
+  // 1. Calculate Team Strengths with greater emphasis on rating gaps
   
-  const totalControl = homeControl + awayControl;
-  const homePossession = homeControl / totalControl; // e.g., 0.55
+  // Control Calculation (Midfield dominance)
+  // Use a power curve to exaggerate differences. A team with 90 MID vs 70 MID should dominate significantly.
+  const homeStrength = Math.pow(home.mid, 2) + Math.pow(home.def, 1.5) + Math.pow(home.att, 1.5);
+  const awayStrength = Math.pow(away.mid, 2) + Math.pow(away.def, 1.5) + Math.pow(away.att, 1.5);
+  
+  // Home Advantage: Adds a raw multiplier to strength
+  const homeAdvantage = 1.1; 
+  const totalStrength = (homeStrength * homeAdvantage) + awayStrength;
+  
+  const homePossession = (homeStrength * homeAdvantage) / totalStrength; // 0.0 to 1.0
 
-  // Attack vs Defense Ratios
-  const homeAttThreat = (home.att / away.def) * 0.018; // Base chance per minute
-  const awayAttThreat = (away.att / home.def) * 0.016;
+  // Attack vs Defense Ratios (Goal Probability)
+  // We use Math.pow(ratio, 2.5) to make the strong teams much more lethal against weak defenses.
+  const baseGoalChance = 0.014; // Base probability per minute
+  
+  const homeAttRatio = home.att / away.def;
+  const awayAttRatio = away.att / home.def;
+
+  // If Ratio is 1.2 (90 vs 75), pow(1.2, 2.5) ~= 1.57 multiplier
+  // If Ratio is 0.8 (75 vs 90), pow(0.8, 2.5) ~= 0.57 multiplier
+  const homeGoalProb = baseGoalChance * Math.pow(homeAttRatio, 2.5) * homeAdvantage;
+  const awayGoalProb = baseGoalChance * Math.pow(awayAttRatio, 2.5);
 
   // 2. Loop through 90 Minutes
   for (let minute = 1; minute <= 90; minute++) {
-    const roll = Math.random();
-
-    // Commentary for start/half/end
+    // Whistles
     if (minute === 1) {
       events.push({ minute, type: 'whistle', text: "The referee blows the whistle, and we are underway!", isImportant: false });
       continue;
@@ -131,14 +139,14 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       continue;
     }
 
-    // Event logic
-    // Determine who has the ball/momentum for this tick based on possession
+    // Possession check for this specific minute
+    // Add some random variance so weak teams still get *some* ball
     const isHomeAttacking = Math.random() < homePossession;
     
     if (isHomeAttacking) {
       // Home Team Attack
-      if (Math.random() < homeAttThreat) {
-        // GOAL for Home
+      if (Math.random() < homeGoalProb) {
+        // GOAL
         const scorer = selectPlayer(home, 'GOAL', sentOffPlayers);
         homeGoals++;
         events.push({
@@ -151,7 +159,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
           isImportant: true
         });
       } else if (Math.random() < 0.015) {
-        // Missed Chance / Save
+        // Missed Chance
         const player = selectPlayer(home, 'CHANCE', sentOffPlayers);
         events.push({
           minute,
@@ -163,8 +171,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       }
     } else {
       // Away Team Attack
-      if (Math.random() < awayAttThreat) {
-        // GOAL for Away
+      if (Math.random() < awayGoalProb) {
+        // GOAL
         const scorer = selectPlayer(away, 'GOAL', sentOffPlayers);
         awayGoals++;
         events.push({
@@ -177,7 +185,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
           isImportant: true
         });
       } else if (Math.random() < 0.015) {
-        // Missed Chance / Save
+        // Missed Chance
         const player = selectPlayer(away, 'CHANCE', sentOffPlayers);
         events.push({
           minute,
@@ -189,17 +197,13 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       }
     }
 
-    // Cards Logic
-    // Increased probability (~4-5 cards per game)
+    // Cards Logic (Independent of possession)
     if (Math.random() < 0.035) {
-      const isHomeCard = Math.random() < 0.4; // Fairer distribution
+      const isHomeCard = Math.random() < 0.4;
       const team = isHomeCard ? home : away;
-      
-      // Ensure we don't card a player who is already sent off
       const offender = selectPlayer(team, 'CARD', sentOffPlayers);
       
-      // Red Card Logic (approx 5% of cards)
-      const isRed = Math.random() < 0.05; 
+      const isRed = Math.random() < 0.03; // Slightly lower red card chance
       
       if (isRed) {
         sentOffPlayers.add(offender.id);
@@ -236,7 +240,10 @@ export const generateSchedule = (teams: Team[]): Match[][] => {
     if (numTeams % 2 !== 0) return []; 
     
     const rounds = numTeams - 1;
-    const tempTeams = [...teams];
+    
+    // CRITICAL: Shuffle teams before generating schedule so matchups are random every season
+    const tempTeams = shuffleArray(teams);
+    
     const fixedTeam = tempTeams.shift(); // Remove first team to be the pivot
     
     if (!fixedTeam) return [];
@@ -247,7 +254,6 @@ export const generateSchedule = (teams: Team[]): Match[][] => {
         
         // 1. Match involving the Fixed Team
         const t2 = tempTeams[0];
-        // Alternating rule for Fixed Team: Home on even rounds (0, 2, 4...)
         const fixedIsHome = round % 2 === 0;
         
         weekMatches.push({
@@ -261,16 +267,11 @@ export const generateSchedule = (teams: Team[]): Match[][] => {
             events: []
         });
 
-        // 2. Other Matches (Standard Circle Method)
-        // tempTeams length is N-1 (Odd). Pair indices i with N-1-i
+        // 2. Other Matches
         for (let i = 1; i < tempTeams.length / 2; i++) {
             const t1 = tempTeams[i];
             const t2 = tempTeams[tempTeams.length - i];
             
-            // Alternating rule for rotating teams: 
-            // Even indices (Top Row in diagram) play Home
-            // Odd indices (Top Row in diagram) play Away
-            // This breaks the simple sequential pattern and ensures balance as teams rotate index.
             const firstIsHome = i % 2 === 0;
 
             weekMatches.push({
@@ -287,18 +288,17 @@ export const generateSchedule = (teams: Team[]): Match[][] => {
 
         schedule.push(weekMatches);
 
-        // Rotate the tempTeams array for next round
-        // Take first element (after the fixed slot) and move it to the end
+        // Rotate
         const first = tempTeams.shift();
         if (first) tempTeams.push(first);
     }
 
-    // Second Half of the Season (Mirror of First Half with swapped Home/Away)
+    // Second Half
     const secondHalf: Match[][] = [];
     schedule.forEach((weekMatches, idx) => {
         const returnMatches = weekMatches.map(m => ({
             ...m,
-            id: `R${idx + rounds}-${m.awayTeamId}-${m.homeTeamId}`, // Swap ID key to be unique
+            id: `R${idx + rounds}-${m.awayTeamId}-${m.homeTeamId}`,
             homeTeamId: m.awayTeamId,
             awayTeamId: m.homeTeamId,
             homeScore: 0,

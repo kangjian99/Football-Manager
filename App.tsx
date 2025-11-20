@@ -23,6 +23,18 @@ const App: React.FC = () => {
   const [schedule, setSchedule] = useState<Match[][]>([]);
   const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A);
   const [seasonYear, setSeasonYear] = useState("2024/2025");
+  
+  // Sound Settings
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    const stored = localStorage.getItem('sound_enabled');
+    return stored === null ? true : stored === 'true';
+  });
+
+  const handleToggleSound = () => {
+    const newVal = !soundEnabled;
+    setSoundEnabled(newVal);
+    localStorage.setItem('sound_enabled', String(newVal));
+  };
 
   // Computed
   const userTeam = teams.find(t => t.id === userTeamId);
@@ -452,6 +464,7 @@ const App: React.FC = () => {
                     matchId={userMatch.id}
                     userTeamId={userTeamId}
                     onMatchComplete={handleMatchComplete}
+                    initialSoundEnabled={soundEnabled}
                 />
             )}
             {currentView === 'SEASON_END' && (
@@ -462,7 +475,11 @@ const App: React.FC = () => {
                 />
             )}
             {currentView === 'SETTINGS' && (
-                <SettingsView onClearApiKey={handleClearApiKey} />
+                <SettingsView 
+                    onClearApiKey={handleClearApiKey} 
+                    soundEnabled={soundEnabled}
+                    onToggleSound={handleToggleSound}
+                />
             )}
              {currentView === 'TACTICS' && (
                 <div className="text-center py-20 text-gray-500">
