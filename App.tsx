@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -6,10 +7,11 @@ import MatchView from './components/MatchView';
 import SquadView from './components/SquadView';
 import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
+import SettingsView from './components/SettingsView';
 import { ALL_TEAMS, SERIE_A_TEAMS, SERIE_B_TEAMS } from './constants';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch } from './services/gameEngine';
-import { Key, Lock } from 'lucide-react';
+import { Key, Lock, ShieldCheck, Info } from 'lucide-react';
 
 const App: React.FC = () => {
   // State
@@ -73,6 +75,13 @@ const App: React.FC = () => {
         localStorage.setItem('gemini_api_key', input.trim());
         setApiKey(input.trim());
     }
+  };
+
+  const handleClearApiKey = () => {
+    localStorage.removeItem('gemini_api_key');
+    setApiKey('');
+    // Reset to dashboard view when clearing key, though the auth guard will catch them first
+    setCurrentView('DASHBOARD'); 
   };
 
   const handleTeamSelect = (id: string) => {
@@ -254,7 +263,7 @@ const App: React.FC = () => {
   if (!apiKey && !process.env.API_KEY) {
     return (
         <div className="h-screen bg-gray-900 flex items-center justify-center p-6">
-            <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-2xl max-w-md w-full">
+            <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-2xl max-w-md w-full animate-in zoom-in duration-300">
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500">
                         <Key size={32} />
@@ -263,6 +272,11 @@ const App: React.FC = () => {
                 <h1 className="text-2xl font-bold text-white text-center mb-2">Welcome Manager</h1>
                 <p className="text-gray-400 text-center mb-8">Please enter your Google Gemini API Key to activate the scouting assistant and commentary engine.</p>
                 
+                <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
+                    <p className="flex gap-2 mb-2"><ShieldCheck className="shrink-0" size={18} /> <strong>Privacy First:</strong> Your key is stored locally in your browser and is never sent to our servers.</p>
+                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>Just playing?</strong> You can enter any random string (e.g. "demo") to bypass this screen and play without AI features.</p>
+                </div>
+
                 <form onSubmit={handleSaveApiKey} className="space-y-4">
                     <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
@@ -279,7 +293,6 @@ const App: React.FC = () => {
                     </button>
                 </form>
                 <p className="text-xs text-gray-500 text-center mt-6">
-                    Your key is stored locally in your browser. <br/>
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">Get an API key here</a>
                 </p>
             </div>
@@ -292,7 +305,18 @@ const App: React.FC = () => {
     return (
       <div className="h-screen bg-gray-900 overflow-y-auto flex flex-col items-center p-6">
         <div className="max-w-4xl w-full py-12 pb-20">
-            <h1 className="text-5xl font-bold text-white text-center mb-2">Calcio Manager AI</h1>
+            <div className="flex justify-between items-center mb-2">
+                <div></div> {/* Spacer */}
+                <h1 className="text-5xl font-bold text-white text-center">Calcio Manager AI</h1>
+                <button 
+                    onClick={handleClearApiKey}
+                    className="text-xs text-gray-500 hover:text-red-400 flex items-center gap-1"
+                    title="Clear API Key"
+                >
+                    <Key size={12} /> Reset Key
+                </button>
+            </div>
+            
             <p className="text-gray-400 text-center mb-12">Select your club to begin your journey</p>
             
             {/* Serie A Selection */}
@@ -365,6 +389,7 @@ const App: React.FC = () => {
                 {currentView === 'FIXTURES' && 'Fixtures & Results'}
                 {currentView === 'MATCH' && 'Match Center'}
                 {currentView === 'SEASON_END' && 'End of Season Summary'}
+                {currentView === 'SETTINGS' && 'Application Settings'}
             </h1>
             <div className="flex items-center gap-6 text-sm">
                 <div className="flex flex-col items-end">
@@ -435,6 +460,9 @@ const App: React.FC = () => {
                     onStartNewSeason={handleStartNewSeason} 
                     seasonYear={seasonYear}
                 />
+            )}
+            {currentView === 'SETTINGS' && (
+                <SettingsView onClearApiKey={handleClearApiKey} />
             )}
              {currentView === 'TACTICS' && (
                 <div className="text-center py-20 text-gray-500">

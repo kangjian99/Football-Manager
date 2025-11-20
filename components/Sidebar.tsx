@@ -61,8 +61,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, userTeam, disab
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
-        <button disabled={disabled} className={`flex items-center gap-3 text-sm px-2 ${disabled ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`}>
+      <div className="border-t border-gray-700">
+        <button 
+            disabled={disabled} 
+            onClick={() => setView('SETTINGS')}
+            className={`w-full flex items-center gap-3 px-6 py-4 text-sm transition-colors ${
+                currentView === 'SETTINGS'
+                  ? 'bg-blue-600 text-white border-r-4 border-blue-400' 
+                  : disabled 
+                    ? 'text-gray-600 cursor-not-allowed' 
+                    : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+            }`}
+        >
             <Settings size={18} />
             Settings
         </button>
