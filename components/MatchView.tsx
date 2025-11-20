@@ -143,14 +143,15 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
       if(event.type === 'sub' && event.subOn && event.subOff) {
         const isAway = event.teamId === awayTeam.id;
         return (
-            <div className={`flex flex-col gap-1 text-sm ${isAway ? 'items-end' : 'items-start'}`}>
-                <div className="flex items-center gap-2 text-green-400">
-                    <span className="text-xs font-bold uppercase">IN</span>
-                    <span className="font-bold text-white">{event.subOn.name}</span>
+            <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-sm ${isAway ? 'justify-end' : 'justify-start'}`}>
+                <div className="flex items-center gap-1.5 text-green-400">
+                    <span className="text-[10px] font-bold uppercase bg-green-900/40 border border-green-800/50 px-1 rounded">IN</span>
+                    <span className="font-bold text-white text-xs md:text-sm">{event.subOn.name}</span>
                 </div>
-                <div className="flex items-center gap-2 text-red-400">
-                    <span className="text-xs font-bold uppercase">OUT</span>
-                    <span className="font-bold text-gray-400">{event.subOff.name}</span>
+                <div className="text-gray-600 text-xs">|</div>
+                <div className="flex items-center gap-1.5 text-red-400">
+                    <span className="text-[10px] font-bold uppercase bg-red-900/40 border border-red-800/50 px-1 rounded">OUT</span>
+                    <span className="font-bold text-gray-400 text-xs md:text-sm">{event.subOff.name}</span>
                 </div>
             </div>
         );
@@ -304,7 +305,9 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                             </div>
                             
                             {/* Event Box */}
-                            <div className={`flex-1 p-3 rounded-lg border shadow-sm relative overflow-hidden ${
+                            <div className={`flex-1 rounded-lg border shadow-sm relative overflow-hidden ${
+                                (event.type === 'sub' || event.type === 'whistle') ? 'py-2 px-3' : 'py-3 px-3'
+                            } ${
                                 event.type === 'goal' ? 'bg-gray-800 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.2)]' : 
                                 event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-900/20 border-red-600' : 'bg-yellow-900/10 border-yellow-600') : 
                                 event.type === 'sub' ? 'bg-gray-800 border-blue-500/50' :
