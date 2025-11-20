@@ -48,11 +48,17 @@ const YELLOW_CARD_TEMPLATES = [
   "Reckless slide tackle from {player}."
 ];
 
+const SECOND_YELLOW_TEMPLATES = [
+    "It's a second yellow for {player}! He is sent off!",
+    "{player} commits another foul and the referee reaches for the pocket. Second yellow, RED CARD!",
+    "Foolish from {player}, he was already booked! He takes an early shower."
+];
+
 const RED_CARD_TEMPLATES = [
     "{player} goes in with two feet! Straight Red Card!",
     "Disgraceful behavior from {player}, the referee has no choice. Red Card!",
     "{player} denies a clear goalscoring opportunity. Sent off!",
-    "Second yellow for {player}! He's off!"
+    "Violent conduct from {player} behind the play! Straight Red!"
 ];
 
 const SUB_TEMPLATES = [
@@ -149,6 +155,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   let homeGoals = 0;
   let awayGoals = 0;
   const sentOffPlayers = new Set<string>(); 
+  const matchYellowCards = new Set<string>(); // Track yellow cards for this match only
 
   // Initialize Lineups
   const homeSquad = getStartingLineup(home);
@@ -377,15 +384,33 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       const activePlayers = isHomeCard ? homeOnPitch : awayOnPitch;
       const team = isHomeCard ? home : away;
       const offender = selectPlayer(activePlayers, 'CARD', sentOffPlayers);
-      const isRed = Math.random() < 0.03;
-      if (isRed) sentOffPlayers.add(offender.id);
+      
+      let isRed = Math.random() < 0.03;
+      let cardText = "";
+
+      if (!isRed) {
+          // Check if player already has a yellow card in THIS match
+          if (matchYellowCards.has(offender.id)) {
+              isRed = true; // Convert to Red
+              cardText = getRandomTemplate(SECOND_YELLOW_TEMPLATES, offender);
+          } else {
+              matchYellowCards.add(offender.id);
+              cardText = getRandomTemplate(YELLOW_CARD_TEMPLATES, offender);
+          }
+      } else {
+          cardText = getRandomTemplate(RED_CARD_TEMPLATES, offender);
+      }
+
+      if (isRed) {
+          sentOffPlayers.add(offender.id);
+      }
 
       events.push({
         minute,
         extraMinute,
         type: 'card',
         cardType: isRed ? 'red' : 'yellow',
-        text: getRandomTemplate(isRed ? RED_CARD_TEMPLATES : YELLOW_CARD_TEMPLATES, offender),
+        text: cardText,
         teamId: team.id,
         playerId: offender.id,
         playerName: offender.name,

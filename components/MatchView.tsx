@@ -25,7 +25,6 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   const [isFinished, setIsFinished] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(initialSoundEnabled);
   const [isPaused, setIsPaused] = useState(false); // State for event pause
-  const scrollRef = useRef<HTMLDivElement>(null);
   
   // Simulate immediately on mount (calculation), but don't show result yet
   useEffect(() => {
@@ -54,6 +53,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
       else if (minute === 45) {
           // If we are within allocated stoppage time
           if (extraMinute < matchResult.firstHalfStoppage) {
+              // No need to wait an extra tick for stoppage time accumulation
               setExtraMinute(prev => prev + 1);
           } else {
               // Stoppage over
@@ -90,7 +90,8 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
       });
       
       if (currentEvents.length > 0) {
-        setEvents(prev => [...prev, ...currentEvents]);
+        // Prepend new events to the top. We reverse currentEvents first to keep logic order (e.g. Foul -> Pen)
+        setEvents(prev => [...currentEvents.reverse(), ...prev]);
         
         let pauseNeeded = false;
 
@@ -132,13 +133,6 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
       }
     }
   }, [minute, extraMinute, matchResult, hasStarted, soundEnabled]);
-
-  // Auto scroll
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [events]);
 
   // Calculate Score live
   const homeScore = events.filter(e => e.type === 'goal' && e.teamId === homeTeam.id).length;
@@ -237,7 +231,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   return (
     <div className="h-full flex flex-col bg-gray-900">
       {/* Scoreboard */}
-      <div className="bg-gray-800 p-6 shadow-xl border-b border-gray-700 flex justify-between items-center relative overflow-hidden">
+      <div className="bg-gray-800 p-6 shadow-xl border-b border-gray-700 flex justify-between items-center relative overflow-hidden shrink-0">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-red-900/20 pointer-events-none"></div>
         
         {/* LEFT: HOME TEAM */}
@@ -274,19 +268,34 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Flex Col Reverse for proper spacing when few items */}
       <div className="flex-1 flex overflow-hidden">
           {/* Live Text Commentary */}
-          <div className="flex-1 p-4 md:p-8 overflow-y-auto space-y-3 scroll-smooth" ref={scrollRef}>
+          <div className="flex-1 p-4 md:p-8 overflow-y-auto space-y-3 scroll-smooth">
+              {isFinished && (
+                  <div className="text-center py-8 mb-6 border-b border-gray-800 animate-in zoom-in duration-500">
+                      <div className="text-4xl font-bold text-white mb-2">FULL TIME</div>
+                      <div className="text-gray-400 mb-6">The match has ended.</div>
+                      <button 
+                        onClick={() => matchResult && onMatchComplete(matchResult)}
+                        className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform transform hover:scale-105"
+                      >
+                          Complete Match
+                      </button>
+                  </div>
+              )}
+
               {events.length === 0 && minute < 5 && (
                   <div className="text-center text-gray-500 italic py-10 animate-pulse">Match is kicking off...</div>
               )}
               
               {events.map((event, idx) => {
                   const isAway = event.teamId === awayTeam.id;
+                  // Use array index as key since we prepend
+                  const uniqueKey = `${event.minute}-${event.extraMinute}-${idx}`;
                   
                   return (
-                    <div key={idx} className={`flex w-full ${isAway ? 'justify-end' : 'justify-start'} ${event.isImportant ? 'my-4' : 'my-1'} animate-in slide-in-from-bottom-2 duration-300`}>
+                    <div key={uniqueKey} className={`flex w-full ${isAway ? 'justify-end' : 'justify-start'} ${event.isImportant ? 'my-4' : 'my-1'} animate-in slide-in-from-top-2 duration-300`}>
                         <div className={`flex max-w-[85%] md:max-w-[70%] gap-4 ${isAway ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}>
                             
                             {/* Minute Bubble */}
@@ -324,7 +333,11 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                 )}
 
                                 {/* Text Content */}
-                                <div className={`${event.type === 'goal' ? 'text-lg md:text-xl font-bold text-white' : 'text-sm md:text-base text-gray-300'}`}>
+                                <div className={`${
+                                    event.type === 'goal' ? 'text-base md:text-lg font-bold text-white' : 
+                                    event.type === 'whistle' ? 'text-xs md:text-sm text-gray-400' :
+                                    'text-sm md:text-base text-gray-300'
+                                }`}>
                                     {event.type === 'goal' && <span className="mx-2">⚽</span>}
                                     {event.type === 'card' && <span className="mx-2">{event.cardType === 'red' ? '🟥' : '🟨'}</span>}
                                     {event.type === 'penalty-award' && <span className="mx-2">⚠️</span>}
@@ -336,26 +349,10 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                     </div>
                   );
               })}
-              
-              {isFinished && (
-                  <div className="text-center py-10 mt-10 border-t border-gray-800 animate-in zoom-in duration-500">
-                      <div className="text-4xl font-bold text-white mb-2">FULL TIME</div>
-                      <div className="text-gray-400 mb-6">The match has ended.</div>
-                      <button 
-                        onClick={() => matchResult && onMatchComplete(matchResult)}
-                        className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform transform hover:scale-105"
-                      >
-                          Complete Match
-                      </button>
-                  </div>
-              )}
-              
-              {/* Spacer for auto-scroll */}
-              <div className="h-20"></div>
           </div>
 
           {/* Right Stats Column (Desktop) */}
-          <div className="w-80 bg-gray-850 border-l border-gray-700 p-6 hidden lg:block">
+          <div className="w-80 bg-gray-850 border-l border-gray-700 p-6 hidden lg:block shrink-0">
              <h3 className="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest">Live Match Stats</h3>
              
              <div className="space-y-8">
@@ -396,7 +393,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
       {/* Footer Controls */}
       {!isFinished && (
-          <div className="bg-gray-800 p-4 border-t border-gray-700 flex justify-center items-center gap-6 z-20">
+          <div className="bg-gray-800 p-4 border-t border-gray-700 flex justify-center items-center gap-6 z-20 shrink-0">
                 <button 
                     onClick={() => setSoundEnabled(!soundEnabled)} 
                     className={`p-3 rounded-full transition-all ${soundEnabled ? 'text-blue-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-700'}`}

@@ -7,9 +7,12 @@ const IT_LAST_NAMES = ['Rossi', 'Russo', 'Ferrari', 'Esposito', 'Bianchi', 'Roma
 
 // --- Player Generator ---
 const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, teamId: string, index: number): Player => {
-  // Variance: +/- 5 from team base rating
+  // Variance: +/- 6 from team base rating
   let rating = Math.floor(baseRating + (Math.random() * 12) - 6);
-  if (rating > 95) rating = 95;
+  
+  // Hard cap for generated players to ensure they don't exceed real superstars (usually ~90+)
+  // Reduced from 95 to 88 to keep "filler" players realistic
+  if (rating > 88) rating = 88; 
   if (rating < 55) rating = 55;
 
   const age = Math.floor(17 + Math.random() * 20); // 17-37
@@ -33,16 +36,31 @@ const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, 
 
 const generateFullSquad = (teamId: string, att: number, mid: number, def: number): Player[] => {
   const squad: Player[] = [];
+  
+  // ADJUSTMENT: Reduce the base rating for generated players compared to the team's overall stats.
+  // Team stats (e.g., ATT 93) reflect the starters/stars. 
+  // Filler players should be significantly lower to avoid generating random 90+ rated players.
+  const adjustRating = (val: number) => {
+    if (val >= 90) return val - 13; // e.g., 93 -> 80. Range 74-86.
+    if (val >= 85) return val - 10; // e.g., 89 -> 79. Range 73-85.
+    if (val >= 80) return val - 7;  // e.g., 82 -> 75. Range 69-81.
+    return val - 4;                 // e.g., 75 -> 71.
+  };
+
+  const genAtt = adjustRating(att);
+  const genMid = adjustRating(mid);
+  const genDef = adjustRating(def);
+  
   // Structure: 3 GK, 8 DEF, 8 MID, 6 FWD (25 man squad)
   
   // GK
-  for(let i=0; i<3; i++) squad.push(generatePlayer('GK', def, teamId, i));
+  for(let i=0; i<3; i++) squad.push(generatePlayer('GK', genDef, teamId, i));
   // DEF
-  for(let i=0; i<8; i++) squad.push(generatePlayer('DEF', def, teamId, i));
+  for(let i=0; i<8; i++) squad.push(generatePlayer('DEF', genDef, teamId, i));
   // MID
-  for(let i=0; i<8; i++) squad.push(generatePlayer('MID', mid, teamId, i));
+  for(let i=0; i<8; i++) squad.push(generatePlayer('MID', genMid, teamId, i));
   // FWD
-  for(let i=0; i<6; i++) squad.push(generatePlayer('FWD', att, teamId, i));
+  for(let i=0; i<6; i++) squad.push(generatePlayer('FWD', genAtt, teamId, i));
 
   // Sort best to worst within squad
   return squad.sort((a, b) => b.rating - a.rating);

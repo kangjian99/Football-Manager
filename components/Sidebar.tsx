@@ -76,6 +76,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, userTeam, disab
             <Settings size={18} />
             Settings
         </button>
+        <div className="px-6 py-4 text-xs text-gray-400 border-t border-gray-700">
+            <p>Developed by</p>
+            <a href="mailto:sonic2112@gmail.com" className="hover:text-white transition-colors">sonic2112@gmail.com</a>
+        </div>
       </div>
     </div>
   );
