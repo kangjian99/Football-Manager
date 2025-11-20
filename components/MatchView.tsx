@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Team, Match, MatchEvent } from '../types';
-import { Play, FastForward, SkipForward, Timer, Volume2, VolumeX } from 'lucide-react';
+import { Play, FastForward, SkipForward, Timer, Volume2, VolumeX, RefreshCcw, ArrowLeftRight } from 'lucide-react';
 import { simulateMatch } from '../services/gameEngine';
 import { playWhistle, playGoalSound, resumeAudio } from '../services/audioService';
 
@@ -18,16 +18,15 @@ interface MatchViewProps {
 const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchComplete, initialSoundEnabled }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [minute, setMinute] = useState(0);
+  const [extraMinute, setExtraMinute] = useState(0); // For stoppage time
   const [events, setEvents] = useState<MatchEvent[]>([]);
   const [speed, setSpeed] = useState(100); // ms per tick
   const [matchResult, setMatchResult] = useState<Match | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(initialSoundEnabled);
+  const [isPaused, setIsPaused] = useState(false); // State for event pause
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  // Keep track of events we've already processed for sound to avoid double playing
-  const processedEventsRef = useRef<Set<number>>(new Set());
-
   // Simulate immediately on mount (calculation), but don't show result yet
   useEffect(() => {
     // We must simulate using homeTeam and awayTeam in that order
@@ -42,46 +41,97 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
   // Playback loop
   useEffect(() => {
-    if (!hasStarted || !matchResult || isFinished) return;
+    if (!hasStarted || !matchResult || isFinished || isPaused) return;
 
     const interval = setInterval(() => {
-      setMinute(prev => {
-        if (prev >= 90) {
-          setIsFinished(true);
-          clearInterval(interval);
-          return 90;
-        }
-        return prev + 1;
-      });
+      // Logic for timing flow including stoppage time
+      
+      // Phase 1: 0 to 44 (going to 45)
+      if (minute < 45) {
+          setMinute(prev => prev + 1);
+      } 
+      // Phase 2: At 45, handle Stoppage First Half
+      else if (minute === 45) {
+          // If we are within allocated stoppage time
+          if (extraMinute < matchResult.firstHalfStoppage) {
+              setExtraMinute(prev => prev + 1);
+          } else {
+              // Stoppage over
+              setMinute(46);
+              setExtraMinute(0);
+          }
+      }
+      // Phase 3: 46 to 89 (going to 90)
+      else if (minute < 90) {
+          setMinute(prev => prev + 1);
+      }
+      // Phase 4: At 90, handle Stoppage Second Half
+      else if (minute === 90) {
+          if (extraMinute < matchResult.secondHalfStoppage) {
+              setExtraMinute(prev => prev + 1);
+          } else {
+              // Stoppage over
+               setIsFinished(true);
+               clearInterval(interval);
+          }
+      }
     }, speed);
 
     return () => clearInterval(interval);
-  }, [hasStarted, speed, matchResult, isFinished]);
+  }, [hasStarted, speed, matchResult, isFinished, isPaused, minute, extraMinute]);
 
   // Update visible events and Play Sounds
   useEffect(() => {
     if (matchResult && hasStarted) {
-      const currentEvents = matchResult.events.filter(e => e.minute === minute);
+      // Filter events matching current minute AND extraMinute
+      const currentEvents = matchResult.events.filter(e => {
+          const eExtra = e.extraMinute || 0;
+          return e.minute === minute && eExtra === extraMinute;
+      });
       
       if (currentEvents.length > 0) {
         setEvents(prev => [...prev, ...currentEvents]);
         
-        // Sound Logic
-        if (soundEnabled) {
-            currentEvents.forEach(evt => {
-                // Whistle for Kickoff (1) and Half Time (46)
+        let pauseNeeded = false;
+
+        // Sound Logic & Pause Check
+        currentEvents.forEach(evt => {
+            if (evt.isImportant) {
+                pauseNeeded = true;
+            }
+
+            if (soundEnabled) {
+                // Whistle
                 if (evt.type === 'whistle') {
-                    playWhistle();
+                    const isStoppageIndication = evt.text.includes('stoppage time indicated');
+                    const isSecondHalfStart = evt.text.includes('Second half begins');
+
+                    if (!isStoppageIndication && !isSecondHalfStart) {
+                        playWhistle();
+                    }
                 }
                 // Goal
                 if (evt.type === 'goal') {
                     playGoalSound();
                 }
-            });
+                // Penalty Whistle (Optional: Re-use whistle for penalty award)
+                if (evt.type === 'penalty-award') {
+                    playWhistle();
+                }
+            }
+        });
+
+        // Trigger pause if important event occurred
+        if (pauseNeeded) {
+            setIsPaused(true);
+            // Pause slightly longer for goals/pens to let user read
+            setTimeout(() => {
+                setIsPaused(false);
+            }, 1500); 
         }
       }
     }
-  }, [minute, matchResult, hasStarted, soundEnabled]);
+  }, [minute, extraMinute, matchResult, hasStarted, soundEnabled]);
 
   // Auto scroll
   useEffect(() => {
@@ -96,6 +146,22 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
   // Helper to render text with highlighted player name
   const renderEventText = (event: MatchEvent) => {
+      if(event.type === 'sub' && event.subOn && event.subOff) {
+        const isAway = event.teamId === awayTeam.id;
+        return (
+            <div className={`flex flex-col gap-1 text-sm ${isAway ? 'items-end' : 'items-start'}`}>
+                <div className="flex items-center gap-2 text-green-400">
+                    <span className="text-xs font-bold uppercase">IN</span>
+                    <span className="font-bold text-white">{event.subOn.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-red-400">
+                    <span className="text-xs font-bold uppercase">OUT</span>
+                    <span className="font-bold text-gray-400">{event.subOff.name}</span>
+                </div>
+            </div>
+        );
+      }
+
       if (!event.playerName) return event.text;
       
       const parts = event.text.split(event.playerName);
@@ -113,6 +179,13 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
               ))}
           </span>
       );
+  };
+
+  const formatTime = () => {
+      if (extraMinute > 0) {
+          return `${minute}+${extraMinute}'`;
+      }
+      return `${minute}'`;
   };
 
   if (!hasStarted) {
@@ -183,8 +256,9 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                 {homeScore} - {awayScore}
             </div>
             <div className="text-green-400 font-mono mt-2 font-bold flex justify-center items-center gap-2">
-                {minute < 90 && <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>}
-                {minute}'
+                {!isFinished && !isPaused && <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>}
+                {isPaused && <span className="text-xs text-yellow-400 uppercase">Event</span>}
+                {formatTime()}
             </div>
         </div>
 
@@ -208,35 +282,60 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                   <div className="text-center text-gray-500 italic py-10 animate-pulse">Match is kicking off...</div>
               )}
               
-              {events.map((event, idx) => (
-                  <div key={idx} className={`flex gap-4 ${event.isImportant ? 'my-4' : 'my-1'} animate-in slide-in-from-bottom-2 duration-300`}>
-                      <div className="w-12 text-right font-mono text-gray-500 text-sm pt-1">{event.minute}'</div>
-                      
-                      <div className={`flex-1 p-3 rounded-lg border shadow-sm relative overflow-hidden ${
-                          event.type === 'goal' ? 'bg-gray-800 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.2)]' : 
-                          event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-900/20 border-red-600' : 'bg-yellow-900/10 border-yellow-600') : 
-                          event.type === 'whistle' ? 'bg-gray-800 border-gray-600 text-center italic' :
-                          'bg-transparent border-l-2 border-gray-700 pl-4 py-1'
-                      }`}>
-                          {/* Badge for important events */}
-                          {event.type !== 'commentary' && event.type !== 'whistle' && (
-                            <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-1 uppercase tracking-wider ${
-                                event.type === 'goal' ? 'bg-green-600 text-white' : 
-                                event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-500 text-black') : 'bg-gray-600'
-                            }`}>
-                                {event.type === 'card' && event.cardType === 'red' ? 'RED CARD' : event.type}
+              {events.map((event, idx) => {
+                  const isAway = event.teamId === awayTeam.id;
+                  
+                  return (
+                    <div key={idx} className={`flex w-full ${isAway ? 'justify-end' : 'justify-start'} ${event.isImportant ? 'my-4' : 'my-1'} animate-in slide-in-from-bottom-2 duration-300`}>
+                        <div className={`flex max-w-[85%] md:max-w-[70%] gap-4 ${isAway ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}>
+                            
+                            {/* Minute Bubble */}
+                            <div className="w-12 flex-shrink-0 font-mono text-gray-500 text-sm pt-1 flex flex-col items-center">
+                                <span>{event.extraMinute ? `${event.minute}+${event.extraMinute}` : event.minute}'</span>
                             </div>
-                          )}
+                            
+                            {/* Event Box */}
+                            <div className={`flex-1 p-3 rounded-lg border shadow-sm relative overflow-hidden ${
+                                event.type === 'goal' ? 'bg-gray-800 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.2)]' : 
+                                event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-900/20 border-red-600' : 'bg-yellow-900/10 border-yellow-600') : 
+                                event.type === 'sub' ? 'bg-gray-800 border-blue-500/50' :
+                                event.type === 'penalty-award' ? 'bg-purple-900/20 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.2)]' :
+                                event.type === 'penalty-miss' ? 'bg-gray-800 border-red-800 text-gray-400' :
+                                event.type === 'whistle' ? 'bg-gray-800 border-gray-600 text-center italic w-full' :
+                                'bg-transparent border-gray-700 py-1'
+                            } ${event.type === 'commentary' && (isAway ? 'border-r-2 pr-4' : 'border-l-2 pl-4')}`}>
+                                
+                                {/* Badge for important events */}
+                                {event.type !== 'commentary' && event.type !== 'whistle' && (
+                                    <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-1 uppercase tracking-wider ${
+                                        event.type === 'goal' ? 'bg-green-600 text-white' : 
+                                        event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-500 text-black') : 
+                                        event.type === 'sub' ? 'bg-blue-600 text-white' :
+                                        event.type === 'penalty-award' ? 'bg-purple-600 text-white' :
+                                        event.type === 'penalty-miss' ? 'bg-red-800 text-white' :
+                                        'bg-gray-600'
+                                    }`}>
+                                        {event.type === 'card' && event.cardType === 'red' ? 'RED CARD' : 
+                                         event.type === 'sub' ? 'SUBSTITUTION' : 
+                                         event.type === 'penalty-award' ? 'PENALTY' :
+                                         event.type === 'penalty-miss' ? 'MISSED PENALTY' :
+                                         event.type}
+                                    </div>
+                                )}
 
-                          {/* Text Content */}
-                          <div className={`${event.type === 'goal' ? 'text-lg md:text-xl font-bold text-white' : 'text-sm md:text-base text-gray-300'}`}>
-                              {event.type === 'goal' && <span className="mr-2">⚽</span>}
-                              {event.type === 'card' && <span className="mr-2">{event.cardType === 'red' ? '🟥' : '🟨'}</span>}
-                              {renderEventText(event)}
-                          </div>
-                      </div>
-                  </div>
-              ))}
+                                {/* Text Content */}
+                                <div className={`${event.type === 'goal' ? 'text-lg md:text-xl font-bold text-white' : 'text-sm md:text-base text-gray-300'}`}>
+                                    {event.type === 'goal' && <span className="mx-2">⚽</span>}
+                                    {event.type === 'card' && <span className="mx-2">{event.cardType === 'red' ? '🟥' : '🟨'}</span>}
+                                    {event.type === 'penalty-award' && <span className="mx-2">⚠️</span>}
+                                    {event.type === 'penalty-miss' && <span className="mx-2">❌</span>}
+                                    {renderEventText(event)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  );
+              })}
               
               {isFinished && (
                   <div className="text-center py-10 mt-10 border-t border-gray-800 animate-in zoom-in duration-500">
@@ -285,6 +384,10 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                         <div className="text-lg font-bold text-yellow-500 mt-4">{events.filter(e => e.type === 'card' && e.teamId === homeTeam.id).length}</div>
                         <div className="text-xs text-gray-600 mt-5 uppercase">Cards</div>
                         <div className="text-lg font-bold text-yellow-500 mt-4">{events.filter(e => e.type === 'card' && e.teamId === awayTeam.id).length}</div>
+                        
+                        <div className="text-lg font-bold text-blue-400 mt-4">{events.filter(e => e.type === 'sub' && e.teamId === homeTeam.id).length}</div>
+                        <div className="text-xs text-gray-600 mt-5 uppercase">Subs</div>
+                        <div className="text-lg font-bold text-blue-400 mt-4">{events.filter(e => e.type === 'sub' && e.teamId === awayTeam.id).length}</div>
                     </div>
                  </div>
              </div>
@@ -308,7 +411,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                 <button onClick={() => setSpeed(20)} className={`p-3 rounded-full transition-all ${speed === 20 ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}>
                     <FastForward size={20} fill="currentColor" />
                 </button>
-                <button onClick={() => setMinute(90)} className="p-3 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 transition-all hover:text-white">
+                <button onClick={() => { setMinute(90); setExtraMinute(0); }} className="p-3 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 transition-all hover:text-white">
                     <SkipForward size={20} fill="currentColor" />
                 </button>
           </div>

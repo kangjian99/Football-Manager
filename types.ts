@@ -39,11 +39,14 @@ export interface Team {
 
 export interface MatchEvent {
   minute: number;
-  type: 'goal' | 'card' | 'sub' | 'commentary' | 'whistle';
+  extraMinute?: number; // For stoppage time (e.g., 45+1, 90+3)
+  type: 'goal' | 'card' | 'sub' | 'commentary' | 'whistle' | 'penalty-award' | 'penalty-miss';
   text: string;
   teamId?: string;
   playerId?: string;
   playerName?: string;
+  subOn?: { id: string, name: string }; // Player entering
+  subOff?: { id: string, name: string }; // Player leaving
   isImportant: boolean;
   cardType?: 'yellow' | 'red';
 }
@@ -57,6 +60,8 @@ export interface Match {
   played: boolean;
   week: number;
   events: MatchEvent[];
+  firstHalfStoppage: number;
+  secondHalfStoppage: number;
 }
 
 export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END';
