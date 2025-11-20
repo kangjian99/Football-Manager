@@ -2,14 +2,15 @@ import { GoogleGenAI } from "@google/genai";
 import { Team } from '../types';
 
 const getAI = () => {
-  const apiKey = process.env.API_KEY;
+  // Prioritize the key from LocalStorage (user input), fallback to environment variable
+  const apiKey = localStorage.getItem('gemini_api_key') || process.env.API_KEY;
   if (!apiKey) return null;
   return new GoogleGenAI({ apiKey });
 };
 
 export const getPreMatchAnalysis = async (userTeam: Team, opponent: Team): Promise<string> => {
   const ai = getAI();
-  if (!ai) return "Assistant Manager: I couldn't reach the scouting network (API Key missing).";
+  if (!ai) return "Assistant Manager: Please configure your API Key to receive scouting reports.";
 
   const prompt = `
     Role: You are the Assistant Manager of ${userTeam.name} in an Italian football simulation game.

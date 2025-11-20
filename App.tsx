@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -10,9 +9,11 @@ import SeasonEndView from './components/SeasonEndView';
 import { ALL_TEAMS, SERIE_A_TEAMS, SERIE_B_TEAMS } from './constants';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch } from './services/gameEngine';
+import { Key, Lock } from 'lucide-react';
 
 const App: React.FC = () => {
   // State
+  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
   const [teams, setTeams] = useState<Team[]>(ALL_TEAMS);
   const [userTeamId, setUserTeamId] = useState<string | null>(null);
   const [currentWeek, setCurrentWeek] = useState(1);
@@ -64,6 +65,15 @@ const App: React.FC = () => {
     
     setSchedule(combinedSchedule);
   }, []);
+
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    const input = (document.getElementById('apiKeyInput') as HTMLInputElement).value;
+    if (input.trim()) {
+        localStorage.setItem('gemini_api_key', input.trim());
+        setApiKey(input.trim());
+    }
+  };
 
   const handleTeamSelect = (id: string) => {
     const t = teams.find(team => team.id === id);
@@ -240,7 +250,44 @@ const App: React.FC = () => {
     setCurrentView('DASHBOARD');
   };
 
-  // Selection Screen
+  // --- API KEY SCREEN ---
+  if (!apiKey && !process.env.API_KEY) {
+    return (
+        <div className="h-screen bg-gray-900 flex items-center justify-center p-6">
+            <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-2xl max-w-md w-full">
+                <div className="flex justify-center mb-6">
+                    <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500">
+                        <Key size={32} />
+                    </div>
+                </div>
+                <h1 className="text-2xl font-bold text-white text-center mb-2">Welcome Manager</h1>
+                <p className="text-gray-400 text-center mb-8">Please enter your Google Gemini API Key to activate the scouting assistant and commentary engine.</p>
+                
+                <form onSubmit={handleSaveApiKey} className="space-y-4">
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                        <input 
+                            id="apiKeyInput"
+                            type="password" 
+                            placeholder="Paste your API Key here" 
+                            className="w-full bg-gray-900 border border-gray-600 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-900/30">
+                        Start Game
+                    </button>
+                </form>
+                <p className="text-xs text-gray-500 text-center mt-6">
+                    Your key is stored locally in your browser. <br/>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">Get an API key here</a>
+                </p>
+            </div>
+        </div>
+    );
+  }
+
+  // --- TEAM SELECTION SCREEN ---
   if (!userTeamId) {
     return (
       <div className="h-screen bg-gray-900 overflow-y-auto flex flex-col items-center p-6">
