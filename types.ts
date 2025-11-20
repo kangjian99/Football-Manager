@@ -1,0 +1,62 @@
+
+export enum LeagueLevel {
+  SERIE_A = 'Serie A',
+  SERIE_B = 'Serie B',
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  position: 'GK' | 'DEF' | 'MID' | 'FWD';
+  rating: number; // 1-99
+  age: number;
+  form?: number; // 1-10, affects match performance
+  goals: number; // Season stats
+  assists: number;
+  matchesPlayed: number;
+  yellowCards: number;
+  redCards: number;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  league: LeagueLevel;
+  att: number;
+  mid: number;
+  def: number;
+  color: string;
+  logo: string;
+  points: number;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  gf: number;
+  ga: number;
+  players: Player[]; 
+}
+
+export interface MatchEvent {
+  minute: number;
+  type: 'goal' | 'card' | 'sub' | 'commentary' | 'whistle';
+  text: string;
+  teamId?: string;
+  playerId?: string;
+  playerName?: string;
+  isImportant: boolean;
+  cardType?: 'yellow' | 'red';
+}
+
+export interface Match {
+  id: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  homeScore: number;
+  awayScore: number;
+  played: boolean;
+  week: number;
+  events: MatchEvent[];
+}
+
+export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END';

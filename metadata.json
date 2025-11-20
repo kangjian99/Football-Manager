@@ -1,0 +1,5 @@
+{
+  "name": "Calcio Manager AI",
+  "description": "A modern football manager simulation for Italian Serie A and Serie B, featuring AI-powered tactical advice and live match simulation.",
+  "requestFramePermissions": []
+}
