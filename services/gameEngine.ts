@@ -1,6 +1,4 @@
 
-
-
 import { Team, Match, MatchEvent, Player } from '../types';
 
 // --- Constants & Templates ---
@@ -135,30 +133,80 @@ const selectPlayer = (players: Player[], type: 'GOAL' | 'CARD' | 'CHANCE' | 'DEF
 
 // Helpers for lineup management
 // EXPORTED so UI can display lineups
-export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[] } => {
-    // FILTER AVAILABLE PLAYERS (Exclude Banned)
+export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[], formation: string } => {
+    // 1. Filter Available Players (Exclude Banned)
     const availablePlayers = team.players.filter(p => !p.matchesBanned || p.matchesBanned <= 0);
 
-    const gks = availablePlayers.filter(p => p.position === 'GK');
-    const outfield = availablePlayers.filter(p => p.position !== 'GK');
+    // 2. Sort by Rating (Best players first)
+    const sortedPlayers = [...availablePlayers].sort((a, b) => b.rating - a.rating);
 
-    // If no GK available due to bans/injuries, pick the highest rated outfield player to play GK (edge case)
-    const startingGK = gks.length > 0 ? gks[0] : (outfield.length > 0 ? outfield[0] : team.players[0]);
+    // 3. Random Formation Selection (4-3-3 or 4-4-2)
+    const formation = Math.random() > 0.5 ? '4-4-2' : '4-3-3';
+
+    const gks = sortedPlayers.filter(p => p.position === 'GK');
+    const defs = sortedPlayers.filter(p => p.position === 'DEF');
+    const mids = sortedPlayers.filter(p => p.position === 'MID');
+    const fwds = sortedPlayers.filter(p => p.position === 'FWD');
+
+    const starting: Player[] = [];
+    const bench: Player[] = [];
+
+    // Pick 1 GK
+    if (gks.length > 0) {
+        starting.push(gks[0]);
+        bench.push(...gks.slice(1));
+    } else {
+        // Emergency: No GK available, pick worst outfield player to play GK
+        const emergencyGk = sortedPlayers[sortedPlayers.length - 1];
+        if (emergencyGk) starting.push(emergencyGk);
+    }
+
+    // Pick 4 DEFs
+    for(let i=0; i<4; i++) {
+        if (defs[i]) starting.push(defs[i]);
+    }
+    bench.push(...defs.slice(4));
+
+    if (formation === '4-4-2') {
+        // 4-4-2: 4 MIDs, 2 FWDs
+        for(let i=0; i<4; i++) {
+            if (mids[i]) starting.push(mids[i]);
+        }
+        bench.push(...mids.slice(4));
+
+        for(let i=0; i<2; i++) {
+            if (fwds[i]) starting.push(fwds[i]);
+        }
+        bench.push(...fwds.slice(2));
+
+    } else {
+        // 4-3-3: 3 MIDs, 3 FWDs
+        for(let i=0; i<3; i++) {
+            if (mids[i]) starting.push(mids[i]);
+        }
+        bench.push(...mids.slice(3));
+
+        for(let i=0; i<3; i++) {
+            if (fwds[i]) starting.push(fwds[i]);
+        }
+        bench.push(...fwds.slice(3));
+    }
+
+    // 4. Handle Fillers (If not enough players for a specific role)
+    const starterIds = new Set(starting.map(p => p.id));
     
-    // Remove the chosen GK from outfield list if he was pulled from there
-    let remainingOutfield = gks.length > 0 ? outfield : outfield.slice(1);
-    
-    const startingOutfield = remainingOutfield.slice(0, 10);
-    const benchOutfield = remainingOutfield.slice(10);
-    const benchGKs = gks.length > 1 ? gks.slice(1) : [];
+    // Re-calculate bench based on who is NOT in starting
+    let realBench = sortedPlayers.filter(p => !starterIds.has(p.id));
 
-    const starting = [startingGK, ...startingOutfield];
-    const bench = [...benchGKs, ...benchOutfield];
+    while (starting.length < 11 && realBench.length > 0) {
+        starting.push(realBench[0]);
+        realBench = realBench.slice(1);
+    }
 
-    // Sort bench by rating
-    bench.sort((a, b) => b.rating - a.rating);
+    // Sort bench by rating for sensible substitution logic later
+    realBench.sort((a, b) => b.rating - a.rating);
 
-    return { starting, bench };
+    return { starting, bench: realBench, formation };
 };
 
 // --- Main Simulation Logic ---
@@ -170,7 +218,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   const sentOffPlayers = new Set<string>(); 
   const matchYellowCards = new Set<string>(); // Track yellow cards for this match only
 
-  // Initialize Lineups
+  // Initialize Lineups with Random Formations
   const homeSquad = getStartingLineup(home);
   const awaySquad = getStartingLineup(away);
 
@@ -487,7 +535,11 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     week,
     events,
     firstHalfStoppage,
-    secondHalfStoppage
+    secondHalfStoppage,
+    homeLineup: homeSquad.starting,
+    awayLineup: awaySquad.starting,
+    homeFormation: homeSquad.formation,
+    awayFormation: awaySquad.formation
   };
 };
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Team, Match, MatchEvent, Player } from '../types';
 import { Play, FastForward, SkipForward, Timer, Volume2, VolumeX, RefreshCcw, ArrowLeftRight, Shirt } from 'lucide-react';
-import { simulateMatch, getStartingLineup } from '../services/gameEngine';
+import { simulateMatch } from '../services/gameEngine';
 import { playWhistle, playGoalSound, resumeAudio } from '../services/audioService';
 
 interface MatchViewProps {
@@ -26,7 +26,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   const [soundEnabled, setSoundEnabled] = useState(initialSoundEnabled);
   const [isPaused, setIsPaused] = useState(false); // State for event pause
   
-  const [lineups, setLineups] = useState<{home: Player[], away: Player[]} | null>(null);
+  const [lineups, setLineups] = useState<{home: Player[], away: Player[], homeFormation?: string, awayFormation?: string} | null>(null);
 
   // Simulate immediately on mount (calculation), but don't show result yet
   useEffect(() => {
@@ -34,11 +34,15 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
     const result = simulateMatch(homeTeam, awayTeam, week, matchId);
     setMatchResult(result);
     
-    // Determine lineups for display (using the same logic engine uses)
-    const homeXI = getStartingLineup(homeTeam).starting;
-    const awayXI = getStartingLineup(awayTeam).starting;
-    setLineups({ home: homeXI, away: awayXI });
-
+    // Use the lineups generated during simulation
+    if (result.homeLineup && result.awayLineup) {
+        setLineups({ 
+            home: result.homeLineup, 
+            away: result.awayLineup,
+            homeFormation: result.homeFormation,
+            awayFormation: result.awayFormation
+        });
+    }
   }, [homeTeam, awayTeam, week, matchId]);
 
   const handleStartMatch = () => {
@@ -224,12 +228,24 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                         </div>
                     </div>
                     
+                    <button 
+                        onClick={handleStartMatch}
+                        className="group relative bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105"
+                    >
+                        <span className="flex items-center gap-2">
+                            <Timer size={20} />
+                            KICK OFF
+                        </span>
+                    </button>
+
                     {/* STARTING LINEUPS */}
                     {lineups && (
                         <div className="w-full grid grid-cols-2 gap-8 bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700">
                             {/* Home XI */}
                             <div>
-                                <h3 className="text-center text-gray-400 font-bold mb-4 text-sm uppercase tracking-widest">Starting XI</h3>
+                                <h3 className="text-center text-gray-400 font-bold mb-2 text-sm uppercase tracking-widest">
+                                    Starting XI {lineups.homeFormation && <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded ml-2">{lineups.homeFormation}</span>}
+                                </h3>
                                 <div className="space-y-2">
                                     {lineups.home.map((player, idx) => (
                                         <div key={player.id} className="flex items-center gap-3 text-sm">
@@ -248,7 +264,9 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
                             {/* Away XI */}
                             <div>
-                                <h3 className="text-center text-gray-400 font-bold mb-4 text-sm uppercase tracking-widest">Starting XI</h3>
+                                <h3 className="text-center text-gray-400 font-bold mb-2 text-sm uppercase tracking-widest">
+                                    Starting XI {lineups.awayFormation && <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded ml-2">{lineups.awayFormation}</span>}
+                                </h3>
                                 <div className="space-y-2">
                                     {lineups.away.map((player, idx) => (
                                         <div key={player.id} className="flex items-center gap-3 text-sm flex-row-reverse">
@@ -266,16 +284,6 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                             </div>
                         </div>
                     )}
-
-                    <button 
-                        onClick={handleStartMatch}
-                        className="group relative bg-green-600 hover:bg-green-500 text-white px-16 py-5 rounded-full font-bold text-2xl shadow-lg shadow-green-900/50 transition-all transform hover:scale-105"
-                    >
-                        <span className="flex items-center gap-3">
-                            <Timer size={32} />
-                            KICK OFF
-                        </span>
-                    </button>
                 </div>
             </div>
         </div>

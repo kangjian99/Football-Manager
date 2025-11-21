@@ -12,7 +12,7 @@ import { ALL_TEAMS, SERIE_A_TEAMS, SERIE_B_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
 //import { PREMIER_LEAGUE_TEAMS as SERIE_A_TEAMS, CHAMPIONSHIP_TEAMS as SERIE_B_TEAMS, ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
-import { generateSchedule, simulateMatch } from './services/gameEngine';
+import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -149,103 +149,103 @@ const App: React.FC = () => {
         return newSchedule;
     });
 
-    // 2. Update Standings and Player Stats (and bans)
-    const newTeams = [...teams].map(team => {
-        let points = 0;
-        let won = 0;
-        let drawn = 0;
-        let lost = 0;
-        let gf = 0;
-        let ga = 0;
-        let played = 0;
-
-        // Deep copy players
-        const newPlayers = team.players.map(p => ({
+    // 2. Update Standings and Player Stats
+    const newTeams = teams.map(team => {
+        // Deep copy players, decrementing previous bans
+        const updatedPlayers = team.players.map(p => ({
             ...p,
-            // If matchesBanned > 0, decrement it as they 'served' a ban this week (assuming team plays every week)
-            // If logic was more complex (byes), we'd check if team played. Here we assume simulation runs for all active.
-            matchesBanned: Math.max(0, p.matchesBanned - 1),
-            goals: 0,
-            assists: 0,
-            matchesPlayed: 0,
-            yellowCards: 0,
-            redCards: 0
+            matchesBanned: Math.max(0, p.matchesBanned - 1)
         }));
 
-        // Iterate through all weeks up to current
-        schedule.forEach((weekMatches, idx) => {
-            const weekResults = idx === currentWeek - 1 ? allResults : weekMatches;
-            
-            weekResults.forEach(m => {
-                if (m.played && (m.homeTeamId === team.id || m.awayTeamId === team.id)) {
-                    // Team Stats
-                    played++;
-                    const isHome = m.homeTeamId === team.id;
-                    const myScore = isHome ? m.homeScore : m.awayScore;
-                    const opScore = isHome ? m.awayScore : m.homeScore;
+        // Check if this team played this week
+        const match = allResults.find(m => m.homeTeamId === team.id || m.awayTeamId === team.id);
+        
+        // Update container variables
+        let { points, won, drawn, lost, gf, ga, played } = team;
 
-                    gf += myScore;
-                    ga += opScore;
+        if (match) {
+            played++;
+            const isHome = (m: Match) => m.homeTeamId === team.id;
+            const myScore = isHome(match) ? match.homeScore : match.awayScore;
+            const opScore = isHome(match) ? match.awayScore : match.homeScore;
 
-                    if (myScore > opScore) {
-                        points += 3;
-                        won++;
-                    } else if (myScore === opScore) {
-                        points += 1;
-                        drawn++;
-                    } else {
-                        lost++;
+            gf += myScore;
+            ga += opScore;
+
+            if (myScore > opScore) {
+                points += 3;
+                won++;
+            } else if (myScore === opScore) {
+                points += 1;
+                drawn++;
+            } else {
+                lost++;
+            }
+
+            // --- UPDATE PLAYER STATS FOR THIS MATCH ---
+            // Use the lineup stored in the match result to accurately credit MP
+            const matchLineup = isHome(match) ? match.homeLineup : match.awayLineup;
+
+            if (matchLineup) {
+                matchLineup.forEach(starter => {
+                    const playerRecord = updatedPlayers.find(p => p.id === starter.id);
+                    if (playerRecord) {
+                        playerRecord.matchesPlayed++;
+                    }
+                });
+            } else {
+                // Fallback logic if match lineup wasn't saved (legacy compat)
+                const eligibilityState = team.players; 
+                const { starting } = getStartingLineup({ ...team, players: eligibilityState });
+                starting.forEach(starter => {
+                    const playerRecord = updatedPlayers.find(p => p.id === starter.id);
+                    if (playerRecord) {
+                        playerRecord.matchesPlayed++;
+                    }
+                });
+            }
+
+            // 2. Process Events (Goals, Cards, Subs)
+            match.events.forEach(evt => {
+                if (evt.teamId === team.id) {
+                    // Handle Subs (Increment MP)
+                    if (evt.type === 'sub' && evt.subOn) {
+                        const sub = updatedPlayers.find(p => p.id === evt.subOn!.id);
+                        if (sub) {
+                            sub.matchesPlayed++;
+                        }
                     }
 
-                    // Player Stats for lineup appearances
-                    // We don't have exact historical lineups stored easily unless we store full match objects deep
-                    // For this simplified logic, we count stats from EVENTS and just increment MP roughly if they did something
-                    // BUT for the current week, we can be more precise with "matchesBanned" logic below based on events.
-                    
-                    m.events.forEach(evt => {
-                        if (evt.teamId === team.id && evt.playerId) {
-                            const player = newPlayers.find(p => p.id === evt.playerId);
-                            if (player) {
-                                if (evt.type === 'goal') player.goals++;
-                                if (evt.type === 'card') {
-                                    if (evt.cardType === 'red') {
-                                        player.redCards++;
-                                        // Red card = 1 match ban (apply immediately for next week)
-                                        // Only apply if this match is the CURRENT week being processed
-                                        if (idx === currentWeek - 1) {
-                                            player.matchesBanned = 1; 
-                                        }
-                                    } else {
-                                        player.yellowCards++;
-                                        // 3 Yellow Cards = 1 match ban
-                                        if (player.yellowCards > 0 && player.yellowCards % 3 === 0) {
-                                            if (idx === currentWeek - 1) {
-                                                player.matchesBanned = 1;
-                                            }
-                                        }
-                                    }
-                                }
-                                // Simplified: If mentioned in event, they played (or we can just not track MP strictly for all historical)
-                                // For accurate MP, we would need to store lineups in match history. 
-                                // For now, we just aggregate goals/cards accurately.
-                            }
-                        }
-                    });
-                    
-                    // Simple MP increment for starters (approximation for historical, since we regenerate lineups each time)
-                    // This is a limitation of the simple engine - lineups are generated at sim time. 
-                    // To fix MP count, we'd need to store 'startingLineup' in the Match object.
-                    // For now, let's leave MP as an approximation or just increment for everyone available
-                     const availableForThisMatch = newPlayers.filter(p => p.matchesBanned === 0); // Approx
-                     availableForThisMatch.slice(0, 11).forEach(p => p.matchesPlayed++);
+                    // Handle Stats & Bans
+                    if (evt.playerId) {
+                         const player = updatedPlayers.find(p => p.id === evt.playerId);
+                         if (player) {
+                             if (evt.type === 'goal') {
+                                 player.goals++;
+                             }
+                             if (evt.type === 'card') {
+                                 if (evt.cardType === 'red') {
+                                     player.redCards++;
+                                     // Red Card = 1 Match Ban (Applied to 'matchesBanned' for next week)
+                                     player.matchesBanned = 1;
+                                 } else {
+                                     player.yellowCards++;
+                                     // 3 Yellows = 1 Match Ban
+                                     if (player.yellowCards > 0 && player.yellowCards % 3 === 0) {
+                                         player.matchesBanned = 1;
+                                     }
+                                 }
+                             }
+                         }
+                    }
                 }
             });
-        });
+        }
         
         return { 
             ...team, 
             points, won, drawn, lost, gf, ga, played,
-            players: newPlayers
+            players: updatedPlayers
         };
     });
 

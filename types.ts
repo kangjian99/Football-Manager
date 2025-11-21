@@ -65,6 +65,10 @@ export interface Match {
   events: MatchEvent[];
   firstHalfStoppage: number;
   secondHalfStoppage: number;
+  homeLineup?: Player[];
+  awayLineup?: Player[];
+  homeFormation?: string;
+  awayFormation?: string;
 }
 
 export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END';
