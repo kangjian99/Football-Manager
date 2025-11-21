@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Team, Match } from '../types';
-import { PlayCircle, TrendingUp, Activity, Users, MapPin, Trophy } from 'lucide-react';
+import { PlayCircle, TrendingUp, Activity, Users, MapPin, Trophy, FastForward } from 'lucide-react';
 import { getPreMatchAnalysis } from '../services/geminiService';
 
 interface DashboardProps {
@@ -13,9 +13,10 @@ interface DashboardProps {
   onPlayMatch: () => void;
   isSeasonEnded: boolean;
   onViewSeasonEnd: () => void;
+  onSimulateWeek: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, opponent, isHome, onPlayMatch, isSeasonEnded, onViewSeasonEnd }) => {
+const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, opponent, isHome, onPlayMatch, isSeasonEnded, onViewSeasonEnd, onSimulateWeek }) => {
   const [analysis, setAnalysis] = useState<string>('Loading assistant report...');
 
   useEffect(() => {
@@ -33,8 +34,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
       }
     } else if (isSeasonEnded) {
         setAnalysis("The season has concluded. The board is reviewing the results.");
-    } else {
-        setAnalysis("No upcoming match scheduled.");
+    } else if (!opponent) {
+        setAnalysis("No match this week. We can focus on training or simulate other league results.");
     }
   }, [userTeam, opponent, isSeasonEnded]);
 
@@ -60,9 +61,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
         </div>
         <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
            <div className="text-gray-400 text-sm mb-1">Next Opponent</div>
-           <div className="text-xl font-bold text-white truncate">{opponent?.name || (isSeasonEnded ? 'Season Ended' : 'None')}</div>
+           <div className="text-xl font-bold text-white truncate">{opponent?.name || (isSeasonEnded ? 'Season Ended' : 'Bye Week')}</div>
            <div className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-               <MapPin size={10}/> {isSeasonEnded ? '-' : (isHome ? 'Home' : 'Away')}
+               <MapPin size={10}/> {isSeasonEnded ? '-' : (opponent ? (isHome ? 'Home' : 'Away') : 'No Game')}
            </div>
         </div>
         <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
@@ -129,7 +130,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
                     </div>
                 </div>
             ) : (
-                <div className="text-center py-12 text-gray-500">No matches scheduled</div>
+                <div className="text-center py-12 relative z-10">
+                    <h3 className="text-2xl font-bold text-gray-300 mb-2">No Fixture Scheduled</h3>
+                    <p className="text-gray-500 mb-6">Your team has no match this week (League Bye or Completed).</p>
+                    
+                    <button 
+                        onClick={onSimulateWeek}
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 mx-auto"
+                    >
+                        <FastForward size={20} />
+                        SIMULATE WEEK
+                    </button>
+                </div>
             )}
             
             {opponent && !isSeasonEnded && (

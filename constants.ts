@@ -574,28 +574,6 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Marco Bleve', position: 'GK', rating: 69, age: 28 },
       { name: 'Simone Panico', position: 'FWD', rating: 68, age: 22 }
   ]),
-  // --- ADDED TEAMS TO REACH 24 FOR DEMONSTRATION ---
-  createTeam('VIC', 'Vicenza', LeagueLevel.SERIE_B, 70, 69, 69, 'bg-red-600 text-white', '⚪', [
-      { name: 'Franco Ferrari', position: 'FWD', rating: 71, age: 28 },
-      { name: 'Filippo Costa', position: 'DEF', rating: 70, age: 28 },
-      { name: 'Ronaldo', position: 'MID', rating: 71, age: 34 },
-      { name: 'Alessandro Confente', position: 'GK', rating: 69, age: 25 }
-  ]),
-  createTeam('SPA', 'SPAL', LeagueLevel.SERIE_B, 69, 68, 68, 'bg-blue-300 text-white', '⚪', [
-      { name: 'Mirco Antenucci', position: 'FWD', rating: 71, age: 39 },
-      { name: 'Marco Bertini', position: 'MID', rating: 69, age: 21 },
-      { name: 'Matteo Arena', position: 'DEF', rating: 69, age: 25 }
-  ]),
-  createTeam('PER', 'Perugia', LeagueLevel.SERIE_B, 68, 69, 69, 'bg-red-700 text-white', '🦁', [
-      { name: 'Federico Ricci', position: 'FWD', rating: 70, age: 30 },
-      { name: 'Edoardo Iannoni', position: 'MID', rating: 70, age: 22 },
-      { name: 'Gabriele Angella', position: 'DEF', rating: 69, age: 35 }
-  ]),
-  createTeam('PAD', 'Padova', LeagueLevel.SERIE_B, 70, 69, 68, 'bg-white text-red-600', '🛡️', [
-      { name: 'Micheal Liguori', position: 'FWD', rating: 71, age: 24 },
-      { name: 'Simone Palombi', position: 'FWD', rating: 70, age: 28 },
-      { name: 'Antonio Donnarumma', position: 'GK', rating: 69, age: 33 }
-  ]),
 ];
 
 export const ALL_TEAMS = [...SERIE_A_TEAMS, ...SERIE_B_TEAMS];

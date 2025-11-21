@@ -42,7 +42,7 @@ const App: React.FC = () => {
 
   // Computed: Identify active leagues dynamically
   const activeLeagues = useMemo(() => {
-      const leagues = Array.from(new Set(teams.map(t => t.league)));
+      const leagues = Array.from(new Set(teams.map(t => t.league))) as LeagueLevel[];
       // Sort leagues by average team strength to determine hierarchy (Tier 1 vs Tier 2)
       return leagues.sort((a, b) => {
           const getAvg = (l: LeagueLevel) => {
@@ -77,6 +77,9 @@ const App: React.FC = () => {
   const isUserHome = userMatch?.homeTeamId === userTeamId;
   const opponentId = userMatch ? (isUserHome ? userMatch.awayTeamId : userMatch.homeTeamId) : null;
   const opponent = teams.find(t => t.id === opponentId) || null;
+
+  // Determine if navigation should be locked (Only if in match view AND match exists)
+  const isMatchInProgress = currentView === 'MATCH' && !!userMatch && !isSeasonEnded;
 
   // Initialization
   useEffect(() => {
@@ -131,8 +134,104 @@ const App: React.FC = () => {
     setCurrentView('MATCH');
   };
 
+  // Unified logic to process a batch of match results (for one week)
+  const processMatchResults = (results: Match[]) => {
+      // Update Schedule
+      setSchedule(prev => {
+          const newSchedule = [...prev];
+          newSchedule[currentWeek - 1] = results;
+          return newSchedule;
+      });
+
+      // Update Teams & Players
+      const newTeams = teams.map(team => {
+          // Deep copy players, decrementing previous bans
+          const updatedPlayers = team.players.map(p => ({
+              ...p,
+              matchesBanned: Math.max(0, p.matchesBanned - 1)
+          }));
+
+          // Check if this team played this week
+          const match = results.find(m => m.homeTeamId === team.id || m.awayTeamId === team.id);
+          
+          // Update container variables
+          let { points, won, drawn, lost, gf, ga, played } = team;
+
+          if (match) {
+              played++;
+              const isHome = (m: Match) => m.homeTeamId === team.id;
+              const myScore = isHome(match) ? match.homeScore : match.awayScore;
+              const opScore = isHome(match) ? match.awayScore : match.homeScore;
+
+              gf += myScore;
+              ga += opScore;
+
+              if (myScore > opScore) {
+                  points += 3;
+                  won++;
+              } else if (myScore === opScore) {
+                  points += 1;
+                  drawn++;
+              } else {
+                  lost++;
+              }
+
+              // --- UPDATE PLAYER STATS ---
+              const matchLineup = isHome(match) ? match.homeLineup : match.awayLineup;
+
+              if (matchLineup) {
+                  matchLineup.forEach(starter => {
+                      const playerRecord = updatedPlayers.find(p => p.id === starter.id);
+                      if (playerRecord) playerRecord.matchesPlayed++;
+                  });
+              }
+
+              match.events.forEach(evt => {
+                  if (evt.teamId === team.id) {
+                      if (evt.type === 'sub' && evt.subOn) {
+                          const sub = updatedPlayers.find(p => p.id === evt.subOn!.id);
+                          if (sub) sub.matchesPlayed++;
+                      }
+                      if (evt.playerId) {
+                           const player = updatedPlayers.find(p => p.id === evt.playerId);
+                           if (player) {
+                               if (evt.type === 'goal') player.goals++;
+                               if (evt.type === 'card') {
+                                   if (evt.cardType === 'red') {
+                                       player.redCards++;
+                                       player.matchesBanned = 1;
+                                   } else {
+                                       player.yellowCards++;
+                                       if (player.yellowCards > 0 && player.yellowCards % 3 === 0) {
+                                           player.matchesBanned = 1;
+                                       }
+                                   }
+                               }
+                           }
+                      }
+                  }
+              });
+          }
+          
+          return { 
+              ...team, 
+              points, won, drawn, lost, gf, ga, played,
+              players: updatedPlayers
+          };
+      });
+
+      setTeams(newTeams);
+      setCurrentWeek(prev => prev + 1);
+      
+      if (currentWeek >= totalWeeks) {
+          setCurrentView('SEASON_END');
+      } else {
+          setCurrentView('LEAGUE'); 
+      }
+  };
+
   const handleMatchComplete = (result: Match) => {
-    // 1. Simulate all OTHER matches in the background for this week
+    // Simulate all OTHER matches in the background for this week
     const otherMatches = currentWeekMatches.filter(m => m.id !== result.id);
     const simulatedOtherMatches = otherMatches.map(m => {
         const home = teams.find(t => t.id === m.homeTeamId)!;
@@ -141,123 +240,17 @@ const App: React.FC = () => {
     });
 
     const allResults = [result, ...simulatedOtherMatches];
+    processMatchResults(allResults);
+  };
 
-    // Update the schedule state
-    setSchedule(prev => {
-        const newSchedule = [...prev];
-        newSchedule[currentWeek - 1] = allResults;
-        return newSchedule;
+  const handleSimulateWeek = () => {
+    // Simulate ALL matches for this week (User has no match)
+    const simulatedMatches = currentWeekMatches.map(m => {
+        const home = teams.find(t => t.id === m.homeTeamId)!;
+        const away = teams.find(t => t.id === m.awayTeamId)!;
+        return simulateMatch(home, away, currentWeek, m.id);
     });
-
-    // 2. Update Standings and Player Stats
-    const newTeams = teams.map(team => {
-        // Deep copy players, decrementing previous bans
-        const updatedPlayers = team.players.map(p => ({
-            ...p,
-            matchesBanned: Math.max(0, p.matchesBanned - 1)
-        }));
-
-        // Check if this team played this week
-        const match = allResults.find(m => m.homeTeamId === team.id || m.awayTeamId === team.id);
-        
-        // Update container variables
-        let { points, won, drawn, lost, gf, ga, played } = team;
-
-        if (match) {
-            played++;
-            const isHome = (m: Match) => m.homeTeamId === team.id;
-            const myScore = isHome(match) ? match.homeScore : match.awayScore;
-            const opScore = isHome(match) ? match.awayScore : match.homeScore;
-
-            gf += myScore;
-            ga += opScore;
-
-            if (myScore > opScore) {
-                points += 3;
-                won++;
-            } else if (myScore === opScore) {
-                points += 1;
-                drawn++;
-            } else {
-                lost++;
-            }
-
-            // --- UPDATE PLAYER STATS FOR THIS MATCH ---
-            // Use the lineup stored in the match result to accurately credit MP
-            const matchLineup = isHome(match) ? match.homeLineup : match.awayLineup;
-
-            if (matchLineup) {
-                matchLineup.forEach(starter => {
-                    const playerRecord = updatedPlayers.find(p => p.id === starter.id);
-                    if (playerRecord) {
-                        playerRecord.matchesPlayed++;
-                    }
-                });
-            } else {
-                // Fallback logic if match lineup wasn't saved (legacy compat)
-                const eligibilityState = team.players; 
-                const { starting } = getStartingLineup({ ...team, players: eligibilityState });
-                starting.forEach(starter => {
-                    const playerRecord = updatedPlayers.find(p => p.id === starter.id);
-                    if (playerRecord) {
-                        playerRecord.matchesPlayed++;
-                    }
-                });
-            }
-
-            // 2. Process Events (Goals, Cards, Subs)
-            match.events.forEach(evt => {
-                if (evt.teamId === team.id) {
-                    // Handle Subs (Increment MP)
-                    if (evt.type === 'sub' && evt.subOn) {
-                        const sub = updatedPlayers.find(p => p.id === evt.subOn!.id);
-                        if (sub) {
-                            sub.matchesPlayed++;
-                        }
-                    }
-
-                    // Handle Stats & Bans
-                    if (evt.playerId) {
-                         const player = updatedPlayers.find(p => p.id === evt.playerId);
-                         if (player) {
-                             if (evt.type === 'goal') {
-                                 player.goals++;
-                             }
-                             if (evt.type === 'card') {
-                                 if (evt.cardType === 'red') {
-                                     player.redCards++;
-                                     // Red Card = 1 Match Ban (Applied to 'matchesBanned' for next week)
-                                     player.matchesBanned = 1;
-                                 } else {
-                                     player.yellowCards++;
-                                     // 3 Yellows = 1 Match Ban
-                                     if (player.yellowCards > 0 && player.yellowCards % 3 === 0) {
-                                         player.matchesBanned = 1;
-                                     }
-                                 }
-                             }
-                         }
-                    }
-                }
-            });
-        }
-        
-        return { 
-            ...team, 
-            points, won, drawn, lost, gf, ga, played,
-            players: updatedPlayers
-        };
-    });
-
-    setTeams(newTeams);
-    setCurrentWeek(prev => prev + 1);
-    
-    // Determine next view
-    if (currentWeek >= totalWeeks) {
-        setCurrentView('SEASON_END');
-    } else {
-        setCurrentView('LEAGUE'); 
-    }
+    processMatchResults(simulatedMatches);
   };
 
   const handleStartNewSeason = () => {
@@ -421,7 +414,7 @@ const App: React.FC = () => {
         currentView={currentView} 
         setView={setCurrentView} 
         userTeam={userTeam!} 
-        disabled={currentView === 'MATCH'} // Disable navigation while in a match
+        disabled={isMatchInProgress} // Only disable if actually playing a match
         isSeasonEnded={isSeasonEnded}
       />
       
@@ -451,7 +444,7 @@ const App: React.FC = () => {
             </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-8 h-[calc(100%-4rem)]">
             {currentView === 'DASHBOARD' && (
                 <Dashboard 
                     userTeam={userTeam!} 
@@ -462,6 +455,7 @@ const App: React.FC = () => {
                     onPlayMatch={handlePlayMatch}
                     isSeasonEnded={isSeasonEnded}
                     onViewSeasonEnd={() => setCurrentView('SEASON_END')}
+                    onSimulateWeek={handleSimulateWeek}
                 />
             )}
             {currentView === 'LEAGUE' && (
@@ -490,16 +484,49 @@ const App: React.FC = () => {
             {currentView === 'FIXTURES' && (
                 <FixturesView schedule={schedule} teams={teams} currentWeek={currentWeek > totalWeeks ? totalWeeks : currentWeek} />
             )}
-            {currentView === 'MATCH' && homeTeamForMatch && awayTeamForMatch && userMatch && !isSeasonEnded && (
-                <MatchView 
-                    homeTeam={homeTeamForMatch}
-                    awayTeam={awayTeamForMatch}
-                    week={currentWeek}
-                    matchId={userMatch.id}
-                    userTeamId={userTeamId}
-                    onMatchComplete={handleMatchComplete}
-                    initialSoundEnabled={soundEnabled}
-                />
+            {currentView === 'MATCH' && (
+                (homeTeamForMatch && awayTeamForMatch && userMatch && !isSeasonEnded) ? (
+                    <MatchView 
+                        homeTeam={homeTeamForMatch}
+                        awayTeam={awayTeamForMatch}
+                        week={currentWeek}
+                        matchId={userMatch.id}
+                        userTeamId={userTeamId}
+                        onMatchComplete={handleMatchComplete}
+                        initialSoundEnabled={soundEnabled}
+                    />
+                ) : (
+                    // Fallback UI if in MATCH view but no match exists (e.g. Season End or Bye Week)
+                    <div className="flex flex-col items-center justify-center h-full space-y-6 text-center animate-in fade-in">
+                        <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-xl max-w-md">
+                            <h2 className="text-2xl font-bold text-white mb-4">No Match Scheduled</h2>
+                            <p className="text-gray-400 mb-6">
+                                {isSeasonEnded 
+                                    ? "The season has concluded. Please view the summary." 
+                                    : `Your team does not have a fixture in Week ${currentWeek} (Bye Week or League Completed).`}
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button 
+                                    onClick={() => setCurrentView('DASHBOARD')}
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-colors"
+                                >
+                                    Return to Dashboard
+                                </button>
+                                {!isSeasonEnded && (
+                                    <button 
+                                        onClick={() => {
+                                            handleSimulateWeek();
+                                            setCurrentView('DASHBOARD');
+                                        }}
+                                        className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold transition-colors"
+                                    >
+                                        Simulate Week
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
             )}
             {currentView === 'SEASON_END' && (
                 <SeasonEndView 

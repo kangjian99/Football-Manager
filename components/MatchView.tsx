@@ -50,6 +50,24 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
     setHasStarted(true);
   };
 
+  const handleSkipMatch = () => {
+    if (!matchResult) return;
+    
+    // Initialize audio if skipping from start screen
+    resumeAudio(); 
+    
+    setHasStarted(true);
+    setIsFinished(true);
+    setIsPaused(false);
+    
+    // Set time to end
+    setMinute(90);
+    setExtraMinute(matchResult.secondHalfStoppage);
+    
+    // Load ALL events in reverse chronological order (newest top)
+    setEvents([...matchResult.events].reverse());
+  };
+
   // Playback loop
   useEffect(() => {
     if (!hasStarted || !matchResult || isFinished || isPaused) return;
@@ -94,7 +112,8 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
   // Update visible events and Play Sounds
   useEffect(() => {
-    if (matchResult && hasStarted) {
+    // IMPORTANT: Do not run this incremental logic if we just finished via skip
+    if (matchResult && hasStarted && !isFinished) {
       // Filter events matching current minute AND extraMinute
       const currentEvents = matchResult.events.filter(e => {
           const eExtra = e.extraMinute || 0;
@@ -144,7 +163,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
         }
       }
     }
-  }, [minute, extraMinute, matchResult, hasStarted, soundEnabled]);
+  }, [minute, extraMinute, matchResult, hasStarted, soundEnabled, isFinished]);
 
   // Calculate Score live
   const homeScore = events.filter(e => e.type === 'goal' && e.teamId === homeTeam.id).length;
@@ -228,15 +247,23 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                         </div>
                     </div>
                     
-                    <button 
-                        onClick={handleStartMatch}
-                        className="group relative bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105"
-                    >
-                        <span className="flex items-center gap-2">
+                    <div className="flex flex-col gap-3 w-full max-w-md">
+                        <button 
+                            onClick={handleStartMatch}
+                            className="group relative bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105 w-full flex justify-center items-center gap-2"
+                        >
                             <Timer size={20} />
                             KICK OFF
-                        </span>
-                    </button>
+                        </button>
+                        
+                        <button 
+                            onClick={handleSkipMatch}
+                            className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-6 py-3 rounded-full font-medium text-sm shadow transition-all border border-gray-700 flex justify-center items-center gap-2"
+                        >
+                            <SkipForward size={16} />
+                            INSTANT RESULT
+                        </button>
+                    </div>
 
                     {/* STARTING LINEUPS */}
                     {lineups && (
@@ -472,7 +499,11 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                 <button onClick={() => setSpeed(20)} className={`p-3 rounded-full transition-all ${speed === 20 ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}>
                     <FastForward size={20} fill="currentColor" />
                 </button>
-                <button onClick={() => { setMinute(90); setExtraMinute(0); }} className="p-3 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 transition-all hover:text-white">
+                <button 
+                    onClick={handleSkipMatch} 
+                    className="p-2 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 transition-all hover:text-white hover:scale-105"
+                    title="Skip to Result"
+                >
                     <SkipForward size={20} fill="currentColor" />
                 </button>
           </div>
