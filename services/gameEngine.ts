@@ -154,6 +154,51 @@ const selectPlayer = (
   return candidates[0];
 };
 
+/**
+ * Selects a candidate to be substituted off.
+ * Higher probability for players with Yellow Cards.
+ * Very low probability for players who were just subbed in.
+ */
+const selectSubOffCandidate = (
+    onPitch: Player[], 
+    yellowCards: Set<string>, 
+    subbedInIds: Set<string>, 
+    sentOffIds: Set<string>
+): Player | null => {
+    // Filter valid candidates: Not GK, not sent off
+    const candidates = onPitch.filter(p => p.position !== 'GK' && !sentOffIds.has(p.id));
+    
+    if (candidates.length === 0) return null;
+
+    const weightedCandidates = candidates.map(p => {
+        let weight = 10; // Base weight
+
+        // High probability to sub off yellow carded players to avoid red
+        if (yellowCards.has(p.id)) {
+            weight += 50; 
+        }
+
+        // Very low probability to sub off a player who was just subbed in
+        if (subbedInIds.has(p.id)) {
+            weight = 0.5;
+        }
+
+        return { player: p, weight };
+    });
+
+    const totalWeight = weightedCandidates.reduce((sum, c) => sum + c.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const item of weightedCandidates) {
+        random -= item.weight;
+        if (random <= 0) return item.player;
+    }
+    
+    // Fallback
+    return candidates[0];
+};
+
+
 // Helpers for lineup management
 export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[], formation: string } => {
     const availablePlayers = team.players.filter(p => !p.matchesBanned || p.matchesBanned <= 0);
@@ -222,6 +267,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   let awayGoals = 0;
   const sentOffPlayers = new Set<string>(); 
   const matchYellowCards = new Set<string>(); 
+  const homeSubbedInIds = new Set<string>();
+  const awaySubbedInIds = new Set<string>();
 
   const homeSquad = getStartingLineup(home);
   const awaySquad = getStartingLineup(away);
@@ -291,17 +338,20 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     const currAwayGoalProb = baseGoalChance * Math.pow(currAwayAttRatio, 2.5);
 
     // --- SUBSTITUTION LOGIC ---
-    if (minute > 55) {
-        let subProb = 0.02;
-        if (minute > 70) subProb = 0.08;
-        if (minute > 80) subProb = 0.15;
-        if (extraMinute > 0) subProb = 0.3;
+    if (minute >= 46) {
+        // Increase probability gradually throughout the second half
+        let subProb = 0.015; // Very small chance early 2nd half (injuries etc)
+        
+        if (minute > 60) subProb = 0.05;  // Start tactical tweaks
+        if (minute > 70) subProb = 0.08;  // Standard sub window
+        if (minute > 80) subProb = 0.12;  // Late changes
+        if (minute > 88) subProb = 0.2;  // Time wasting / desperation
+        if (extraMinute > 0) subProb = 0.40;
 
         // Home Sub
         if (homeSubsUsed < MAX_SUBS && Math.random() < subProb) {
-            const candidatesOff = homeOnPitch.filter(p => p.position !== 'GK' && !sentOffPlayers.has(p.id));
-            if (candidatesOff.length > 0) {
-                const subOff = candidatesOff[Math.floor(Math.random() * candidatesOff.length)];
+            const subOff = selectSubOffCandidate(homeOnPitch, matchYellowCards, homeSubbedInIds, sentOffPlayers);
+            if (subOff) {
                 const candidatesOn = homeBench.filter(p => p.position === subOff.position);
                 const subOn = candidatesOn.length > 0 ? candidatesOn[0] : homeBench[0];
 
@@ -310,6 +360,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
                     homeOnPitch.push(subOn);
                     homeBench = homeBench.filter(p => p.id !== subOn.id);
                     homeSubsUsed++;
+                    homeSubbedInIds.add(subOn.id);
                     
                     let t = SUB_TEMPLATES[Math.floor(Math.random() * SUB_TEMPLATES.length)];
                     t = t.replace("{team}", home.name).replace("{in}", subOn.name).replace("{out}", subOff.name);
@@ -321,9 +372,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
 
         // Away Sub
         if (awaySubsUsed < MAX_SUBS && Math.random() < subProb) {
-            const candidatesOff = awayOnPitch.filter(p => p.position !== 'GK' && !sentOffPlayers.has(p.id));
-            if (candidatesOff.length > 0) {
-                const subOff = candidatesOff[Math.floor(Math.random() * candidatesOff.length)];
+            const subOff = selectSubOffCandidate(awayOnPitch, matchYellowCards, awaySubbedInIds, sentOffPlayers);
+            if (subOff) {
                 const candidatesOn = awayBench.filter(p => p.position === subOff.position);
                 const subOn = candidatesOn.length > 0 ? candidatesOn[0] : awayBench[0];
 
@@ -332,6 +382,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
                     awayOnPitch.push(subOn);
                     awayBench = awayBench.filter(p => p.id !== subOn.id);
                     awaySubsUsed++;
+                    awaySubbedInIds.add(subOn.id);
                     
                     let t = SUB_TEMPLATES[Math.floor(Math.random() * SUB_TEMPLATES.length)];
                     t = t.replace("{team}", away.name).replace("{in}", subOn.name).replace("{out}", subOff.name);

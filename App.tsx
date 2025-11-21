@@ -13,7 +13,7 @@ import { ALL_TEAMS } from './constants';
 //import { PREMIER_LEAGUE_TEAMS as SERIE_A_TEAMS, CHAMPIONSHIP_TEAMS as SERIE_B_TEAMS, ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
-import { Key, Lock, ShieldCheck, Info } from 'lucide-react';
+import { Key, Lock, ShieldCheck, Info, Menu } from 'lucide-react';
 
 const App: React.FC = () => {
   // State
@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A); // Default, will update on load
   const [seasonYear, setSeasonYear] = useState("2024/2025");
   const [isMatchInProgress, setIsMatchInProgress] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Sound Settings
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
@@ -79,6 +80,16 @@ const App: React.FC = () => {
   const opponentId = userMatch ? (isUserHome ? userMatch.awayTeamId : userMatch.homeTeamId) : null;
   const opponent = teams.find(t => t.id === opponentId) || null;
 
+  // Determine if user has ANY matches left in the schedule
+  const userHasFutureMatches = useMemo(() => {
+      if (!userTeamId) return false;
+      // Check from current week onwards
+      const remainingWeeks = schedule.slice(currentWeek - 1);
+      return remainingWeeks.some(weekMatches => 
+          weekMatches.some(m => m.homeTeamId === userTeamId || m.awayTeamId === userTeamId)
+      );
+  }, [schedule, currentWeek, userTeamId]);
+
   // Initialization
   useEffect(() => {
     // Generate schedule based on dynamically detected leagues
@@ -102,7 +113,7 @@ const App: React.FC = () => {
         setSchedule(combinedSchedule);
         setViewLeague(activeLeagues[0]); // Default view to top tier
     }
-  }, []); // Run once on mount (or when team set changes if we added that dep)
+  }, []); // Run once on mount
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,24 +143,16 @@ const App: React.FC = () => {
     setCurrentView('MATCH');
   };
 
-  // Unified logic to process a batch of match results (for one week)
-  const processMatchResults = (results: Match[]) => {
-      // Update Schedule
-      setSchedule(prev => {
-          const newSchedule = [...prev];
-          newSchedule[currentWeek - 1] = results;
-          return newSchedule;
-      });
-
-      // Update Teams & Players
-      const newTeams = teams.map(team => {
+  // Pure function to calculate stats updates
+  const calculateTeamUpdates = (currentTeams: Team[], results: Match[]): Team[] => {
+      return currentTeams.map(team => {
           // Deep copy players, decrementing previous bans
           const updatedPlayers = team.players.map(p => ({
               ...p,
               matchesBanned: Math.max(0, p.matchesBanned - 1)
           }));
 
-          // Check if this team played this week
+          // Check if this team played in this batch of results
           const match = results.find(m => m.homeTeamId === team.id || m.awayTeamId === team.id);
           
           // Update container variables
@@ -217,8 +220,20 @@ const App: React.FC = () => {
               players: updatedPlayers
           };
       });
+  };
 
+  const processMatchResults = (results: Match[]) => {
+      // Update Schedule
+      setSchedule(prev => {
+          const newSchedule = [...prev];
+          newSchedule[currentWeek - 1] = results;
+          return newSchedule;
+      });
+
+      // Update Teams using the helper logic
+      const newTeams = calculateTeamUpdates(teams, results);
       setTeams(newTeams);
+
       setCurrentWeek(prev => prev + 1);
       
       if (currentWeek >= totalWeeks) {
@@ -243,7 +258,36 @@ const App: React.FC = () => {
   };
 
   const handleSimulateWeek = () => {
-    // Simulate ALL matches for this week (User has no match)
+    // Check if user is essentially done with the season (e.g. Tier 1 finished, Tier 2 still going)
+    if (!userHasFutureMatches && currentWeek <= totalWeeks) {
+        // BULK SIMULATION: Fast forward through all remaining weeks
+        let tempTeams = [...teams];
+        let tempSchedule = [...schedule];
+        
+        for (let w = currentWeek; w <= totalWeeks; w++) {
+            const weekMatches = tempSchedule[w-1];
+            const results = weekMatches.map(m => {
+               const home = tempTeams.find(t => t.id === m.homeTeamId)!;
+               const away = tempTeams.find(t => t.id === m.awayTeamId)!;
+               // Simulate logic
+               return simulateMatch(home, away, w, m.id);
+            });
+            
+            // Update schedule for this week
+            tempSchedule[w-1] = results;
+            // Accumulate stats for next iteration
+            tempTeams = calculateTeamUpdates(tempTeams, results);
+        }
+        
+        // Final State Updates
+        setSchedule(tempSchedule);
+        setTeams(tempTeams);
+        setCurrentWeek(totalWeeks + 1);
+        setCurrentView('SEASON_END');
+        return;
+    }
+
+    // Normal Single Week Simulation
     const simulatedMatches = currentWeekMatches.map(m => {
         const home = teams.find(t => t.id === m.homeTeamId)!;
         const away = teams.find(t => t.id === m.awayTeamId)!;
@@ -268,21 +312,76 @@ const App: React.FC = () => {
     const relegated = tier1Teams.slice(-3);
     const promoted = tier2Teams.slice(0, 3);
 
-    // 2. Create Next Season Team Data
+    // 2. Create Next Season Team Data & Apply Player Growth
     const nextTeams = teams.map(t => {
         let newLeague = t.league;
         if (relegated.some(r => r.id === t.id)) newLeague = tier2League;
         if (promoted.some(p => p.id === t.id)) newLeague = tier1League;
 
+        // Update Player Ages and Ratings
+        const updatedPlayers = t.players.map(p => {
+            const newAge = p.age + 1;
+            let newRating = p.rating;
+            const randomFactor = Math.random();
+
+            // Development Logic based on Age
+            if (newAge <= 21) {
+                // Youngsters improve fast
+                if (randomFactor > 0.3) newRating += Math.floor(Math.random() * 3) + 1; // +1 to +3
+            } else if (newAge <= 26) {
+                // Developing/Prime entry
+                if (randomFactor > 0.4) newRating += Math.floor(Math.random() * 2) + 1; // +1 to +2
+            } else if (newAge <= 31) {
+                // Prime - mostly stable, small variations
+                if (randomFactor > 0.7) newRating += 1;
+                else if (randomFactor < 0.3) newRating -= 1;
+            } else {
+                // Decline for older players
+                if (randomFactor > 0.2) newRating -= Math.floor(Math.random() * 3) + 1; // -1 to -3
+            }
+
+            // Clamp rating
+            if (newRating > 99) newRating = 99;
+            if (newRating < 50) newRating = 50;
+
+            return {
+                ...p,
+                age: newAge,
+                rating: newRating,
+                // Reset seasonal stats
+                goals: 0, assists: 0, matchesPlayed: 0, yellowCards: 0, redCards: 0, matchesBanned: 0,
+                form: 6 + Math.floor(Math.random() * 4)
+            };
+        });
+
+        // Recalculate Team Stats based on new squad
+        const getPosAvg = (pos: string) => {
+            const ps = updatedPlayers.filter(p => p.position === pos).sort((a,b) => b.rating - a.rating).slice(0, 5); 
+            if (ps.length === 0) return t[pos === 'FWD' ? 'att' : pos === 'MID' ? 'mid' : 'def'];
+            return Math.round(ps.reduce((sum, p) => sum + p.rating, 0) / ps.length);
+        };
+
+        // GK contributes to DEF stat
+        const defPlayers = updatedPlayers.filter(p => p.position === 'DEF').sort((a,b) => b.rating - a.rating).slice(0, 4);
+        const gkPlayer = updatedPlayers.filter(p => p.position === 'GK').sort((a,b) => b.rating - a.rating)[0];
+        
+        const newAtt = getPosAvg('FWD');
+        const newMid = getPosAvg('MID');
+        
+        let newDef = t.def;
+        if (defPlayers.length > 0 && gkPlayer) {
+            const defSum = defPlayers.reduce((sum, p) => sum + p.rating, 0);
+            newDef = Math.round((defSum + gkPlayer.rating) / (defPlayers.length + 1));
+        }
+
         return {
             ...t,
             league: newLeague,
+            att: newAtt, 
+            mid: newMid, 
+            def: newDef,
             points: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, played: 0,
-            // Reset player seasonal stats
-            players: t.players.map(p => ({
-                ...p,
-                goals: 0, assists: 0, matchesPlayed: 0, yellowCards: 0, redCards: 0, matchesBanned: 0
-            }))
+            players: updatedPlayers
         };
     });
 
@@ -354,7 +453,9 @@ const App: React.FC = () => {
   }
 
   // --- TEAM SELECTION SCREEN ---
-  if (!userTeamId) {
+  // Fix: Ensure we not only have an ID, but a VALID team object.
+  // If userTeamId is stale (e.g. from previous session with different league data), userTeam will be undefined.
+  if (!userTeamId || !userTeam) {
     return (
       <div className="h-screen bg-gray-900 overflow-y-auto flex flex-col items-center p-6">
         <div className="max-w-6xl w-full py-12 pb-20">
@@ -415,25 +516,35 @@ const App: React.FC = () => {
         userTeam={userTeam!} 
         disabled={isMatchInProgress} // Lock navigation during match
         isSeasonEnded={isSeasonEnded}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
       />
       
-      <main className="flex-1 overflow-y-auto bg-gray-900">
-        <header className="h-16 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-8 sticky top-0 z-20">
-            <h1 className="text-xl font-bold text-gray-200">
-                {currentView === 'DASHBOARD' && 'Manager Dashboard'}
-                {currentView === 'SQUAD' && 'Squad Management'}
-                {currentView === 'LEAGUE' && 'League Tables'}
-                {currentView === 'FIXTURES' && 'Fixtures & Results'}
-                {currentView === 'MATCH' && 'Match Center'}
-                {currentView === 'SEASON_END' && 'End of Season Summary'}
-                {currentView === 'SETTINGS' && 'Application Settings'}
-            </h1>
-            <div className="flex items-center gap-6 text-sm">
-                <div className="flex flex-col items-end">
+      <main className="flex-1 overflow-y-auto bg-gray-900 flex flex-col">
+        <header className="h-16 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-4 md:px-8 sticky top-0 z-20 shrink-0">
+            <div className="flex items-center">
+                <button 
+                    className="md:hidden mr-4 text-gray-400 hover:text-white"
+                    onClick={() => setMobileMenuOpen(true)}
+                >
+                    <Menu />
+                </button>
+                <h1 className="text-lg md:text-xl font-bold text-gray-200 truncate">
+                    {currentView === 'DASHBOARD' && 'Manager Dashboard'}
+                    {currentView === 'SQUAD' && 'Squad Management'}
+                    {currentView === 'LEAGUE' && 'League Tables'}
+                    {currentView === 'FIXTURES' && 'Fixtures & Results'}
+                    {currentView === 'MATCH' && 'Match Center'}
+                    {currentView === 'SEASON_END' && 'End of Season Summary'}
+                    {currentView === 'SETTINGS' && 'Application Settings'}
+                </h1>
+            </div>
+            <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
+                <div className="flex flex-col items-end hidden sm:flex">
                     <span className="text-gray-400">Current Season</span>
                     <span className="font-bold text-white">{seasonYear}</span>
                 </div>
-                <div className="w-px h-8 bg-gray-700"></div>
+                <div className="w-px h-8 bg-gray-700 hidden sm:block"></div>
                 <div className="flex flex-col items-end">
                     <span className="text-gray-400">Week</span>
                     <span className={`font-bold ${isSeasonEnded ? 'text-red-400' : 'text-blue-400'}`}>
@@ -443,7 +554,7 @@ const App: React.FC = () => {
             </div>
         </header>
 
-        <div className="p-8 h-[calc(100%-4rem)]">
+        <div className="p-4 md:p-8 flex-1 overflow-y-auto">
             {currentView === 'DASHBOARD' && (
                 <Dashboard 
                     userTeam={userTeam!} 
@@ -455,16 +566,17 @@ const App: React.FC = () => {
                     isSeasonEnded={isSeasonEnded}
                     onViewSeasonEnd={() => setCurrentView('SEASON_END')}
                     onSimulateWeek={handleSimulateWeek}
+                    userHasFutureMatches={userHasFutureMatches}
                 />
             )}
             {currentView === 'LEAGUE' && (
                  <div className="space-y-4">
-                    <div className="flex gap-2 bg-gray-800 p-1 rounded-lg w-fit">
+                    <div className="flex gap-2 bg-gray-800 p-1 rounded-lg w-fit overflow-x-auto max-w-full">
                         {activeLeagues.map((league, index) => (
                             <button 
                                 key={league}
                                 onClick={() => setViewLeague(league)}
-                                className={`px-4 py-2 rounded-md text-sm font-bold transition-colors ${
+                                className={`px-4 py-2 rounded-md text-sm font-bold transition-colors whitespace-nowrap ${
                                     viewLeague === league 
                                         ? (index === 0 ? 'bg-blue-600 text-white shadow' : 'bg-green-600 text-white shadow') 
                                         : 'text-gray-400 hover:text-white'
@@ -520,7 +632,7 @@ const App: React.FC = () => {
                                         }}
                                         className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold transition-colors"
                                     >
-                                        Simulate Week
+                                        {userHasFutureMatches ? 'Simulate Week' : 'Simulate Season Remainder'}
                                     </button>
                                 )}
                             </div>

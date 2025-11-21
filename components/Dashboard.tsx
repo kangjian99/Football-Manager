@@ -14,9 +14,10 @@ interface DashboardProps {
   isSeasonEnded: boolean;
   onViewSeasonEnd: () => void;
   onSimulateWeek: () => void;
+  userHasFutureMatches?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, opponent, isHome, onPlayMatch, isSeasonEnded, onViewSeasonEnd, onSimulateWeek }) => {
+const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, opponent, isHome, onPlayMatch, isSeasonEnded, onViewSeasonEnd, onSimulateWeek, userHasFutureMatches = true }) => {
   const [analysis, setAnalysis] = useState<string>('Loading assistant report...');
 
   useEffect(() => {
@@ -76,10 +77,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Next Match Card or Season End Card */}
         <div className="lg:col-span-2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-                {isSeasonEnded ? <Trophy size={200} /> : <PlayCircle size={200} />}
+            {/* Background Decoration - Adjusted to be subtle and not overlap logos */}
+            <div className="absolute -top-10 -right-10 p-4 opacity-5 pointer-events-none transform rotate-12">
+                {isSeasonEnded ? <Trophy size={150} /> : <PlayCircle size={150} />}
             </div>
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
                 <span className="w-2 h-8 bg-blue-500 rounded-full"></span>
                 {isSeasonEnded ? 'Season Status' : 'Next Fixture'}
             </h2>
@@ -131,21 +134,27 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
                 </div>
             ) : (
                 <div className="text-center py-12 relative z-10">
-                    <h3 className="text-2xl font-bold text-gray-300 mb-2">No Fixture Scheduled</h3>
-                    <p className="text-gray-500 mb-6">Your team has no match this week (League Bye or Completed).</p>
+                    <h3 className="text-2xl font-bold text-gray-300 mb-2">
+                        {userHasFutureMatches ? 'No Fixture Scheduled' : 'Season Finished'}
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                        {userHasFutureMatches 
+                            ? "Your team has no match this week (League Bye)." 
+                            : "You have completed all your league matches. Waiting for other leagues to finish."}
+                    </p>
                     
                     <button 
                         onClick={onSimulateWeek}
                         className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 mx-auto"
                     >
                         <FastForward size={20} />
-                        SIMULATE WEEK
+                        {userHasFutureMatches ? 'SIMULATE WEEK' : 'SIMULATE REMAINDER'}
                     </button>
                 </div>
             )}
             
             {opponent && !isSeasonEnded && (
-                <div className="mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center relative z-10">
                     <button 
                         onClick={onPlayMatch}
                         className="bg-green-600 hover:bg-green-500 text-white px-12 py-4 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105 flex items-center gap-2"

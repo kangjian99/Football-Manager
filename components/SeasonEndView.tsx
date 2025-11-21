@@ -21,12 +21,28 @@ const SeasonEndView: React.FC<SeasonEndViewProps> = ({ teams, onStartNewSeason, 
     });
   };
 
-  const serieA = sortTeams(teams.filter(t => t.league === LeagueLevel.SERIE_A));
-  const serieB = sortTeams(teams.filter(t => t.league === LeagueLevel.SERIE_B));
+  // Dynamically determine active leagues and their hierarchy based on team stats
+  const leagues = Array.from(new Set(teams.map(t => t.league))) as LeagueLevel[];
+  const sortedLeagues = leagues.sort((a, b) => {
+      const getAvg = (l: LeagueLevel) => {
+          const ts = teams.filter(t => t.league === l);
+          if (ts.length === 0) return 0;
+          return ts.reduce((acc, t) => acc + t.att + t.mid + t.def, 0) / ts.length;
+      };
+      return getAvg(b) - getAvg(a);
+  });
 
-  const champion = serieA[0];
-  const relegated = serieA.slice(-3);
-  const promoted = serieB.slice(0, 3);
+  const tier1League = sortedLeagues[0];
+  const tier2League = sortedLeagues[1];
+
+  const tier1Teams = sortTeams(teams.filter(t => t.league === tier1League));
+  const tier2Teams = sortTeams(teams.filter(t => t.league === tier2League));
+
+  const champion = tier1Teams[0];
+  const relegated = tier1Teams.slice(-3);
+  const promoted = tier2Teams.slice(0, 3);
+
+  if (!champion) return <div className="text-center text-white p-10">Calculating season results...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -39,7 +55,7 @@ const SeasonEndView: React.FC<SeasonEndViewProps> = ({ teams, onStartNewSeason, 
       <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-900/20 border border-yellow-600/50 rounded-2xl p-8 flex flex-col items-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <Trophy className="text-yellow-500 mb-4" size={64} />
-        <div className="text-yellow-400 font-bold tracking-widest uppercase mb-2">Serie A Champions</div>
+        <div className="text-yellow-400 font-bold tracking-widest uppercase mb-2">{tier1League} Champions</div>
         <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl shadow-[0_0_30px_rgba(234,179,8,0.4)] ${champion.color} border-4 border-yellow-500 mb-4`}>
             {champion.logo}
         </div>
@@ -54,7 +70,7 @@ const SeasonEndView: React.FC<SeasonEndViewProps> = ({ teams, onStartNewSeason, 
                 <ArrowDownCircle size={100} />
             </div>
             <h3 className="text-xl font-bold text-red-400 mb-6 flex items-center gap-2">
-                <ArrowDownCircle /> Relegated to Serie B
+                <ArrowDownCircle /> Relegated to {tier2League}
             </h3>
             <div className="space-y-3">
                 {relegated.map(team => (
@@ -75,7 +91,7 @@ const SeasonEndView: React.FC<SeasonEndViewProps> = ({ teams, onStartNewSeason, 
                 <ArrowUpCircle size={100} />
             </div>
             <h3 className="text-xl font-bold text-green-400 mb-6 flex items-center gap-2">
-                <ArrowUpCircle /> Promoted to Serie A
+                <ArrowUpCircle /> Promoted to {tier1League}
             </h3>
             <div className="space-y-3">
                 {promoted.map(team => (

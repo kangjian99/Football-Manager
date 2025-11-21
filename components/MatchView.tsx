@@ -365,9 +365,9 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
           {/* Live Text Commentary */}
           <div className="flex-1 p-4 md:p-8 overflow-y-auto space-y-3 scroll-smooth">
               {isFinished && (
-                  <div className="text-center py-8 mb-6 border-b border-gray-800 animate-in zoom-in duration-500">
-                      <div className="text-4xl font-bold text-white mb-2">FULL TIME</div>
-                      <div className="text-gray-400 mb-6">The match has ended.</div>
+                  <div className="text-center py-4 mb-4 border-b border-gray-800 animate-in zoom-in duration-500">
+                      <div className="text-2xl font-bold text-white mb-1">FULL TIME</div>
+                      <div className="text-xs text-gray-400 mb-4">The match has ended.</div>
                       <button 
                         onClick={() => matchResult && onMatchComplete(matchResult)}
                         className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform transform hover:scale-105"
