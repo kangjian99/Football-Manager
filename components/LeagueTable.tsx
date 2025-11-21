@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Team } from '../types';
 
@@ -19,7 +20,9 @@ const LeagueTable: React.FC<LeagueTableProps> = ({ teams, userTeamId }) => {
   return (
     <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-700 bg-gray-850">
-        <h2 className="text-lg font-bold text-white">League Standings</h2>
+        <h2 className="text-lg font-bold text-white">
+             {teams.length > 0 ? teams[0].league : 'League'} Standings
+        </h2>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -48,8 +51,8 @@ const LeagueTable: React.FC<LeagueTableProps> = ({ teams, userTeamId }) => {
                 >
                   <td className="px-6 py-3 text-gray-400 font-mono">
                     {index + 1}
-                    {index < 4 && <span className="ml-2 w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>}
-                    {index >= sortedTeams.length - 3 && <span className="ml-2 w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>}
+                    {index < 4 && <span className="ml-2 w-1.5 h-1.5 rounded-full bg-green-500 inline-block" title="Promotion / CL Spot"></span>}
+                    {index >= sortedTeams.length - 3 && <span className="ml-2 w-1.5 h-1.5 rounded-full bg-red-500 inline-block" title="Relegation Zone"></span>}
                   </td>
                   <td className="px-6 py-3 font-medium text-white flex items-center gap-3">
                      <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${team.color}`}>{team.logo}</div>

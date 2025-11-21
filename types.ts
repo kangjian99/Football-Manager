@@ -2,6 +2,8 @@
 export enum LeagueLevel {
   SERIE_A = 'Serie A',
   SERIE_B = 'Serie B',
+  PREMIER_LEAGUE = 'Premier League',
+  CHAMPIONSHIP = 'Championship'
 }
 
 export interface Player {
@@ -16,6 +18,7 @@ export interface Player {
   matchesPlayed: number;
   yellowCards: number;
   redCards: number;
+  matchesBanned: number; // 0 = available, > 0 = suspended
 }
 
 export interface Team {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import LeagueTable from './components/LeagueTable';
@@ -9,6 +9,8 @@ import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
 import { ALL_TEAMS, SERIE_A_TEAMS, SERIE_B_TEAMS } from './constants';
+// To switch to English leagues, uncomment the line below and comment out the line above.
+//import { PREMIER_LEAGUE_TEAMS as SERIE_A_TEAMS, CHAMPIONSHIP_TEAMS as SERIE_B_TEAMS, ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info } from 'lucide-react';
@@ -16,12 +18,14 @@ import { Key, Lock, ShieldCheck, Info } from 'lucide-react';
 const App: React.FC = () => {
   // State
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
+  // Default to Italian leagues as per initial configuration. 
+  // To change data source, swap the imports above.
   const [teams, setTeams] = useState<Team[]>(ALL_TEAMS);
   const [userTeamId, setUserTeamId] = useState<string | null>(null);
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [schedule, setSchedule] = useState<Match[][]>([]);
-  const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A);
+  const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A); // Default, will update on load
   const [seasonYear, setSeasonYear] = useState("2024/2025");
   
   // Sound Settings
@@ -35,6 +39,19 @@ const App: React.FC = () => {
     setSoundEnabled(newVal);
     localStorage.setItem('sound_enabled', String(newVal));
   };
+
+  // Computed: Identify active leagues dynamically
+  const activeLeagues = useMemo(() => {
+      const leagues = Array.from(new Set(teams.map(t => t.league)));
+      // Sort leagues by average team strength to determine hierarchy (Tier 1 vs Tier 2)
+      return leagues.sort((a, b) => {
+          const getAvg = (l: LeagueLevel) => {
+             const ts = teams.filter(t => t.league === l);
+             return ts.reduce((acc, t) => acc + t.att + t.mid + t.def, 0) / ts.length;
+          };
+          return getAvg(b) - getAvg(a);
+      });
+  }, [teams]);
 
   // Computed
   const userTeam = teams.find(t => t.id === userTeamId);
@@ -63,22 +80,28 @@ const App: React.FC = () => {
 
   // Initialization
   useEffect(() => {
-    // Initialize Schedule for BOTH leagues
-    const sA = generateSchedule(SERIE_A_TEAMS);
-    const sB = generateSchedule(SERIE_B_TEAMS);
-    
-    // Merge schedules week by week
-    const combinedSchedule: Match[][] = [];
-    const maxWeeks = Math.max(sA.length, sB.length);
-    
-    for(let i = 0; i < maxWeeks; i++) {
-        const matchesA = sA[i] || [];
-        const matchesB = sB[i] || [];
-        combinedSchedule.push([...matchesA, ...matchesB]);
+    // Generate schedule based on dynamically detected leagues
+    if (activeLeagues.length > 0) {
+        const tier1Teams = teams.filter(t => t.league === activeLeagues[0]);
+        const tier2Teams = teams.filter(t => t.league === activeLeagues[1]);
+        
+        const s1 = generateSchedule(tier1Teams);
+        const s2 = generateSchedule(tier2Teams);
+        
+        // Merge schedules week by week
+        const combinedSchedule: Match[][] = [];
+        const maxWeeks = Math.max(s1.length, s2.length);
+        
+        for(let i = 0; i < maxWeeks; i++) {
+            const matches1 = s1[i] || [];
+            const matches2 = s2[i] || [];
+            combinedSchedule.push([...matches1, ...matches2]);
+        }
+        
+        setSchedule(combinedSchedule);
+        setViewLeague(activeLeagues[0]); // Default view to top tier
     }
-    
-    setSchedule(combinedSchedule);
-  }, []);
+  }, []); // Run once on mount (or when team set changes if we added that dep)
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +115,6 @@ const App: React.FC = () => {
   const handleClearApiKey = () => {
     localStorage.removeItem('gemini_api_key');
     setApiKey('');
-    // Reset to dashboard view when clearing key, though the auth guard will catch them first
     setCurrentView('DASHBOARD'); 
   };
 
@@ -127,7 +149,7 @@ const App: React.FC = () => {
         return newSchedule;
     });
 
-    // 2. Update Standings and Player Stats
+    // 2. Update Standings and Player Stats (and bans)
     const newTeams = [...teams].map(team => {
         let points = 0;
         let won = 0;
@@ -137,9 +159,12 @@ const App: React.FC = () => {
         let ga = 0;
         let played = 0;
 
-        // Create a deep copy of players to reset stats
+        // Deep copy players
         const newPlayers = team.players.map(p => ({
             ...p,
+            // If matchesBanned > 0, decrement it as they 'served' a ban this week (assuming team plays every week)
+            // If logic was more complex (byes), we'd check if team played. Here we assume simulation runs for all active.
+            matchesBanned: Math.max(0, p.matchesBanned - 1),
             goals: 0,
             assists: 0,
             matchesPlayed: 0,
@@ -172,26 +197,47 @@ const App: React.FC = () => {
                         lost++;
                     }
 
-                    // Player Stats
-                    const sortedForLineup = [...newPlayers].sort((a,b) => b.rating - a.rating);
-                    const starters = sortedForLineup.slice(0, 14);
-                    starters.forEach(starter => {
-                        const pRef = newPlayers.find(p => p.id === starter.id);
-                        if (pRef) pRef.matchesPlayed++;
-                    });
-
+                    // Player Stats for lineup appearances
+                    // We don't have exact historical lineups stored easily unless we store full match objects deep
+                    // For this simplified logic, we count stats from EVENTS and just increment MP roughly if they did something
+                    // BUT for the current week, we can be more precise with "matchesBanned" logic below based on events.
+                    
                     m.events.forEach(evt => {
                         if (evt.teamId === team.id && evt.playerId) {
                             const player = newPlayers.find(p => p.id === evt.playerId);
                             if (player) {
                                 if (evt.type === 'goal') player.goals++;
                                 if (evt.type === 'card') {
-                                    if (evt.cardType === 'red') player.redCards++;
-                                    else player.yellowCards++;
+                                    if (evt.cardType === 'red') {
+                                        player.redCards++;
+                                        // Red card = 1 match ban (apply immediately for next week)
+                                        // Only apply if this match is the CURRENT week being processed
+                                        if (idx === currentWeek - 1) {
+                                            player.matchesBanned = 1; 
+                                        }
+                                    } else {
+                                        player.yellowCards++;
+                                        // 3 Yellow Cards = 1 match ban
+                                        if (player.yellowCards > 0 && player.yellowCards % 3 === 0) {
+                                            if (idx === currentWeek - 1) {
+                                                player.matchesBanned = 1;
+                                            }
+                                        }
+                                    }
                                 }
+                                // Simplified: If mentioned in event, they played (or we can just not track MP strictly for all historical)
+                                // For accurate MP, we would need to store lineups in match history. 
+                                // For now, we just aggregate goals/cards accurately.
                             }
                         }
                     });
+                    
+                    // Simple MP increment for starters (approximation for historical, since we regenerate lineups each time)
+                    // This is a limitation of the simple engine - lineups are generated at sim time. 
+                    // To fix MP count, we'd need to store 'startingLineup' in the Match object.
+                    // For now, let's leave MP as an approximation or just increment for everyone available
+                     const availableForThisMatch = newPlayers.filter(p => p.matchesBanned === 0); // Approx
+                     availableForThisMatch.slice(0, 11).forEach(p => p.matchesPlayed++);
                 }
             });
         });
@@ -215,23 +261,26 @@ const App: React.FC = () => {
   };
 
   const handleStartNewSeason = () => {
-    // 1. Identify Promotions and Relegations
+    // 1. Identify Promotions and Relegations dynamically based on active leagues
+    const tier1League = activeLeagues[0];
+    const tier2League = activeLeagues[1];
+
     const sortByPoints = (a: Team, b: Team) => {
         if (b.points !== a.points) return b.points - a.points;
         return (b.gf - b.ga) - (a.gf - a.ga);
     };
 
-    const serieATeams = teams.filter(t => t.league === LeagueLevel.SERIE_A).sort(sortByPoints);
-    const serieBTeams = teams.filter(t => t.league === LeagueLevel.SERIE_B).sort(sortByPoints);
+    const tier1Teams = teams.filter(t => t.league === tier1League).sort(sortByPoints);
+    const tier2Teams = teams.filter(t => t.league === tier2League).sort(sortByPoints);
 
-    const relegated = serieATeams.slice(-3);
-    const promoted = serieBTeams.slice(0, 3);
+    const relegated = tier1Teams.slice(-3);
+    const promoted = tier2Teams.slice(0, 3);
 
     // 2. Create Next Season Team Data
     const nextTeams = teams.map(t => {
         let newLeague = t.league;
-        if (relegated.some(r => r.id === t.id)) newLeague = LeagueLevel.SERIE_B;
-        if (promoted.some(p => p.id === t.id)) newLeague = LeagueLevel.SERIE_A;
+        if (relegated.some(r => r.id === t.id)) newLeague = tier2League;
+        if (promoted.some(p => p.id === t.id)) newLeague = tier1League;
 
         return {
             ...t,
@@ -240,24 +289,24 @@ const App: React.FC = () => {
             // Reset player seasonal stats
             players: t.players.map(p => ({
                 ...p,
-                goals: 0, assists: 0, matchesPlayed: 0, yellowCards: 0, redCards: 0
+                goals: 0, assists: 0, matchesPlayed: 0, yellowCards: 0, redCards: 0, matchesBanned: 0
             }))
         };
     });
 
     // 3. Generate New Schedule
-    const nextSerieATeams = nextTeams.filter(t => t.league === LeagueLevel.SERIE_A);
-    const nextSerieBTeams = nextTeams.filter(t => t.league === LeagueLevel.SERIE_B);
+    const nextTier1Teams = nextTeams.filter(t => t.league === tier1League);
+    const nextTier2Teams = nextTeams.filter(t => t.league === tier2League);
     
-    const sA = generateSchedule(nextSerieATeams);
-    const sB = generateSchedule(nextSerieBTeams);
+    const s1 = generateSchedule(nextTier1Teams);
+    const s2 = generateSchedule(nextTier2Teams);
 
     const combinedSchedule: Match[][] = [];
-    const maxWeeks = Math.max(sA.length, sB.length);
+    const maxWeeks = Math.max(s1.length, s2.length);
     for(let i = 0; i < maxWeeks; i++) {
-        const matchesA = sA[i] || [];
-        const matchesB = sB[i] || [];
-        combinedSchedule.push([...matchesA, ...matchesB]);
+        const matches1 = s1[i] || [];
+        const matches2 = s2[i] || [];
+        combinedSchedule.push([...matches1, ...matches2]);
     }
 
     // 4. Update State
@@ -316,7 +365,7 @@ const App: React.FC = () => {
   if (!userTeamId) {
     return (
       <div className="h-screen bg-gray-900 overflow-y-auto flex flex-col items-center p-6">
-        <div className="max-w-4xl w-full py-12 pb-20">
+        <div className="max-w-6xl w-full py-12 pb-20">
             <div className="flex justify-between items-center mb-2">
                 <div></div> {/* Spacer */}
                 <h1 className="text-5xl font-bold text-white text-center">Calcio Manager AI</h1>
@@ -331,47 +380,31 @@ const App: React.FC = () => {
             
             <p className="text-gray-400 text-center mb-12">Select your club to begin your journey</p>
             
-            {/* Serie A Selection */}
-            <h2 className="text-2xl font-bold text-gray-300 mb-6 pl-2 border-l-4 border-blue-500">Serie A</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                {SERIE_A_TEAMS.map(team => (
-                    <button 
-                        key={team.id}
-                        onClick={() => handleTeamSelect(team.id)}
-                        className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl border border-gray-700 hover:border-blue-500 transition-all flex flex-col items-center gap-3 group"
-                    >
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg ${team.color} group-hover:scale-110 transition-transform`}>
-                            {team.logo}
-                        </div>
-                        <div className="font-bold text-white">{team.name}</div>
-                        <div className="text-xs text-gray-500 flex gap-2">
-                            <span>ATT {team.att}</span>
-                            <span>DEF {team.def}</span>
-                        </div>
-                    </button>
-                ))}
-            </div>
-
-             {/* Serie B Selection */}
-             <h2 className="text-2xl font-bold text-gray-300 mb-6 pl-2 border-l-4 border-green-500">Serie B</h2>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                {SERIE_B_TEAMS.map(team => (
-                    <button 
-                        key={team.id}
-                        onClick={() => handleTeamSelect(team.id)}
-                        className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl border border-gray-700 hover:border-green-500 transition-all flex flex-col items-center gap-3 group"
-                    >
-                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg ${team.color} group-hover:scale-110 transition-transform`}>
-                            {team.logo}
-                        </div>
-                        <div className="font-bold text-white">{team.name}</div>
-                        <div className="text-xs text-gray-500 flex gap-2">
-                            <span>ATT {team.att}</span>
-                            <span>DEF {team.def}</span>
-                        </div>
-                    </button>
-                ))}
-            </div>
+            {activeLeagues.map((league, index) => (
+                <div key={league} className="mb-12">
+                     <h2 className={`text-2xl font-bold text-gray-300 mb-6 pl-2 border-l-4 ${index === 0 ? 'border-blue-500' : 'border-green-500'}`}>
+                        {league}
+                     </h2>
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {teams.filter(t => t.league === league).map(team => (
+                            <button 
+                                key={team.id}
+                                onClick={() => handleTeamSelect(team.id)}
+                                className={`bg-gray-800 hover:bg-gray-700 p-4 rounded-xl border border-gray-700 transition-all flex flex-col items-center gap-3 group ${index === 0 ? 'hover:border-blue-500' : 'hover:border-green-500'}`}
+                            >
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg ${team.color} group-hover:scale-110 transition-transform`}>
+                                    {team.logo}
+                                </div>
+                                <div className="font-bold text-white">{team.name}</div>
+                                <div className="text-xs text-gray-500 flex gap-2">
+                                    <span>ATT {team.att}</span>
+                                    <span>DEF {team.def}</span>
+                                </div>
+                            </button>
+                        ))}
+                     </div>
+                </div>
+            ))}
 
         </div>
       </div>
@@ -434,18 +467,19 @@ const App: React.FC = () => {
             {currentView === 'LEAGUE' && (
                  <div className="space-y-4">
                     <div className="flex gap-2 bg-gray-800 p-1 rounded-lg w-fit">
-                        <button 
-                            onClick={() => setViewLeague(LeagueLevel.SERIE_A)}
-                            className={`px-4 py-2 rounded-md text-sm font-bold transition-colors ${viewLeague === LeagueLevel.SERIE_A ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                        >
-                            Serie A
-                        </button>
-                        <button 
-                            onClick={() => setViewLeague(LeagueLevel.SERIE_B)}
-                            className={`px-4 py-2 rounded-md text-sm font-bold transition-colors ${viewLeague === LeagueLevel.SERIE_B ? 'bg-green-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                        >
-                            Serie B
-                        </button>
+                        {activeLeagues.map((league, index) => (
+                            <button 
+                                key={league}
+                                onClick={() => setViewLeague(league)}
+                                className={`px-4 py-2 rounded-md text-sm font-bold transition-colors ${
+                                    viewLeague === league 
+                                        ? (index === 0 ? 'bg-blue-600 text-white shadow' : 'bg-green-600 text-white shadow') 
+                                        : 'text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                {league}
+                            </button>
+                        ))}
                     </div>
                     <LeagueTable teams={teams.filter(t => t.league === viewLeague)} userTeamId={userTeamId} />
                 </div>

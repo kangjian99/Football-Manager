@@ -1,4 +1,6 @@
 
+
+
 import { Team, Match, MatchEvent, Player } from '../types';
 
 // --- Constants & Templates ---
@@ -132,18 +134,29 @@ const selectPlayer = (players: Player[], type: 'GOAL' | 'CARD' | 'CHANCE' | 'DEF
 };
 
 // Helpers for lineup management
-const getStartingLineup = (team: Team): { starting: Player[], bench: Player[] } => {
-    const gks = team.players.filter(p => p.position === 'GK');
-    const outfield = team.players.filter(p => p.position !== 'GK');
+// EXPORTED so UI can display lineups
+export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[] } => {
+    // FILTER AVAILABLE PLAYERS (Exclude Banned)
+    const availablePlayers = team.players.filter(p => !p.matchesBanned || p.matchesBanned <= 0);
 
-    const startingGK = gks[0] || team.players[0];
-    const benchGKs = gks.slice(1);
+    const gks = availablePlayers.filter(p => p.position === 'GK');
+    const outfield = availablePlayers.filter(p => p.position !== 'GK');
 
-    const startingOutfield = outfield.slice(0, 10);
-    const benchOutfield = outfield.slice(10);
+    // If no GK available due to bans/injuries, pick the highest rated outfield player to play GK (edge case)
+    const startingGK = gks.length > 0 ? gks[0] : (outfield.length > 0 ? outfield[0] : team.players[0]);
+    
+    // Remove the chosen GK from outfield list if he was pulled from there
+    let remainingOutfield = gks.length > 0 ? outfield : outfield.slice(1);
+    
+    const startingOutfield = remainingOutfield.slice(0, 10);
+    const benchOutfield = remainingOutfield.slice(10);
+    const benchGKs = gks.length > 1 ? gks.slice(1) : [];
 
     const starting = [startingGK, ...startingOutfield];
     const bench = [...benchGKs, ...benchOutfield];
+
+    // Sort bench by rating
+    bench.sort((a, b) => b.rating - a.rating);
 
     return { starting, bench };
 };
@@ -478,44 +491,42 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   };
 };
 
+// Generate Round Robin Schedule (Circle Method)
+// Now adaptable to any number of teams (including odd numbers via dummy team)
 export const generateSchedule = (teams: Team[]): Match[][] => {
-    const schedule: Match[][] = [];
-    const numTeams = teams.length;
-    if (numTeams % 2 !== 0) return []; 
+    let tempTeams = [...teams];
     
+    // If odd number of teams, add a dummy "BYE" team
+    // This allows the schedule generator to work for 21, 23, 25 teams etc.
+    if (tempTeams.length % 2 !== 0) {
+        tempTeams.push({ id: 'BYE', name: 'BYE', league: teams[0].league } as any);
+    }
+
+    const numTeams = tempTeams.length;
+    const schedule: Match[][] = [];
     const rounds = numTeams - 1;
-    const tempTeams = shuffleArray(teams);
-    const fixedTeam = tempTeams.shift(); 
+    
+    // We shuffle the array (excluding the first fixed element if we want random first week matchups)
+    // But standard circle method usually fixes one. Let's shuffle all initially for randomness.
+    tempTeams = shuffleArray(tempTeams);
+    
+    const fixedTeam = tempTeams.shift(); // Keep one team fixed
     if (!fixedTeam) return [];
 
-    // First Half
+    // First Half of the Season
     for (let round = 0; round < rounds; round++) {
         const weekMatches: Match[] = [];
+        
+        // Match the fixed team against the first rotating team
         const t2 = tempTeams[0];
         const fixedIsHome = round % 2 === 0;
-        
-        weekMatches.push({
-            id: `R${round}-${fixedTeam.id}-${t2.id}`,
-            homeTeamId: fixedIsHome ? fixedTeam.id : t2.id,
-            awayTeamId: fixedIsHome ? t2.id : fixedTeam.id,
-            homeScore: 0,
-            awayScore: 0,
-            played: false,
-            week: round + 1,
-            events: [],
-            firstHalfStoppage: 0,
-            secondHalfStoppage: 0
-        });
 
-        for (let i = 1; i < tempTeams.length / 2; i++) {
-            const t1 = tempTeams[i];
-            const t2 = tempTeams[tempTeams.length - i];
-            const firstIsHome = i % 2 === 0;
-
+        // Only add match if neither team is the dummy 'BYE' team
+        if (fixedTeam.id !== 'BYE' && t2.id !== 'BYE') {
             weekMatches.push({
-                id: `R${round}-${t1.id}-${t2.id}`,
-                homeTeamId: firstIsHome ? t1.id : t2.id,
-                awayTeamId: firstIsHome ? t2.id : t1.id,
+                id: `R${round}-${fixedTeam.id}-${t2.id}`,
+                homeTeamId: fixedIsHome ? fixedTeam.id : t2.id,
+                awayTeamId: fixedIsHome ? t2.id : fixedTeam.id,
                 homeScore: 0,
                 awayScore: 0,
                 played: false,
@@ -525,12 +536,37 @@ export const generateSchedule = (teams: Team[]): Match[][] => {
                 secondHalfStoppage: 0
             });
         }
+
+        // Match the rest of the pairs
+        for (let i = 1; i < tempTeams.length / 2; i++) {
+            const t1 = tempTeams[i];
+            const t2 = tempTeams[tempTeams.length - i];
+            
+            if (t1.id !== 'BYE' && t2.id !== 'BYE') {
+                const firstIsHome = i % 2 === 0;
+                weekMatches.push({
+                    id: `R${round}-${t1.id}-${t2.id}`,
+                    homeTeamId: firstIsHome ? t1.id : t2.id,
+                    awayTeamId: firstIsHome ? t2.id : t1.id,
+                    homeScore: 0,
+                    awayScore: 0,
+                    played: false,
+                    week: round + 1,
+                    events: [],
+                    firstHalfStoppage: 0,
+                    secondHalfStoppage: 0
+                });
+            }
+        }
+        
         schedule.push(weekMatches);
+        
+        // Rotate elements: move first element to end
         const first = tempTeams.shift();
         if (first) tempTeams.push(first);
     }
 
-    // Second Half
+    // Second Half of the Season (Mirror)
     const secondHalf: Match[][] = [];
     schedule.forEach((weekMatches, idx) => {
         const returnMatches = weekMatches.map(m => ({

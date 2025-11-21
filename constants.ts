@@ -1,5 +1,26 @@
 
+import React from 'react';
 import { Team, LeagueLevel, Player } from './types';
+
+// --- Logo Components ---
+
+// A utility to create striped patterns for logos
+const StripedLogo = ({ colors, rotate = 0, vertical = false }: { colors: string[], rotate?: number, vertical?: boolean }) => {
+  return React.createElement('div', {
+    className: "w-full h-full rounded-full overflow-hidden relative border-2 border-gray-800/20",
+    style: { transform: `rotate(${rotate}deg)` }
+  }, colors.map((c, i) => 
+    React.createElement('div', {
+      key: i,
+      className: `absolute ${vertical ? 'h-full' : 'w-full'}`,
+      style: { 
+        backgroundColor: c,
+        [vertical ? 'width' : 'height']: `${100 / colors.length}%`,
+        [vertical ? 'left' : 'top']: `${(100 / colors.length) * i}%`
+      }
+    })
+  ));
+};
 
 // --- Name Databases (for procedural generation filler) ---
 const IT_FIRST_NAMES = ['Alessandro', 'Lorenzo', 'Mattia', 'Francesco', 'Leonardo', 'Andrea', 'Riccardo', 'Gabriele', 'Tommaso', 'Antonio', 'Marco', 'Giuseppe', 'Davide', 'Federico', 'Michele', 'Giovanni', 'Roberto', 'Simone', 'Luca', 'Stefano', 'Dario', 'Paolo', 'Vincenzo', 'Enrico', 'Pietro'];
@@ -30,6 +51,7 @@ const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, 
     matchesPlayed: 0,
     yellowCards: 0,
     redCards: 0,
+    matchesBanned: 0, // Initialize
     form: 6 + Math.floor(Math.random() * 4) // 6-10
   };
 };
@@ -86,6 +108,7 @@ const injectRealPlayers = (generatedSquad: Player[], realData: Partial<Player>[]
       matchesPlayed: 0,
       yellowCards: 0,
       redCards: 0,
+      matchesBanned: 0,
       form: 8
     };
 
@@ -104,7 +127,7 @@ const injectRealPlayers = (generatedSquad: Player[], realData: Partial<Player>[]
 const createTeam = (
   id: string, name: string, league: LeagueLevel, 
   att: number, mid: number, def: number, 
-  color: string, logo: string, 
+  color: string, logo: any, // logo can now be string or JSX
   realPlayers: Partial<Player>[] = []
 ): Team => {
   let players = generateFullSquad(id, att, mid, def);
@@ -121,7 +144,7 @@ const createTeam = (
 // --- SERIE A DATA (2024/25) ---
 
 export const SERIE_A_TEAMS: Team[] = [
-  createTeam('INT', 'Inter', LeagueLevel.SERIE_A, 93, 91, 90, 'bg-blue-700', '🔵', [
+  createTeam('INT', 'Inter', LeagueLevel.SERIE_A, 93, 91, 90, 'bg-blue-700', React.createElement(StripedLogo, { colors: ['#000', '#0066ff'], vertical: true }), [
     { name: 'Lautaro Martinez', position: 'FWD', rating: 94, age: 27 },
     { name: 'Marcus Thuram', position: 'FWD', rating: 89, age: 27 },
     { name: 'Nicolo Barella', position: 'MID', rating: 90, age: 27 },
@@ -140,7 +163,7 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Carlos Augusto', position: 'DEF', rating: 81, age: 25 },
     { name: 'Yann Bisseck', position: 'DEF', rating: 80, age: 23 }
   ]),
-  createTeam('MIL', 'Milan', LeagueLevel.SERIE_A, 89, 86, 85, 'bg-red-600', '🔴', [
+  createTeam('MIL', 'Milan', LeagueLevel.SERIE_A, 89, 86, 85, 'bg-red-600', React.createElement(StripedLogo, { colors: ['#d40000', '#000'], vertical: true }), [
     { name: 'Rafael Leao', position: 'FWD', rating: 89, age: 25 },
     { name: 'Christian Pulisic', position: 'FWD', rating: 87, age: 26 },
     { name: 'Alvaro Morata', position: 'FWD', rating: 84, age: 31 },
@@ -157,7 +180,7 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Strahinja Pavlovic', position: 'DEF', rating: 80, age: 23 },
     { name: 'Noah Okafor', position: 'FWD', rating: 79, age: 24 }
   ]),
-  createTeam('JUV', 'Juventus', LeagueLevel.SERIE_A, 87, 88, 88, 'bg-gray-100 text-black', '⚪', [
+  createTeam('JUV', 'Juventus', LeagueLevel.SERIE_A, 87, 88, 88, 'bg-gray-100 text-black', React.createElement(StripedLogo, { colors: ['#000', '#fff'], vertical: true }), [
     { name: 'Dusan Vlahovic', position: 'FWD', rating: 88, age: 24 },
     { name: 'Kenan Yildiz', position: 'FWD', rating: 84, age: 19 },
     { name: 'Teun Koopmeiners', position: 'MID', rating: 87, age: 26 },
@@ -550,6 +573,28 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Mattia Finotto', position: 'FWD', rating: 69, age: 31 },
       { name: 'Marco Bleve', position: 'GK', rating: 69, age: 28 },
       { name: 'Simone Panico', position: 'FWD', rating: 68, age: 22 }
+  ]),
+  // --- ADDED TEAMS TO REACH 24 FOR DEMONSTRATION ---
+  createTeam('VIC', 'Vicenza', LeagueLevel.SERIE_B, 70, 69, 69, 'bg-red-600 text-white', '⚪', [
+      { name: 'Franco Ferrari', position: 'FWD', rating: 71, age: 28 },
+      { name: 'Filippo Costa', position: 'DEF', rating: 70, age: 28 },
+      { name: 'Ronaldo', position: 'MID', rating: 71, age: 34 },
+      { name: 'Alessandro Confente', position: 'GK', rating: 69, age: 25 }
+  ]),
+  createTeam('SPA', 'SPAL', LeagueLevel.SERIE_B, 69, 68, 68, 'bg-blue-300 text-white', '⚪', [
+      { name: 'Mirco Antenucci', position: 'FWD', rating: 71, age: 39 },
+      { name: 'Marco Bertini', position: 'MID', rating: 69, age: 21 },
+      { name: 'Matteo Arena', position: 'DEF', rating: 69, age: 25 }
+  ]),
+  createTeam('PER', 'Perugia', LeagueLevel.SERIE_B, 68, 69, 69, 'bg-red-700 text-white', '🦁', [
+      { name: 'Federico Ricci', position: 'FWD', rating: 70, age: 30 },
+      { name: 'Edoardo Iannoni', position: 'MID', rating: 70, age: 22 },
+      { name: 'Gabriele Angella', position: 'DEF', rating: 69, age: 35 }
+  ]),
+  createTeam('PAD', 'Padova', LeagueLevel.SERIE_B, 70, 69, 68, 'bg-white text-red-600', '🛡️', [
+      { name: 'Micheal Liguori', position: 'FWD', rating: 71, age: 24 },
+      { name: 'Simone Palombi', position: 'FWD', rating: 70, age: 28 },
+      { name: 'Antonio Donnarumma', position: 'GK', rating: 69, age: 33 }
   ]),
 ];
 

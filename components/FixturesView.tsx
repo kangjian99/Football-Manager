@@ -23,6 +23,15 @@ const FixturesView: React.FC<FixturesViewProps> = ({ schedule, teams, currentWee
       if (viewWeek < schedule.length) setViewWeek(prev => prev + 1);
   };
 
+  // Group matches by league based on the home team's league
+  const leaguesInMatchWeek = Array.from(new Set(matches.map(m => getTeam(m.homeTeamId)?.league))).filter(Boolean) as LeagueLevel[];
+
+  // Sort leagues (Tier 1 then Tier 2 - using team count average logic or just alphanumeric if simple, 
+  // but since we know the data order usually, simple existence check is enough for display).
+  // For display consistency, we can sort by the same logic as App.tsx or just alphabetic if we don't have context.
+  // However, let's just render them in the order they appear or sort based on string to be deterministic.
+  leaguesInMatchWeek.sort();
+
   const renderMatchRow = (match: Match) => {
         const home = getTeam(match.homeTeamId);
         const away = getTeam(match.awayTeamId);
@@ -66,9 +75,6 @@ const FixturesView: React.FC<FixturesViewProps> = ({ schedule, teams, currentWee
         );
   };
 
-  const serieAMatches = matches.filter(m => getTeam(m.homeTeamId)?.league === LeagueLevel.SERIE_A);
-  const serieBMatches = matches.filter(m => getTeam(m.homeTeamId)?.league === LeagueLevel.SERIE_B);
-
   return (
     <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-700 bg-gray-850 flex justify-between items-center">
@@ -97,23 +103,20 @@ const FixturesView: React.FC<FixturesViewProps> = ({ schedule, teams, currentWee
             <div className="p-8 text-center text-gray-500">No fixtures scheduled for this week.</div>
         ) : (
             <>
-                {serieAMatches.length > 0 && (
-                    <>
-                        <div className="bg-gray-900/50 px-4 py-2 text-xs font-bold text-blue-400 uppercase tracking-wider border-b border-gray-700">
-                            Serie A
+                {leaguesInMatchWeek.map((league, index) => {
+                    const leagueMatches = matches.filter(m => getTeam(m.homeTeamId)?.league === league);
+                    // Heuristic to style Tier 1 vs Tier 2 differently if we wanted, but generic is safer.
+                    const colorClass = index === 0 ? 'text-blue-400' : 'text-green-400';
+                    
+                    return (
+                        <div key={league}>
+                            <div className={`bg-gray-900/50 px-4 py-2 text-xs font-bold ${colorClass} uppercase tracking-wider border-b border-gray-700 ${index > 0 ? 'border-t' : ''}`}>
+                                {league}
+                            </div>
+                            {leagueMatches.map(renderMatchRow)}
                         </div>
-                        {serieAMatches.map(renderMatchRow)}
-                    </>
-                )}
-                
-                {serieBMatches.length > 0 && (
-                    <>
-                        <div className="bg-gray-900/50 px-4 py-2 text-xs font-bold text-green-400 uppercase tracking-wider border-b border-gray-700 border-t">
-                            Serie B
-                        </div>
-                        {serieBMatches.map(renderMatchRow)}
-                    </>
-                )}
+                    );
+                })}
             </>
         )}
       </div>
