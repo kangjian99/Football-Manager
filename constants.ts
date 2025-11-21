@@ -154,7 +154,8 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Benjamin Pavard', position: 'DEF', rating: 85, age: 28 },
     { name: 'Henrikh Mkhitaryan', position: 'MID', rating: 84, age: 35 },
     { name: 'Yann Sommer', position: 'GK', rating: 86, age: 35 },
-    { name: 'Mehdi Taremi', position: 'FWD', rating: 83, age: 32 },
+    { name: 'Mehdi Taremi', position: 'FWD', rating: 82, age: 32 },
+    { name: 'Marko Arnautović', position: 'FWD', rating: 84, age: 36 }, 
     { name: 'Piotr Zielinski', position: 'MID', rating: 83, age: 30 },
     { name: 'Davide Frattesi', position: 'MID', rating: 82, age: 25 },
     { name: 'Denzel Dumfries', position: 'DEF', rating: 83, age: 28 },
@@ -200,9 +201,9 @@ export const SERIE_A_TEAMS: Team[] = [
   createTeam('NAP', 'Napoli', LeagueLevel.SERIE_A, 89, 86, 85, 'bg-sky-500', '💠', [
     { name: 'Khvicha Kvaratskhelia', position: 'FWD', rating: 89, age: 23 },
     { name: 'Romelu Lukaku', position: 'FWD', rating: 86, age: 31 },
-    { name: 'Scott McTominay', position: 'MID', rating: 85, age: 27 },
+    { name: 'Scott McTominay', position: 'MID', rating: 86, age: 27 },
     { name: 'Alessandro Buongiorno', position: 'DEF', rating: 85, age: 25 },
-    { name: 'Giovanni Di Lorenzo', position: 'DEF', rating: 86, age: 31 },
+    { name: 'Giovanni Di Lorenzo', position: 'DEF', rating: 83, age: 31 },
     { name: 'Stanislav Lobotka', position: 'MID', rating: 84, age: 29 },
     { name: 'Alex Meret', position: 'GK', rating: 83, age: 27 },
     { name: 'Frank Anguissa', position: 'MID', rating: 83, age: 28 },
@@ -340,23 +341,25 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Abdou Harroui', position: 'MID', rating: 75, age: 26 }
   ]),
   createTeam('COM', 'Como', LeagueLevel.SERIE_A, 78, 77, 76, 'bg-blue-500', '🌊', [
-    { name: 'Nico Paz', position: 'MID', rating: 79, age: 20 },
-    { name: 'Patrick Cutrone', position: 'FWD', rating: 78, age: 26 },
+    { name: 'Nico Paz', position: 'MID', rating: 81, age: 20 },
+    { name: 'Patrick Cutrone', position: 'FWD', rating: 79, age: 26 },
     { name: 'Sergi Roberto', position: 'MID', rating: 79, age: 32 },
-    { name: 'Gabriel Strefezza', position: 'FWD', rating: 78, age: 27 },
+    { name: 'Gabriel Strefezza', position: 'FWD', rating: 80, age: 27 },
     { name: 'Emil Audero', position: 'GK', rating: 77, age: 27 },
     { name: 'Alberto Moreno', position: 'DEF', rating: 77, age: 32 },
-    { name: 'Andrea Belotti', position: 'FWD', rating: 76, age: 30 },
-    { name: 'Maximo Perrone', position: 'MID', rating: 77, age: 21 },
-    { name: 'Pepe Reina', position: 'GK', rating: 76, age: 41 },
-    { name: 'Alberto Dossena', position: 'DEF', rating: 76, age: 25 },
+    { name: 'Andrea Belotti', position: 'FWD', rating: 77, age: 30 },
+    { name: 'Maximo Perrone', position: 'MID', rating: 79, age: 21 },
+    { name: 'Lucas Da Cunha', position: 'MID', rating: 81, age: 24 },
+    { name: 'Jean Butez', position: 'GK', rating: 79, age: 30 },
+    { name: 'Alberto Dossena', position: 'DEF', rating: 77, age: 25 },
+    { name: 'Marc-Oliver Kempf', position: 'DEF', rating: 79, age: 30 },
     { name: 'Ignace Van der Brempt', position: 'DEF', rating: 75, age: 22 }
   ]),
   createTeam('PAR', 'Parma', LeagueLevel.SERIE_A, 77, 76, 75, 'bg-yellow-300 text-blue-800', '✝️', [
     { name: 'Dennis Man', position: 'FWD', rating: 80, age: 26 },
     { name: 'Ange-Yoan Bonny', position: 'FWD', rating: 78, age: 20 },
     { name: 'Adrian Bernabe', position: 'MID', rating: 79, age: 23 },
-    { name: 'Zion Suzuki', position: 'GK', rating: 77, age: 22 },
+    { name: 'Zion Suzuki', position: 'GK', rating: 80, age: 22 },
     { name: 'Valentin Mihaila', position: 'FWD', rating: 76, age: 24 },
     { name: 'Simon Sohm', position: 'MID', rating: 76, age: 23 },
     { name: 'Alessandro Circati', position: 'DEF', rating: 76, age: 20 },
@@ -391,8 +394,8 @@ export const SERIE_A_TEAMS: Team[] = [
   ]),
   createTeam('MON', 'Monza', LeagueLevel.SERIE_A, 76, 77, 76, 'bg-red-600', '🏎️', [
     { name: 'Matteo Pessina', position: 'MID', rating: 79, age: 27 },
-    { name: 'Daniel Maldini', position: 'FWD', rating: 78, age: 22 },
-    { name: 'Dany Mota', position: 'FWD', rating: 77, age: 26 },
+    { name: 'Daniel Maldini', position: 'FWD', rating: 77, age: 22 },
+    { name: 'Dany Mota', position: 'FWD', rating: 78, age: 26 },
     { name: 'Stefano Turati', position: 'GK', rating: 77, age: 23 },
     { name: 'Pablo Mari', position: 'DEF', rating: 77, age: 31 },
     { name: 'Gianluca Caprari', position: 'FWD', rating: 76, age: 31 },
@@ -400,7 +403,7 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Georgios Kyriakopoulos', position: 'DEF', rating: 75, age: 28 },
     { name: 'Warren Bondo', position: 'MID', rating: 75, age: 20 },
     { name: 'Milan Djuric', position: 'FWD', rating: 75, age: 34 },
-    { name: 'Samuele Birindelli', position: 'DEF', rating: 74, age: 25 }
+    { name: 'Samuele Birindelli', position: 'DEF', rating: 76, age: 25 }
   ]),
   createTeam('LEC', 'Lecce', LeagueLevel.SERIE_A, 75, 75, 75, 'bg-yellow-500 text-black', '☀️', [
     { name: 'Nikola Krstovic', position: 'FWD', rating: 78, age: 24 },
@@ -443,7 +446,7 @@ export const SERIE_B_TEAMS: Team[] = [
   ]),
   createTeam('SAM', 'Sampdoria', LeagueLevel.SERIE_B, 76, 75, 74, 'bg-blue-600', '⚓', [
       { name: 'Gennaro Tutino', position: 'FWD', rating: 77, age: 28 },
-      { name: 'Massimo Coda', position: 'FWD', rating: 76, age: 35 },
+      { name: 'Massimo Coda', position: 'FWD', rating: 78, age: 35 },
       { name: 'Pajtim Kasami', position: 'MID', rating: 75, age: 32 },
       { name: 'Bartosz Bereszynski', position: 'DEF', rating: 74, age: 32 },
       { name: 'Fabio Borini', position: 'FWD', rating: 74, age: 33 },
@@ -464,23 +467,23 @@ export const SERIE_B_TEAMS: Team[] = [
   createTeam('CRE', 'Cremonese', LeagueLevel.SERIE_B, 75, 75, 73, 'bg-gray-400 text-red-800', '🎻', [
       { name: 'Franco Vazquez', position: 'MID', rating: 76, age: 35 },
       { name: 'Jari Vandeputte', position: 'MID', rating: 76, age: 28 },
-      { name: 'Federico Bonazzoli', position: 'FWD', rating: 75, age: 27 },
+      { name: 'Federico Bonazzoli', position: 'FWD', rating: 77, age: 27 },
       { name: 'Andrea Fulignati', position: 'GK', rating: 74, age: 29 },
       { name: 'Luca Zanimacchia', position: 'MID', rating: 75, age: 26 },
       { name: 'Michele Castagnetti', position: 'MID', rating: 74, age: 34 },
       { name: 'Manuel De Luca', position: 'FWD', rating: 74, age: 26 }
   ]),
   createTeam('PIS', 'Pisa', LeagueLevel.SERIE_B, 74, 73, 72, 'bg-blue-800', '🗼', [
-      { name: 'Matteo Tramoni', position: 'MID', rating: 75, age: 24 },
+      { name: 'Matteo Tramoni', position: 'MID', rating: 77, age: 24 },
       { name: 'Nicholas Bonfanti', position: 'FWD', rating: 74, age: 22 },
       { name: 'Marius Marin', position: 'MID', rating: 73, age: 26 },
       { name: 'Adrian Semper', position: 'GK', rating: 74, age: 26 },
-      { name: 'Stefano Moreo', position: 'FWD', rating: 73, age: 31 },
+      { name: 'Stefano Moreo', position: 'FWD', rating: 76, age: 31 },
       { name: 'Antonio Caracciolo', position: 'DEF', rating: 72, age: 34 }
   ]),
   createTeam('SPE', 'Spezia', LeagueLevel.SERIE_B, 73, 73, 72, 'bg-white text-black', '🦅', [
       { name: 'Salvatore Esposito', position: 'MID', rating: 75, age: 23 },
-      { name: 'Francesco Pio Esposito', position: 'FWD', rating: 72, age: 19 },
+      { name: 'Francesco Pio Esposito', position: 'FWD', rating: 76, age: 19 },
       { name: 'Edoardo Soleri', position: 'FWD', rating: 73, age: 26 },
       { name: 'Filippo Bandinelli', position: 'MID', rating: 73, age: 29 },
       { name: 'Arkadiusz Reca', position: 'DEF', rating: 72, age: 29 }
@@ -514,7 +517,7 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Thomas Battistella', position: 'MID', rating: 71, age: 22 }
   ]),
   createTeam('CAT', 'Catanzaro', LeagueLevel.SERIE_B, 70, 70, 69, 'bg-yellow-500 text-red-600', '🦅', [
-      { name: 'Pietro Iemmello', position: 'FWD', rating: 74, age: 32 },
+      { name: 'Pietro Iemmello', position: 'FWD', rating: 76, age: 32 },
       { name: 'Tommaso Biasci', position: 'FWD', rating: 71, age: 29 },
       { name: 'Mirko Pigliacelli', position: 'GK', rating: 71, age: 31 },
       { name: 'Jacopo Petriccione', position: 'MID', rating: 71, age: 29 }
@@ -527,7 +530,7 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Ebrima Darboe', position: 'MID', rating: 71, age: 23 }
   ]),
   createTeam('SUD', 'Sudtirol', LeagueLevel.SERIE_B, 69, 70, 70, 'bg-white text-red-700', '🏔️', [
-      { name: 'Daniele Casiraghi', position: 'MID', rating: 72, age: 31 },
+      { name: 'Daniele Casiraghi', position: 'MID', rating: 76, age: 31 },
       { name: 'Raphael Odogwu', position: 'FWD', rating: 70, age: 33 },
       { name: 'Jasmin Kurtic', position: 'MID', rating: 71, age: 35 },
       { name: 'Giacomo Poluzzi', position: 'GK', rating: 70, age: 36 }
@@ -536,7 +539,7 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Cedric Gondo', position: 'FWD', rating: 71, age: 27 },
       { name: 'Luca Vido', position: 'FWD', rating: 70, age: 27 },
       { name: 'Francesco Bardi', position: 'GK', rating: 71, age: 32 },
-      { name: 'Manuel Portanova', position: 'MID', rating: 71, age: 24 }
+      { name: 'Manuel Portanova', position: 'MID', rating: 76, age: 24 }
   ]),
   createTeam('COS', 'Cosenza', LeagueLevel.SERIE_B, 69, 69, 68, 'bg-blue-900 text-red-600', '🐺', [
       { name: 'Tommaso Fumagalli', position: 'FWD', rating: 70, age: 24 },
@@ -551,9 +554,9 @@ export const SERIE_B_TEAMS: Team[] = [
       { name: 'Alessio Vita', position: 'MID', rating: 70, age: 31 }
   ]),
   createTeam('CES', 'Cesena', LeagueLevel.SERIE_B, 71, 70, 69, 'bg-black text-white', '🐴', [
-      { name: 'Cristian Shpendi', position: 'FWD', rating: 72, age: 21 },
-      { name: 'Augustus Kargbo', position: 'FWD', rating: 70, age: 25 },
-      { name: 'Simone Bastoni', position: 'MID', rating: 73, age: 27 },
+      { name: 'Cristian Shpendi', position: 'FWD', rating: 74, age: 21 },
+      { name: 'Augustus Kargbo', position: 'FWD', rating: 71, age: 25 },
+      { name: 'Simone Bastoni', position: 'MID', rating: 75, age: 27 },
       { name: 'Mirko Antonucci', position: 'FWD', rating: 72, age: 25 }
   ]),
   createTeam('MAN', 'Mantova', LeagueLevel.SERIE_B, 69, 69, 68, 'bg-red-500', '⚪', [

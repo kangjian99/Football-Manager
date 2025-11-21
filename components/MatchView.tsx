@@ -270,7 +270,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
                     {/* STARTING LINEUPS - Narrower box, slightly larger font */}
                     {lineups && (
-                        <div className="w-full max-w-lg mx-auto grid grid-cols-2 gap-6 bg-gray-800/80 backdrop-blur-sm p-5 rounded-xl border border-gray-700 text-sm md:text-base mt-2 space-y-2 shadow-xl">
+                        <div className="w-full max-w-lg mx-auto grid grid-cols-2 gap-6 bg-gray-800/80 backdrop-blur-sm p-5 rounded-xl border border-gray-700 text-sm md:text-base mt-2 shadow-xl">
                             {/* Home XI */}
                             <div>
                                 <h3 className="text-center text-gray-400 font-bold mb-3 uppercase tracking-widest text-xs">
