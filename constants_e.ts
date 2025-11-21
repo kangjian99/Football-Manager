@@ -1,5 +1,26 @@
 
+import React from 'react';
 import { Team, LeagueLevel, Player } from './types';
+
+// --- Logo Components ---
+
+// A utility to create striped patterns for logos
+const StripedLogo = ({ colors, rotate = 0, vertical = false }: { colors: string[], rotate?: number, vertical?: boolean }) => {
+  return React.createElement('div', {
+    className: "w-full h-full rounded-full overflow-hidden relative border-2 border-gray-800/20",
+    style: { transform: `rotate(${rotate}deg)` }
+  }, colors.map((c, i) => 
+    React.createElement('div', {
+      key: i,
+      className: `absolute ${vertical ? 'h-full' : 'w-full'}`,
+      style: { 
+        backgroundColor: c,
+        [vertical ? 'width' : 'height']: `${100 / colors.length}%`,
+        [vertical ? 'left' : 'top']: `${(100 / colors.length) * i}%`
+      }
+    })
+  ));
+};
 
 // --- Name Databases (British / Commonwealth names) ---
 const UK_FIRST_NAMES = ['James', 'Oliver', 'Jack', 'Harry', 'George', 'Noah', 'Charlie', 'Jacob', 'Alfie', 'Thomas', 'Joshua', 'William', 'Ethan', 'Henry', 'Oscar', 'Archie', 'Leo', 'Lucas', 'Logan', 'Muhammad', 'Alex', 'Daniel', 'Matthew', 'Liam', 'Callum'];
@@ -125,7 +146,7 @@ const createTeam = (
 // Relegated last season: Leicester, Ipswich, Southampton
 
 export const PREMIER_LEAGUE_TEAMS: Team[] = [
-  createTeam('MCI', 'Man City', LeagueLevel.PREMIER_LEAGUE, 95, 94, 93, 'bg-sky-500', '🔵', [
+  createTeam('MCI', 'Man City', LeagueLevel.PREMIER_LEAGUE, 95, 94, 93, 'bg-sky-500', '⛵', [
     { name: 'Erling Haaland', position: 'FWD', rating: 94, age: 25 },
     { name: 'Phil Foden', position: 'MID', rating: 92, age: 25 },
     { name: 'Rodri', position: 'MID', rating: 93, age: 29 },
@@ -142,15 +163,16 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Ilkay Gundogan', position: 'MID', rating: 87, age: 35 },
     { name: 'Jack Grealish', position: 'FWD', rating: 86, age: 30 }
   ]),
-  createTeam('LIV', 'Liverpool', LeagueLevel.PREMIER_LEAGUE, 93, 91, 91, 'bg-red-600', '🔴', [
+  createTeam('LIV', 'Liverpool', LeagueLevel.PREMIER_LEAGUE, 93, 91, 91, 'bg-red-600', '🦅', [
     { name: 'Mohamed Salah', position: 'FWD', rating: 92, age: 33 },
     { name: 'Virgil van Dijk', position: 'DEF', rating: 91, age: 34 },
     { name: 'Alisson', position: 'GK', rating: 90, age: 33 },
     { name: 'Trent Alexander-Arnold', position: 'DEF', rating: 90, age: 27 },
     { name: 'Luis Díaz', position: 'FWD', rating: 89, age: 28 },
     { name: 'Alexis Mac Allister', position: 'MID', rating: 89, age: 26 },
-    { name: 'Darwin Núñez', position: 'FWD', rating: 88, age: 26 },
-    { name: 'Diogo Jota', position: 'FWD', rating: 88, age: 28 },
+    { name: 'Wataru Endo', position: 'MID', rating: 82, age: 32 },
+    { name: 'Darwin Núñez', position: 'FWD', rating: 85, age: 26 },
+    { name: 'Federico Chiesa', position: 'FWD', rating: 82, age: 28 },
     { name: 'Cody Gakpo', position: 'FWD', rating: 87, age: 26 },
     { name: 'Ibrahima Konaté', position: 'DEF', rating: 88, age: 26 },
     { name: 'Dominik Szoboszlai', position: 'MID', rating: 88, age: 25 },
@@ -159,7 +181,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Caoimhin Kelleher', position: 'GK', rating: 84, age: 27 },
     { name: 'Curtis Jones', position: 'MID', rating: 84, age: 24 }
   ]),
-  createTeam('ARS', 'Arsenal', LeagueLevel.PREMIER_LEAGUE, 93, 92, 92, 'bg-red-700', '🔴⚪', [
+  createTeam('ARS', 'Arsenal', LeagueLevel.PREMIER_LEAGUE, 93, 92, 92, 'bg-red-700', React.createElement(StripedLogo, { colors: ['#fff', '#ef0107', '#fff'], rotate: 90, vertical: false }), [
     { name: 'Bukayo Saka', position: 'FWD', rating: 92, age: 24 },
     { name: 'Martin Ødegaard', position: 'MID', rating: 91, age: 26 },
     { name: 'Declan Rice', position: 'MID', rating: 91, age: 26 },
@@ -176,7 +198,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Riccardo Calafiori', position: 'DEF', rating: 86, age: 23 },
     { name: 'Mikel Merino', position: 'MID', rating: 86, age: 29 }
   ]),
-  createTeam('CHE', 'Chelsea', LeagueLevel.PREMIER_LEAGUE, 91, 90, 88, 'bg-blue-600', '🔵', [
+  createTeam('CHE', 'Chelsea', LeagueLevel.PREMIER_LEAGUE, 91, 90, 88, 'bg-blue-600', '🦁', [
     { name: 'Cole Palmer', position: 'MID', rating: 91, age: 23 },
     { name: 'Enzo Fernández', position: 'MID', rating: 89, age: 24 },
     { name: 'Moises Caicedo', position: 'MID', rating: 88, age: 24 },
@@ -193,7 +215,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Noni Madueke', position: 'FWD', rating: 85, age: 23 },
     { name: 'Robert Sánchez', position: 'GK', rating: 84, age: 27 }
   ]),
-  createTeam('NEW', 'Newcastle', LeagueLevel.PREMIER_LEAGUE, 89, 88, 87, 'bg-black text-white', '⚫⚪', [
+  createTeam('NEW', 'Newcastle', LeagueLevel.PREMIER_LEAGUE, 89, 88, 87, 'bg-black text-white', '🏰', [
     { name: 'Alexander Isak', position: 'FWD', rating: 90, age: 26 },
     { name: 'Bruno Guimarães', position: 'MID', rating: 90, age: 28 },
     { name: 'Anthony Gordon', position: 'FWD', rating: 88, age: 24 },
@@ -208,7 +230,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Lewis Hall', position: 'DEF', rating: 84, age: 21 },
     { name: 'Miguel Almirón', position: 'FWD', rating: 84, age: 31 }
   ]),
-  createTeam('AVL', 'Aston Villa', LeagueLevel.PREMIER_LEAGUE, 88, 87, 87, 'bg-claret-600 text-white', '🟣', [
+  createTeam('AVL', 'Aston Villa', LeagueLevel.PREMIER_LEAGUE, 88, 87, 87, 'bg-claret-600 text-white', React.createElement(StripedLogo, { colors: ['#670e36', '#95bfe5'], vertical: true }), [
     { name: 'Ollie Watkins', position: 'FWD', rating: 88, age: 29 },
     { name: 'Emiliano Martínez', position: 'GK', rating: 89, age: 33 },
     { name: 'Ezri Konsa', position: 'DEF', rating: 86, age: 28 },
@@ -224,7 +246,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Tyrone Mings', position: 'DEF', rating: 84, age: 32 },
     { name: 'Jhon Durán', position: 'FWD', rating: 84, age: 21 }
   ]),
-  createTeam('TOT', 'Tottenham', LeagueLevel.PREMIER_LEAGUE, 88, 87, 86, 'bg-white', '⚪', [
+  createTeam('TOT', 'Tottenham', LeagueLevel.PREMIER_LEAGUE, 88, 87, 86, 'bg-white', '🐓', [
     { name: 'Son Heung-min', position: 'FWD', rating: 89, age: 33 },
     { name: 'James Maddison', position: 'MID', rating: 88, age: 28 },
     { name: 'Pedro Porro', position: 'DEF', rating: 87, age: 26 },
@@ -239,7 +261,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Richarlison', position: 'FWD', rating: 85, age: 28 },
     { name: 'Pape Matar Sarr', position: 'MID', rating: 84, age: 23 }
   ]),
-  createTeam('MUN', 'Man United', LeagueLevel.PREMIER_LEAGUE, 87, 86, 85, 'bg-red-700', '🔴', [
+  createTeam('MUN', 'Man United', LeagueLevel.PREMIER_LEAGUE, 87, 86, 85, 'bg-red-700', '🔱', [
     { name: 'Bruno Fernandes', position: 'MID', rating: 89, age: 31 },
     { name: 'Rasmus Højlund', position: 'FWD', rating: 87, age: 22 },
     { name: 'Lisandro Martínez', position: 'DEF', rating: 87, age: 27 },
@@ -254,37 +276,39 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Noussair Mazraoui', position: 'DEF', rating: 84, age: 28 },
     { name: 'Leny Yoro', position: 'DEF', rating: 84, age: 20 }
   ]),
-  createTeam('BHA', 'Brighton', LeagueLevel.PREMIER_LEAGUE, 86, 86, 85, 'bg-blue-500 text-white', '🔵⚪', [
-    { name: 'Kaoru Mitoma', position: 'FWD', rating: 88, age: 28 },
+  createTeam('BHA', 'Brighton', LeagueLevel.PREMIER_LEAGUE, 86, 86, 85, 'bg-blue-500 text-white', '🕊️', [
+    { name: 'Kaoru Mitoma', position: 'MID', rating: 86, age: 28 },
     { name: 'João Pedro', position: 'FWD', rating: 87, age: 24 },
-    { name: 'Evan Ferguson', position: 'FWD', rating: 86, age: 21 },
+    { name: 'Danny Welbeck', position: 'FWD', rating: 84, age: 34 },
+    { name: 'Evan Ferguson', position: 'FWD', rating: 82, age: 21 },
     { name: 'Lewis Dunk', position: 'DEF', rating: 85, age: 34 },
-    { name: 'Billy Gilmour', position: 'MID', rating: 85, age: 24 },
-    { name: 'Pervis Estupiñán', position: 'DEF', rating: 85, age: 27 },
-    { name: 'Jan Paul van Hecke', position: 'DEF', rating: 84, age: 25 },
+    { name: 'Solly March', position: 'MID', rating: 81, age: 31 },
+    { name: 'Pervis Estupiñán', position: 'DEF', rating: 83, age: 27 },
+    { name: 'Jan Paul van Hecke', position: 'DEF', rating: 82, age: 25 },
     { name: 'Jason Steele', position: 'GK', rating: 83, age: 35 },
-    { name: 'Yankuba Minteh', position: 'FWD', rating: 84, age: 21 },
+    { name: 'Yankuba Minteh', position: 'MID', rating: 84, age: 21 },
     { name: 'James Milner', position: 'MID', rating: 83, age: 39 },
     { name: 'Adam Webster', position: 'DEF', rating: 83, age: 30 },
     { name: 'Carlos Baleba', position: 'MID', rating: 84, age: 21 },
     { name: 'Georginio Rutter', position: 'FWD', rating: 83, age: 23 },
-    { name: 'Jack Hinshelwood', position: 'MID', rating: 83, age: 20 }
+    { name: 'Jack Hinshelwood', position: 'MID', rating: 81, age: 20 }
   ]),
-  createTeam('WHU', 'West Ham', LeagueLevel.PREMIER_LEAGUE, 85, 85, 84, 'bg-claret-500', '🔴', [
+  createTeam('WHU', 'West Ham', LeagueLevel.PREMIER_LEAGUE, 85, 85, 84, 'bg-red-900', '🔨', [
     { name: 'Jarrod Bowen', position: 'FWD', rating: 87, age: 28 },
     { name: 'Mohammed Kudus', position: 'MID', rating: 87, age: 25 },
     { name: 'Lucas Paquetá', position: 'MID', rating: 86, age: 28 },
     { name: 'Edson Álvarez', position: 'MID', rating: 85, age: 28 },
-    { name: 'Nayef Aguerd', position: 'DEF', rating: 84, age: 29 },
+    { name: 'Maximilian Kilman', position: 'DEF', rating: 84, age: 28 },
     { name: 'Alphonse Areola', position: 'GK', rating: 84, age: 32 },
     { name: 'Aaron Wan-Bissaka', position: 'DEF', rating: 84, age: 27 },
     { name: 'Michail Antonio', position: 'FWD', rating: 83, age: 35 },
     { name: 'Maxwel Cornet', position: 'FWD', rating: 82, age: 29 },
-    { name: 'Konstantinos Mavropanos', position: 'DEF', rating: 83, age: 27 },
+    { name: 'Konstantinos Mavropanos', position: 'DEF', rating: 82, age: 27 },
+    { name: 'Jean-Clair Todibo', position: 'DEF', rating: 83, age: 25 },
     { name: 'Guido Rodríguez', position: 'MID', rating: 83, age: 31 },
     { name: 'Crysencio Summerville', position: 'FWD', rating: 84, age: 24 }
   ]),
-  createTeam('CRY', 'Crystal Palace', LeagueLevel.PREMIER_LEAGUE, 84, 84, 84, 'bg-blue-600 text-red-600', '🔵🔴', [
+  createTeam('CRY', 'Crystal Palace', LeagueLevel.PREMIER_LEAGUE, 84, 84, 84, 'bg-blue-600 text-red-600', '💎', [
     { name: 'Eberechi Eze', position: 'MID', rating: 86, age: 27 },
     { name: 'Marc Guéhi', position: 'DEF', rating: 86, age: 25 },
     { name: 'Adam Wharton', position: 'MID', rating: 83, age: 21 },
@@ -350,11 +374,11 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Mario Lemina', position: 'MID', rating: 82, age: 32 },
     { name: 'Craig Dawson', position: 'DEF', rating: 81, age: 35 },
     { name: 'Rayán Aït-Nouri', position: 'DEF', rating: 82, age: 24 },
-    { name: 'Max Kilman', position: 'DEF', rating: 81, age: 28 },
+    { name: 'Maxwel Kilman', position: 'DEF', rating: 81, age: 28 },
     { name: 'Pablo Sarabia', position: 'MID', rating: 81, age: 33 },
     { name: 'Jean-Ricner Bellegarde', position: 'MID', rating: 80, age: 27 }
   ]),
-  createTeam('FUL', 'Fulham', LeagueLevel.PREMIER_LEAGUE, 82, 82, 82, 'bg-white text-black', '⚪⚫', [
+  createTeam('FUL', 'Fulham', LeagueLevel.PREMIER_LEAGUE, 82, 82, 82, 'bg-white text-black', '🏠', [
     { name: 'João Palhinha', position: 'MID', rating: 85, age: 30 },
     { name: 'Andreas Pereira', position: 'MID', rating: 83, age: 29 },
     { name: 'Raul Jimenez', position: 'FWD', rating: 82, age: 34 },
@@ -368,7 +392,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Rodrigo Muniz', position: 'FWD', rating: 81, age: 24 },
     { name: 'Timothy Castagne', position: 'DEF', rating: 81, age: 29 }
   ]),
-  createTeam('EVE', 'Everton', LeagueLevel.PREMIER_LEAGUE, 82, 81, 83, 'bg-blue-700', '🔵', [
+  createTeam('EVE', 'Everton', LeagueLevel.PREMIER_LEAGUE, 82, 81, 83, 'bg-blue-700', '🍬', [
     { name: 'Dominic Calvert-Lewin', position: 'FWD', rating: 83, age: 28 },
     { name: 'Jordan Pickford', position: 'GK', rating: 84, age: 31 },
     { name: 'James Tarkowski', position: 'DEF', rating: 83, age: 32 },
@@ -382,7 +406,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Idrissa Gueye', position: 'MID', rating: 80, age: 36 },
     { name: 'James Garner', position: 'MID', rating: 80, age: 24 }
   ]),
-  createTeam('LEE', 'Leeds United', LeagueLevel.PREMIER_LEAGUE, 85, 84, 83, 'bg-white', '⚪', [ // Promoted
+  createTeam('LEE', 'Leeds United', LeagueLevel.PREMIER_LEAGUE, 85, 84, 83, 'bg-white', '🦚', [ // Promoted
     { name: 'Crysencio Summerville', position: 'FWD', rating: 86, age: 24 },
     { name: 'Wilfried Gnonto', position: 'FWD', rating: 85, age: 22 },
     { name: 'Ethan Ampadu', position: 'DEF', rating: 84, age: 25 },
@@ -396,7 +420,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Ao Tanaka', position: 'MID', rating: 80, age: 27 },
     { name: 'Max Wöber', position: 'DEF', rating: 80, age: 27 }
   ]),
-  createTeam('BUR', 'Burnley', LeagueLevel.PREMIER_LEAGUE, 84, 83, 84, 'bg-claret-500', '⚔️', [ // Promoted
+  createTeam('BUR', 'Burnley', LeagueLevel.PREMIER_LEAGUE, 84, 83, 84, 'bg-claret-500', '🍷', [ // Promoted
     { name: 'James Trafford', position: 'GK', rating: 85, age: 23 },
     { name: 'Josh Brownhill', position: 'MID', rating: 83, age: 29 },
     { name: 'Luca Koleosho', position: 'FWD', rating: 83, age: 21 },
@@ -410,7 +434,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Josh Cullen', position: 'MID', rating: 80, age: 29 },
     { name: 'Nathan Redmond', position: 'MID', rating: 79, age: 31 }
   ]),
-  createTeam('SUN', 'Sunderland', LeagueLevel.PREMIER_LEAGUE, 83, 82, 81, 'bg-red-600 text-white', '🔴⚪', [ // Promoted
+  createTeam('SUN', 'Sunderland', LeagueLevel.PREMIER_LEAGUE, 83, 82, 81, 'bg-red-600 text-white', '🐈‍⬛', [ // Promoted
     { name: 'Jack Clarke', position: 'FWD', rating: 84, age: 25 },
     { name: 'Dan Neil', position: 'MID', rating: 83, age: 24 },
     { name: 'Jobe Bellingham', position: 'MID', rating: 82, age: 20 },
@@ -457,7 +481,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Kalvin Phillips', position: 'MID', rating: 78, age: 29 },
     { name: 'Jack Taylor', position: 'MID', rating: 77, age: 27 }
   ]),
-  createTeam('SOU', 'Southampton', LeagueLevel.CHAMPIONSHIP, 82, 81, 80, 'bg-red-600 text-white', '🔴⚪', [
+  createTeam('SOU', 'Southampton', LeagueLevel.CHAMPIONSHIP, 82, 81, 80, 'bg-red-600 text-white', '😇', [
     { name: 'Adam Armstrong', position: 'FWD', rating: 81, age: 28 },
     { name: 'Taylor Harwood-Bellis', position: 'DEF', rating: 81, age: 23 },
     { name: 'Kyle Walker-Peters', position: 'DEF', rating: 81, age: 28 },
@@ -471,7 +495,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Jack Stephens', position: 'DEF', rating: 78, age: 31 },
     { name: 'Mateusz Lis', position: 'GK', rating: 77, age: 28 }
   ]),
-  createTeam('SHU', 'Sheffield United', LeagueLevel.CHAMPIONSHIP, 81, 80, 80, 'bg-red-600 text-white', '🔴⚪', [
+  createTeam('SHU', 'Sheffield United', LeagueLevel.CHAMPIONSHIP, 81, 80, 80, 'bg-red-600 text-white', '⚔️', [
     { name: 'Anel Ahmedhodzic', position: 'DEF', rating: 81, age: 26 },
     { name: 'Vini Souza', position: 'MID', rating: 81, age: 26 },
     { name: 'Gustavo Hamer', position: 'MID', rating: 82, age: 28 },
@@ -485,7 +509,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Jamie Shackleton', position: 'MID', rating: 78, age: 26 },
     { name: 'Kieffer Moore', position: 'FWD', rating: 78, age: 33 }
   ]),
-  createTeam('COV', 'Coventry City', LeagueLevel.CHAMPIONSHIP, 81, 81, 80, 'bg-sky-500', '🔵', [
+  createTeam('COV', 'Coventry City', LeagueLevel.CHAMPIONSHIP, 81, 81, 80, 'bg-sky-500', '🐘', [
     { name: 'Haji Wright', position: 'FWD', rating: 81, age: 27 },
     { name: 'Ellis Simms', position: 'FWD', rating: 80, age: 24 },
     { name: 'Ben Sheaf', position: 'MID', rating: 80, age: 27 },
@@ -498,7 +522,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Tatsuhiro Sakamoto', position: 'FWD', rating: 78, age: 29 },
     { name: 'Jamie Allen', position: 'MID', rating: 77, age: 30 }
   ]),
-  createTeam('MID', 'Middlesbrough', LeagueLevel.CHAMPIONSHIP, 80, 80, 79, 'bg-red-600', '🔴', [
+  createTeam('MID', 'Middlesbrough', LeagueLevel.CHAMPIONSHIP, 80, 80, 79, 'bg-red-600', '🦁', [
     { name: 'Tommy Conway', position: 'FWD', rating: 81, age: 23 },
     { name: 'Hayden Hackney', position: 'MID', rating: 81, age: 23 },
     { name: 'Finn Azaz', position: 'MID', rating: 80, age: 25 },
@@ -511,7 +535,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Lukas Engel', position: 'DEF', rating: 78, age: 27 },
     { name: 'George Edmundson', position: 'DEF', rating: 78, age: 28 }
   ]),
-  createTeam('WBA', 'West Brom', LeagueLevel.CHAMPIONSHIP, 80, 79, 80, 'bg-navy-800 text-white', '⚪🔵', [
+  createTeam('WBA', 'West Brom', LeagueLevel.CHAMPIONSHIP, 80, 79, 80, 'bg-navy-800 text-white', '🐦', [
     { name: 'Josh Maja', position: 'FWD', rating: 80, age: 26 },
     { name: 'Jayson Molumby', position: 'MID', rating: 79, age: 26 },
     { name: 'Alex Mowatt', position: 'MID', rating: 79, age: 30 },
@@ -524,7 +548,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Grady Diangana', position: 'FWD', rating: 78, age: 27 },
     { name: 'Karlan Grant', position: 'FWD', rating: 78, age: 28 }
   ]),
-  createTeam('NOR', 'Norwich City', LeagueLevel.CHAMPIONSHIP, 79, 79, 78, 'bg-yellow-400 text-green-700', '🟡🟢', [
+  createTeam('NOR', 'Norwich City', LeagueLevel.CHAMPIONSHIP, 79, 79, 78, 'bg-yellow-400 text-green-700', '🐤', [
     { name: 'Josh Sargent', position: 'FWD', rating: 81, age: 25 },
     { name: 'Gabriel Sara', position: 'MID', rating: 81, age: 26 },
     { name: 'Marcelino Nunez', position: 'MID', rating: 79, age: 25 },
@@ -537,7 +561,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Christian Fassnacht', position: 'MID', rating: 77, age: 32 },
     { name: 'Ben Gibson', position: 'DEF', rating: 77, age: 32 }
   ]),
-  createTeam('HUL', 'Hull City', LeagueLevel.CHAMPIONSHIP, 78, 78, 78, 'bg-orange-500 text-black', '🟠⚫', [
+  createTeam('HUL', 'Hull City', LeagueLevel.CHAMPIONSHIP, 78, 78, 78, 'bg-orange-500 text-black', '🐯', [
     { name: 'Jaden Philogene', position: 'FWD', rating: 80, age: 23 },
     { name: 'Abdulkadir Omur', position: 'MID', rating: 79, age: 26 },
     { name: 'Alfie Jones', position: 'DEF', rating: 78, age: 28 },
@@ -550,7 +574,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Liam Delap', position: 'FWD', rating: 79, age: 22 },
     { name: 'Tyler Morton', position: 'MID', rating: 78, age: 23 }
   ]),
-  createTeam('MIL', 'Millwall', LeagueLevel.CHAMPIONSHIP, 78, 77, 79, 'bg-blue-800', '🔵', [
+  createTeam('MIL', 'Millwall', LeagueLevel.CHAMPIONSHIP, 78, 77, 79, 'bg-blue-800', '🦁', [
     { name: 'Zian Flemming', position: 'MID', rating: 80, age: 27 },
     { name: 'Japhet Tanganga', position: 'DEF', rating: 79, age: 26 },
     { name: 'Jake Cooper', position: 'DEF', rating: 79, age: 30 },
@@ -563,7 +587,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Mihailo Ivanovic', position: 'FWD', rating: 77, age: 21 },
     { name: 'Wes Harding', position: 'DEF', rating: 76, age: 29 }
   ]),
-  createTeam('SWA', 'Swansea City', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-white text-black', '⚪⚫', [
+  createTeam('SWA', 'Swansea City', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-white text-black', '🦢', [
     { name: 'Ronald', position: 'FWD', rating: 79, age: 25 },
     { name: 'Josh Tymon', position: 'DEF', rating: 78, age: 26 },
     { name: 'Matt Grimes', position: 'MID', rating: 79, age: 30 },
@@ -576,7 +600,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Liam Cullen', position: 'FWD', rating: 77, age: 26 },
     { name: 'Eom Ji-sung', position: 'FWD', rating: 77, age: 23 }
   ]),
-  createTeam('QPR', 'Queens Park Rangers', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-blue-600 text-white', '🔵⚪', [
+  createTeam('QPR', 'Queens Park Rangers', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-blue-600 text-white', '💠', [
     { name: 'Ilias Chair', position: 'MID', rating: 80, age: 28 },
     { name: 'Sinclair Armstrong', position: 'FWD', rating: 78, age: 22 },
     { name: 'Jake Clarke-Salter', position: 'DEF', rating: 78, age: 28 },
@@ -589,7 +613,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Jack Colback', position: 'MID', rating: 76, age: 36 },
     { name: 'Michael Frey', position: 'FWD', rating: 76, age: 31 }
   ]),
-  createTeam('CAR', 'Cardiff City', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-blue-700', '🔵', [
+  createTeam('CAR', 'Cardiff City', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-blue-700', '🐦', [
     { name: 'Aaron Ramsey', position: 'MID', rating: 79, age: 34 },
     { name: 'Callum Robinson', position: 'FWD', rating: 78, age: 30 },
     { name: 'Perry Ng', position: 'DEF', rating: 78, age: 29 },
@@ -602,7 +626,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Ollie Tanner', position: 'FWD', rating: 76, age: 23 },
     { name: 'Callum O\'Dowda', position: 'MID', rating: 76, age: 30 }
   ]),
-  createTeam('BRC', 'Bristol City', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-red-700', '🔴', [
+  createTeam('BRC', 'Bristol City', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-red-700', '🐦', [
     { name: 'Jason Knight', position: 'MID', rating: 79, age: 24 },
     { name: 'Tommy Conway', position: 'FWD', rating: 79, age: 23 },
     { name: 'Ross McCrorie', position: 'DEF', rating: 78, age: 27 },
@@ -615,7 +639,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Haydon Roberts', position: 'DEF', rating: 76, age: 23 },
     { name: 'Scott Twine', position: 'MID', rating: 78, age: 26 }
   ]),
-  createTeam('PLY', 'Plymouth Argyle', LeagueLevel.CHAMPIONSHIP, 76, 76, 76, 'bg-green-600 text-white', '🟢', [
+  createTeam('PLY', 'Plymouth Argyle', LeagueLevel.CHAMPIONSHIP, 76, 76, 76, 'bg-green-600 text-white', '🚢', [
     { name: 'Morgan Whittaker', position: 'FWD', rating: 79, age: 24 },
     { name: 'Ryan Hardie', position: 'FWD', rating: 77, age: 28 },
     { name: 'Adam Randell', position: 'MID', rating: 77, age: 25 },
@@ -628,7 +652,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Mickel Miller', position: 'FWD', rating: 75, age: 29 },
     { name: 'Adam Forshaw', position: 'MID', rating: 75, age: 34 }
   ]),
-  createTeam('STO', 'Stoke City', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-red-600 text-white', '🔴⚪', [
+  createTeam('STO', 'Stoke City', LeagueLevel.CHAMPIONSHIP, 77, 77, 77, 'bg-red-600 text-white', '🏺', [
     { name: 'Million Manhoef', position: 'FWD', rating: 78, age: 23 },
     { name: 'Ben Wilmot', position: 'DEF', rating: 78, age: 26 },
     { name: 'Wouter Burger', position: 'MID', rating: 78, age: 24 },
@@ -641,7 +665,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Bae Junho', position: 'MID', rating: 77, age: 22 },
     { name: 'Daniel Johnson', position: 'MID', rating: 76, age: 33 }
   ]),
-  createTeam('DER', 'Derby County', LeagueLevel.CHAMPIONSHIP, 77, 76, 77, 'bg-white text-black', '⚪⚫', [
+  createTeam('DER', 'Derby County', LeagueLevel.CHAMPIONSHIP, 77, 76, 77, 'bg-white text-black', '🐏', [
     { name: 'Ebou Adams', position: 'MID', rating: 78, age: 29 },
     { name: 'Nathaniel Mendez-Laing', position: 'FWD', rating: 78, age: 33 },
     { name: 'Curtis Nelson', position: 'DEF', rating: 77, age: 32 },
@@ -654,7 +678,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'David Ozoh', position: 'MID', rating: 76, age: 20 },
     { name: 'Corey Blackett-Taylor', position: 'FWD', rating: 76, age: 28 }
   ]),
-  createTeam('SHW', 'Sheffield Wednesday', LeagueLevel.CHAMPIONSHIP, 78, 77, 77, 'bg-blue-600 text-white', '🔵', [
+  createTeam('SHW', 'Sheffield Wednesday', LeagueLevel.CHAMPIONSHIP, 78, 77, 77, 'bg-blue-600 text-white', '🦉', [
     { name: 'Barry Bannan', position: 'MID', rating: 79, age: 35 },
     { name: 'Anthony Musaba', position: 'FWD', rating: 78, age: 25 },
     { name: 'Di\'Shon Bernard', position: 'DEF', rating: 77, age: 25 },
@@ -667,7 +691,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Marvin Johnson', position: 'DEF', rating: 76, age: 35 },
     { name: 'Michael Smith', position: 'FWD', rating: 76, age: 34 }
   ]),
-  createTeam('WAT', 'Watford', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-yellow-500 text-black', '🟡⚫', [
+  createTeam('WAT', 'Watford', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-yellow-500 text-black', '🐝', [
     { name: 'Yaser Asprilla', position: 'MID', rating: 80, age: 22 },
     { name: 'Edo Kayembe', position: 'MID', rating: 79, age: 27 },
     { name: 'Jamal Lewis', position: 'DEF', rating: 78, age: 27 },
@@ -680,7 +704,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Angelo Ogbonna', position: 'DEF', rating: 77, age: 37 },
     { name: 'Kwadwo Baah', position: 'FWD', rating: 76, age: 22 }
   ]),
-  createTeam('BLA', 'Blackburn Rovers', LeagueLevel.CHAMPIONSHIP, 77, 77, 76, 'bg-blue-500 text-white', '🔵⚪', [
+  createTeam('BLA', 'Blackburn Rovers', LeagueLevel.CHAMPIONSHIP, 77, 77, 76, 'bg-blue-500 text-white', '🌹', [ // Halved actually, but stripes close enough for simple
     { name: 'Sammie Szmodics', position: 'FWD', rating: 80, age: 30 },
     { name: 'Tyrhys Dolan', position: 'FWD', rating: 78, age: 23 },
     { name: 'Hayden Carter', position: 'DEF', rating: 77, age: 26 },
@@ -693,7 +717,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'John Buckley', position: 'MID', rating: 76, age: 26 },
     { name: 'Harry Pickering', position: 'DEF', rating: 76, age: 26 }
   ]),
-  createTeam('OXF', 'Oxford United', LeagueLevel.CHAMPIONSHIP, 76, 76, 75, 'bg-yellow-600', '🟡', [
+  createTeam('OXF', 'Oxford United', LeagueLevel.CHAMPIONSHIP, 76, 76, 75, 'bg-yellow-600', '🐂', [
     { name: 'Cameron Brannagan', position: 'MID', rating: 78, age: 29 },
     { name: 'Mark Harris', position: 'FWD', rating: 77, age: 26 },
     { name: 'Ciaron Brown', position: 'DEF', rating: 76, age: 27 },
@@ -706,7 +730,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Dane Scarlett', position: 'FWD', rating: 75, age: 21 },
     { name: 'Joe Bennett', position: 'DEF', rating: 75, age: 35 }
   ]),
-  createTeam('POR', 'Portsmouth', LeagueLevel.CHAMPIONSHIP, 77, 76, 76, 'bg-blue-600 text-white', '🔵', [
+  createTeam('POR', 'Portsmouth', LeagueLevel.CHAMPIONSHIP, 77, 76, 76, 'bg-blue-600 text-white', '⚓', [
     { name: 'Colby Bishop', position: 'FWD', rating: 78, age: 29 },
     { name: 'Marlon Pack', position: 'MID', rating: 77, age: 34 },
     { name: 'Conor Shaughnessy', position: 'DEF', rating: 77, age: 29 },
@@ -719,7 +743,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Jordan Williams', position: 'DEF', rating: 75, age: 26 },
     { name: 'Tom McIntyre', position: 'DEF', rating: 75, age: 27 }
   ]),
-  createTeam('LUT', 'Luton Town', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-orange-600', '🟠', [
+  createTeam('LUT', 'Luton Town', LeagueLevel.CHAMPIONSHIP, 78, 78, 77, 'bg-orange-600', '🎩', [
     { name: 'Alfie Doughty', position: 'DEF', rating: 79, age: 25 },
     { name: 'Carlton Morris', position: 'FWD', rating: 79, age: 29 },
     { name: 'Teden Mengi', position: 'DEF', rating: 78, age: 23 },
@@ -731,7 +755,7 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Amari\'i Bell', position: 'DEF', rating: 76, age: 31 },
     { name: 'Liam Walsh', position: 'MID', rating: 76, age: 28 }
   ]),
-  createTeam('PRE', 'Preston North End', LeagueLevel.CHAMPIONSHIP, 76, 76, 76, 'bg-white text-blue-600', '⚪🔵', [
+  createTeam('PRE', 'Preston North End', LeagueLevel.CHAMPIONSHIP, 76, 76, 76, 'bg-white text-blue-600', '🐑', [
     { name: 'Will Keane', position: 'FWD', rating: 77, age: 32 },
     { name: 'Ben Whiteman', position: 'MID', rating: 77, age: 29 },
     { name: 'Ali McCann', position: 'MID', rating: 76, age: 25 },

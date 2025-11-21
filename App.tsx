@@ -8,7 +8,7 @@ import SquadView from './components/SquadView';
 import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
-import { ALL_TEAMS, SERIE_A_TEAMS, SERIE_B_TEAMS } from './constants';
+import { ALL_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
 //import { PREMIER_LEAGUE_TEAMS as SERIE_A_TEAMS, CHAMPIONSHIP_TEAMS as SERIE_B_TEAMS, ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [schedule, setSchedule] = useState<Match[][]>([]);
   const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A); // Default, will update on load
   const [seasonYear, setSeasonYear] = useState("2024/2025");
+  const [isMatchInProgress, setIsMatchInProgress] = useState(false);
   
   // Sound Settings
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
@@ -77,9 +78,6 @@ const App: React.FC = () => {
   const isUserHome = userMatch?.homeTeamId === userTeamId;
   const opponentId = userMatch ? (isUserHome ? userMatch.awayTeamId : userMatch.homeTeamId) : null;
   const opponent = teams.find(t => t.id === opponentId) || null;
-
-  // Determine if navigation should be locked (Only if in match view AND match exists)
-  const isMatchInProgress = currentView === 'MATCH' && !!userMatch && !isSeasonEnded;
 
   // Initialization
   useEffect(() => {
@@ -231,6 +229,7 @@ const App: React.FC = () => {
   };
 
   const handleMatchComplete = (result: Match) => {
+    setIsMatchInProgress(false);
     // Simulate all OTHER matches in the background for this week
     const otherMatches = currentWeekMatches.filter(m => m.id !== result.id);
     const simulatedOtherMatches = otherMatches.map(m => {
@@ -414,7 +413,7 @@ const App: React.FC = () => {
         currentView={currentView} 
         setView={setCurrentView} 
         userTeam={userTeam!} 
-        disabled={isMatchInProgress} // Only disable if actually playing a match
+        disabled={isMatchInProgress} // Lock navigation during match
         isSeasonEnded={isSeasonEnded}
       />
       
@@ -492,6 +491,7 @@ const App: React.FC = () => {
                         week={currentWeek}
                         matchId={userMatch.id}
                         userTeamId={userTeamId}
+                        onMatchStart={() => setIsMatchInProgress(true)}
                         onMatchComplete={handleMatchComplete}
                         initialSoundEnabled={soundEnabled}
                     />

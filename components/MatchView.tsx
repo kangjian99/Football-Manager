@@ -11,11 +11,12 @@ interface MatchViewProps {
   week: number;
   matchId: string;
   userTeamId: string;
+  onMatchStart: () => void;
   onMatchComplete: (matchResult: Match) => void;
   initialSoundEnabled: boolean;
 }
 
-const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchComplete, initialSoundEnabled }) => {
+const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchStart, onMatchComplete, initialSoundEnabled }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [minute, setMinute] = useState(0);
   const [extraMinute, setExtraMinute] = useState(0); // For stoppage time
@@ -46,6 +47,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   }, [homeTeam, awayTeam, week, matchId]);
 
   const handleStartMatch = () => {
+    onMatchStart(); // Lock navigation
     resumeAudio(); // Initialize audio context on user interaction
     setHasStarted(true);
   };
@@ -53,6 +55,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   const handleSkipMatch = () => {
     if (!matchResult) return;
     
+    onMatchStart(); // Lock navigation
     // Initialize audio if skipping from start screen
     resumeAudio(); 
     
@@ -220,37 +223,37 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
             <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1522778119026-d647f0565c6a?q=80&w=2070')] bg-cover bg-center pointer-events-none"></div>
                 
-                <div className="z-10 flex flex-col items-center gap-8 w-full max-w-5xl">
-                    <div className="flex items-center justify-between w-full">
+                <div className="z-10 flex flex-col items-center gap-6 w-full max-w-4xl">
+                    <div className="flex items-center justify-center gap-4 md:gap-8 w-full animate-in zoom-in duration-500">
                         {/* HOME TEAM PREVIEW */}
-                        <div className="flex flex-col items-center gap-4">
-                            <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl ${homeTeam.color} shadow-[0_0_40px_rgba(0,0,0,0.5)] border-4 border-gray-700`}>
+                        <div className="flex flex-col items-center gap-2 w-1/3">
+                            <div className={`w-20 h-20 md:w-28 md:h-28 rounded-full flex items-center justify-center text-3xl md:text-4xl ${homeTeam.color} shadow-[0_0_40px_rgba(0,0,0,0.5)] border-4 border-gray-700 relative group`}>
                                 {homeTeam.logo}
+                                {homeTeam.id === userTeamId && <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">YOU</div>}
                             </div>
-                            <h2 className="text-3xl font-bold text-white">{homeTeam.name}</h2>
-                            {homeTeam.id === userTeamId && <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">YOU</span>}
+                            <h2 className="text-xl md:text-2xl font-bold text-white text-center leading-tight">{homeTeam.name}</h2>
                         </div>
 
-                        <div className="flex flex-col items-center">
-                            <div className="text-xl font-mono text-gray-400 mb-2">WEEK {week}</div>
-                            <div className="text-6xl font-bold text-white italic">VS</div>
-                            <div className="text-sm text-gray-500 mt-4">Stadio Olimpico</div>
+                        {/* VS SECTION - Compact & Small */}
+                        <div className="flex flex-col items-center justify-center w-12 shrink-0 -mt-2">
+                            <div className="text-[12px] font-mono text-gray-400 mb-1">WK {week}</div>
+                            <div className="text-3xl md:text-4xl font-black text-white italic tracking-tighter drop-shadow-lg leading-none">VS</div>
                         </div>
 
                         {/* AWAY TEAM PREVIEW */}
-                        <div className="flex flex-col items-center gap-4">
-                            <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl ${awayTeam.color} shadow-[0_0_40px_rgba(0,0,0,0.5)] border-4 border-gray-700`}>
+                        <div className="flex flex-col items-center gap-2 w-1/3">
+                            <div className={`w-20 h-20 md:w-28 md:h-28 rounded-full flex items-center justify-center text-3xl md:text-4xl ${awayTeam.color} shadow-[0_0_40px_rgba(0,0,0,0.5)] border-4 border-gray-700 relative group`}>
                                 {awayTeam.logo}
+                                {awayTeam.id === userTeamId && <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">YOU</div>}
                             </div>
-                            <h2 className="text-3xl font-bold text-white">{awayTeam.name}</h2>
-                            {awayTeam.id === userTeamId && <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">YOU</span>}
+                            <h2 className="text-xl md:text-2xl font-bold text-white text-center leading-tight">{awayTeam.name}</h2>
                         </div>
                     </div>
                     
-                    <div className="flex flex-col gap-3 w-full max-w-md">
+                    <div className="flex items-center gap-3 w-full max-w-xs mt-2">
                         <button 
                             onClick={handleStartMatch}
-                            className="group relative bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105 w-full flex justify-center items-center gap-2"
+                            className="flex-1 group relative bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-full font-bold text-lg shadow-lg shadow-green-900/50 transition-all transform hover:scale-105 flex justify-center items-center gap-2"
                         >
                             <Timer size={20} />
                             KICK OFF
@@ -258,26 +261,26 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                         
                         <button 
                             onClick={handleSkipMatch}
-                            className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-6 py-3 rounded-full font-medium text-sm shadow transition-all border border-gray-700 flex justify-center items-center gap-2"
+                            className="w-12 h-12 shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-full shadow transition-all border border-gray-700 flex justify-center items-center transform hover:scale-105"
+                            title="Instant Result"
                         >
-                            <SkipForward size={16} />
-                            INSTANT RESULT
+                            <SkipForward size={20} />
                         </button>
                     </div>
 
-                    {/* STARTING LINEUPS */}
+                    {/* STARTING LINEUPS - Narrower box, slightly larger font */}
                     {lineups && (
-                        <div className="w-full grid grid-cols-2 gap-8 bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700">
+                        <div className="w-full max-w-lg mx-auto grid grid-cols-2 gap-6 bg-gray-800/80 backdrop-blur-sm p-5 rounded-xl border border-gray-700 text-sm md:text-base mt-2 space-y-2 shadow-xl">
                             {/* Home XI */}
                             <div>
-                                <h3 className="text-center text-gray-400 font-bold mb-2 text-sm uppercase tracking-widest">
-                                    Starting XI {lineups.homeFormation && <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded ml-2">{lineups.homeFormation}</span>}
+                                <h3 className="text-center text-gray-400 font-bold mb-3 uppercase tracking-widest text-xs">
+                                    {homeTeam.name} <span className="bg-gray-700 px-1 rounded ml-1">{lineups.homeFormation || '4-4-2'}</span>
                                 </h3>
                                 <div className="space-y-2">
                                     {lineups.home.map((player, idx) => (
-                                        <div key={player.id} className="flex items-center gap-3 text-sm">
-                                             <div className="w-6 text-right text-gray-500 font-mono">{idx + 1}</div>
-                                             <div className={`w-8 text-center text-[10px] font-bold px-1 rounded ${
+                                        <div key={player.id} className="flex items-center gap-2">
+                                             <div className="w-5 text-right text-gray-500 font-mono text-xs">{idx + 1}</div>
+                                             <div className={`w-8 text-center text-[10px] font-bold px-0.5 rounded ${
                                                 player.position === 'GK' ? 'bg-yellow-700 text-yellow-100' : 
                                                 player.position === 'DEF' ? 'bg-blue-800 text-blue-200' :
                                                 player.position === 'MID' ? 'bg-green-800 text-green-200' :
@@ -291,14 +294,14 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
                             {/* Away XI */}
                             <div>
-                                <h3 className="text-center text-gray-400 font-bold mb-2 text-sm uppercase tracking-widest">
-                                    Starting XI {lineups.awayFormation && <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded ml-2">{lineups.awayFormation}</span>}
+                                <h3 className="text-center text-gray-400 font-bold mb-3 uppercase tracking-widest text-xs">
+                                    {awayTeam.name} <span className="bg-gray-700 px-1 rounded ml-1">{lineups.awayFormation || '4-4-2'}</span>
                                 </h3>
                                 <div className="space-y-2">
                                     {lineups.away.map((player, idx) => (
-                                        <div key={player.id} className="flex items-center gap-3 text-sm flex-row-reverse">
-                                             <div className="w-6 text-left text-gray-500 font-mono">{idx + 1}</div>
-                                             <div className={`w-8 text-center text-[10px] font-bold px-1 rounded ${
+                                        <div key={player.id} className="flex items-center gap-2 flex-row-reverse">
+                                             <div className="w-5 text-left text-gray-500 font-mono text-xs">{idx + 1}</div>
+                                             <div className={`w-8 text-center text-[10px] font-bold px-0.5 rounded ${
                                                 player.position === 'GK' ? 'bg-yellow-700 text-yellow-100' : 
                                                 player.position === 'DEF' ? 'bg-blue-800 text-blue-200' :
                                                 player.position === 'MID' ? 'bg-green-800 text-green-200' :
