@@ -527,7 +527,7 @@ const App: React.FC = () => {
         <div className="max-w-6xl w-full py-12 pb-20">
             <div className="flex justify-between items-center mb-2">
                 <div></div> {/* Spacer */}
-                <h1 className="text-5xl font-bold text-white text-center">Calcio Manager AI</h1>
+                <h1 className="text-5xl font-bold text-white text-center">Football Manager AI</h1>
                 <button 
                     onClick={handleClearApiKey}
                     className="text-xs text-gray-500 hover:text-red-400 flex items-center gap-1"

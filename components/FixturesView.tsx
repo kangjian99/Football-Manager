@@ -26,11 +26,19 @@ const FixturesView: React.FC<FixturesViewProps> = ({ schedule, teams, currentWee
   // Group matches by league based on the home team's league
   const leaguesInMatchWeek = Array.from(new Set(matches.map(m => getTeam(m.homeTeamId)?.league))).filter(Boolean) as LeagueLevel[];
 
-  // Sort leagues (Tier 1 then Tier 2 - using team count average logic or just alphanumeric if simple, 
-  // but since we know the data order usually, simple existence check is enough for display).
-  // For display consistency, we can sort by the same logic as App.tsx or just alphabetic if we don't have context.
-  // However, let's just render them in the order they appear or sort based on string to be deterministic.
-  leaguesInMatchWeek.sort();
+  // Sort leagues by tier (Tier 1 > Tier 2), then alphabetical
+  leaguesInMatchWeek.sort((a, b) => {
+      const getPriority = (league: LeagueLevel) => {
+          if (league === LeagueLevel.PREMIER_LEAGUE || league === LeagueLevel.SERIE_A) return 1;
+          if (league === LeagueLevel.CHAMPIONSHIP || league === LeagueLevel.SERIE_B) return 2;
+          return 3;
+      };
+      const pA = getPriority(a);
+      const pB = getPriority(b);
+      
+      if (pA !== pB) return pA - pB;
+      return a.localeCompare(b);
+  });
 
   const renderMatchRow = (match: Match) => {
         const home = getTeam(match.homeTeamId);
