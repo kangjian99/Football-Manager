@@ -10,7 +10,7 @@ import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
 import { ALL_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
-//import { PREMIER_LEAGUE_TEAMS as SERIE_A_TEAMS, CHAMPIONSHIP_TEAMS as SERIE_B_TEAMS, ALL_TEAMS } from './constants_e';
+//import { ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info, Menu } from 'lucide-react';
@@ -422,13 +422,19 @@ const App: React.FC = () => {
                     </div>
                 </div>
                 <h1 className="text-2xl font-bold text-white text-center mb-2">Welcome Manager</h1>
+                <p className="text-gray-400 text-center mb-8">请输入您的 Google Gemini API 密钥，以激活球探助手和解说引擎</p>
+                
+                <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
+                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>只想试玩？</strong>您可以输入任意字符串（例如“demo”）跳过此页面，无需使用 AI 功能即可体验游戏</p>
+                </div>
+{/*
                 <p className="text-gray-400 text-center mb-8">Please enter your Google Gemini API Key to activate the scouting assistant and commentary engine.</p>
                 
                 <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
                     <p className="flex gap-2 mb-2"><ShieldCheck className="shrink-0" size={18} /> <strong>Privacy First:</strong> Your key is stored locally in your browser and is never sent to our servers.</p>
                     <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>Just playing?</strong> You can enter any random string (e.g. "demo") to bypass this screen and play without AI features.</p>
                 </div>
-
+*/}
                 <form onSubmit={handleSaveApiKey} className="space-y-4">
                     <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />

@@ -36,7 +36,7 @@ const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, 
   if (rating > 88) rating = 88; 
   if (rating < 55) rating = 55;
 
-  const age = Math.floor(17 + Math.random() * 20); // 17-37
+  const age = Math.floor(17 + Math.random() * 6); // 17-23
   const fname = IT_FIRST_NAMES[Math.floor(Math.random() * IT_FIRST_NAMES.length)];
   const lname = IT_LAST_NAMES[Math.floor(Math.random() * IT_LAST_NAMES.length)];
 
@@ -166,7 +166,7 @@ export const SERIE_A_TEAMS: Team[] = [
   ]),
   createTeam('MIL', 'Milan', LeagueLevel.SERIE_A, 89, 86, 85, 'bg-red-600', React.createElement(StripedLogo, { colors: ['#d40000', '#000'], vertical: true }), [
     { name: 'Rafael Leao', position: 'FWD', rating: 89, age: 25 },
-    { name: 'Christian Pulisic', position: 'FWD', rating: 87, age: 26 },
+    { name: 'Christian Pulisic', position: 'MID', rating: 87, age: 26 },
     { name: 'Alvaro Morata', position: 'FWD', rating: 84, age: 31 },
     { name: 'Theo Hernandez', position: 'DEF', rating: 88, age: 26 },
     { name: 'Tijani Reijnders', position: 'MID', rating: 85, age: 26 },
@@ -177,6 +177,7 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Matteo Gabbia', position: 'DEF', rating: 80, age: 24 },
     { name: 'Ruben Loftus-Cheek', position: 'MID', rating: 81, age: 28 },
     { name: 'Samuel Chukwueze', position: 'FWD', rating: 80, age: 25 },
+    { name: 'Alexis Saelemaekers', position: 'MID', rating: 83, age: 26 },
     { name: 'Emerson Royal', position: 'DEF', rating: 79, age: 25 },
     { name: 'Strahinja Pavlovic', position: 'DEF', rating: 80, age: 23 },
     { name: 'Noah Okafor', position: 'FWD', rating: 79, age: 24 }
@@ -243,9 +244,10 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Stephan El Shaarawy', position: 'FWD', rating: 80, age: 31 },
     { name: 'Bryan Cristante', position: 'MID', rating: 81, age: 29 },
     { name: 'Mats Hummels', position: 'DEF', rating: 82, age: 35 },
-    { name: 'Angelino', position: 'DEF', rating: 80, age: 27 },
+    { name: 'Angelino', position: 'DEF', rating: 81, age: 27 },
     { name: 'Mario Hermoso', position: 'DEF', rating: 80, age: 29 },
-    { name: 'Tommaso Baldanzi', position: 'MID', rating: 78, age: 21 }
+    { name: 'Tommaso Baldanzi', position: 'MID', rating: 79, age: 22 },
+    { name: 'Niccolo Pisilli', position: 'MID', rating: 78, age: 21 }
   ]),
   createTeam('LAZ', 'Lazio', LeagueLevel.SERIE_A, 85, 84, 83, 'bg-sky-300 text-black', '🦅', [
     { name: 'Mattia Zaccagni', position: 'FWD', rating: 85, age: 29 },
@@ -276,7 +278,7 @@ export const SERIE_A_TEAMS: Team[] = [
       { name: 'Lucas Martinez Quarta', position: 'DEF', rating: 80, age: 28 },
       { name: 'Pietro Comuzzo', position: 'DEF', rating: 77, age: 19 },
       { name: 'Luca Ranieri', position: 'DEF', rating: 79, age: 25 },
-      { name: 'Rolando Mandragora', position: 'MID', rating: 78, age: 27 }
+      { name: 'Rolando Mandragora', position: 'MID', rating: 79, age: 27 }
   ]),
   createTeam('BOL', 'Bologna', LeagueLevel.SERIE_A, 80, 81, 80, 'bg-red-800', '🏰', [
       { name: 'Riccardo Orsolini', position: 'FWD', rating: 83, age: 27 },

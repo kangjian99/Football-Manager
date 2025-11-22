@@ -4,75 +4,93 @@ import { Team, Match, MatchEvent, Player } from '../types';
 // --- Constants & Templates ---
 
 const GOAL_TEMPLATES = [
-  "{player} unleashes a thunderbolt from 25 yards! What a goal!",
-  "{player} rises highest at the back post to head it home!",
-  "Brilliant team move finished off by {player} with a calm tap-in.",
-  "{player} dribbles past two defenders and slots it into the bottom corner!",
-  "A defensive mix-up allows {player} to steal the ball and score!",
-  "{player} smashes a volley into the roof of the net!",
-  "Cool as you like! {player} chips the goalkeeper."
+  "{player} 在25码外起脚怒射！世界波！球进了！",
+  "{player} 在后点高高跃起，头球破门！",
+  "精彩的团队配合！{player} 门前冷静推射得手。",
+  "{player} 连过两人，将球送入球门死角！",
+  "后防线出现失误，{player} 断球后轻松破门！",
+  "{player} 凌空抽射！皮球直挂球门顶网！",
+  "四两拨千斤！{player} 面对出击的门将轻巧吊射得分。",
+  "百步穿杨！{player} 禁区外一脚重炮轰门，门将鞭长莫及！",
+  "{player} 接到直塞球形成单刀，晃过门将打空门得手！",
+  "门前嗅觉灵敏！{player} 补射入网。",
+  "教科书般的反击！{player} 完成致命一击。",
+  "{player} 低射远角，皮球擦着立柱钻入网窝！"
 ];
 
 const GK_GOAL_TEMPLATES = [
-  "UNBELIEVABLE! The goalkeeper {player} comes up for the corner and HEADS IT IN!",
-  "Last minute drama! Goalkeeper {player} smashes it home from inside the box!",
-  "{player} the goalkeeper is the hero! He scores to save the match!"
+  "难以置信！门将 {player} 冲到前场争顶角球，竟然头球破门！",
+  "读秒绝杀！门将 {player} 在禁区混战中将球打进！",
+  "门将 {player} 成为了英雄！他亲自进球拯救了比赛！"
 ];
 
 const PENALTY_AWARD_TEMPLATES = [
-    "PENALTY! {def} trips {att} inside the box! The referee points to the spot immediately.",
-    "Handball! {def} blocks the shot with his arm. Penalty given!",
-    "Clumsy challenge by {def} on {att}. It's a clear penalty!",
-    "The referee blows the whistle! {def} pulls down {att} in the area. Penalty kick!"
+  "点球！{def} 在禁区内绊倒了 {att}！裁判毫不犹豫指向点球点。",
+  "手球犯规！{def} 用手臂阻挡了射门。点球！",
+  "{def} 对 {att} 的拙劣犯规，这是一个毫无争议的点球！",
+  "哨响了！{def} 在禁区内拉倒了 {att}。极刑！",
+  "{def} 鲁莽的滑铲带倒了 {att}，裁判判罚点球！"
 ];
 
 const PENALTY_GOAL_TEMPLATES = [
-    "{player} sends the keeper the wrong way! Calmly finished.",
-    "{player} smashes the penalty into the top corner! Unstoppable.",
-    "Ice cold nerves! {player} slots the penalty home.",
-    "The keeper gets a hand to it, but {player}'s penalty is too powerful!"
+  "{player} 骗过门将，轻松将球推入反角。",
+  "{player} 大力抽射球门上角！理论上的死角，无法扑救。",
+  "拥有一颗大心脏！{player} 冷静主罚命中。",
+  "门将虽然碰到了皮球，但 {player} 的射门力量太大了，球还是进了！",
+  "勺子点球！{player} 艺高人胆大，戏耍了门将。",
+  "{player} 助跑节奏变化，推射死角得手。"
 ];
 
 const PENALTY_MISS_TEMPLATES = [
-    "SAVED! The keeper guesses correctly and denies {player}!",
-    "MISSED! {player} drags the penalty wide of the post. A huge let off!",
-    "OFF THE BAR! {player} goes for power but hits the woodwork!",
-    "Terrible penalty from {player}, straight at the goalkeeper."
+  "扑出去了！门将判断对了方向，拒之门外！",
+  "打偏了！{player} 追求角度但这脚打偏了，太可惜了！",
+  "中柱弹出！{player} 发力过猛，皮球狠狠砸在横梁上！",
+  "质量极差的点球，{player} 把球直接送到了门将怀里。",
+  "{player} 支撑脚打滑，一脚将球踢上了看台！"
 ];
 
 const CHANCE_TEMPLATES = [
-  "{player} hits the post! So close!",
-  "Great save by the keeper to deny {player}!",
-  "{player} fires just wide of the upright.",
-  "Last ditch tackle denies {player} a clear goalscoring opportunity."
+  "{player} 击中立柱！差之毫厘！",
+  "门将做出世界级扑救，挡出了 {player} 的必进球！",
+  "{player} 的射门滑门而出。",
+  "关键时刻的铲断！阻挡了 {player} 的得分机会。",
+  "{player} 错失良机！面对空门竟然打高了！",
+  "神勇的指尖触球！门将把 {player} 的吊射托出了横梁！",
+  "门线解围！{player} 的射门在进球前一瞬间被后卫踢出。"
 ];
 
 const YELLOW_CARD_TEMPLATES = [
-  "Late challenge by {player}. The referee shows a yellow card.",
-  "{player} pulls the shirt of the opponent. Tactical foul, yellow card.",
-  "Arguments with the referee earn {player} a booking.",
-  "Reckless slide tackle from {player}."
+  "{player} 动作过大，裁判出示黄牌警告。",
+  "{player} 拉拽对手球衣，战术犯规，吃到黄牌。",
+  "因为对裁判判罚表示不满，{player} 被黄牌警告。",
+  "{player} 鲁莽的滑铲。",
+  "{player} 破坏了对方的反击机会，这是一张战术黄牌。"
 ];
 
 const SECOND_YELLOW_TEMPLATES = [
-    "It's a second yellow for {player}! He is sent off!",
-    "{player} commits another foul and the referee reaches for the pocket. Second yellow, RED CARD!",
-    "Foolish from {player}, he was already booked! He takes an early shower."
+  "{player} 吃到第二张黄牌！两黄变一红，被罚下场！",
+  "{player} 再次犯规，裁判掏出了红牌！两黄变一红！",
+  "太不理智了，{player} 身上已经有一张黄牌了！他将被提前罚下。",
+  "这是自找麻烦，{player} 吃到第二张黄牌，红牌离场！"
 ];
 
 const RED_CARD_TEMPLATES = [
-    "{player} goes in with two feet! Straight Red Card!",
-    "Disgraceful behavior from {player}, the referee has no choice. Red Card!",
-    "{player} denies a clear goalscoring opportunity. Sent off!",
-    "Violent conduct from {player} behind the play! Straight Red!"
+  "{player} 双脚离地飞铲！直接红牌！",
+  "{player} 行为恶劣，裁判别无选择。红牌罚下！",
+  "{player} 破坏了明显的得分机会。被罚下场！",
+  "{player} 报复性动作！直接红牌！",
+  "极其危险的动作，{player} 被裁判直接驱逐出场。"
 ];
 
 const SUB_TEMPLATES = [
-    "Substitution for {team}: {in} replaces {out}.",
-    "{team} make a change: {out} comes off for {in}.",
-    "Fresh legs for {team} as {in} comes on for {out}.",
-    "Tactical change: {in} enters the fray, replacing {out}."
+  "{team} 换人：{in} 换下 {out}。",
+  "{team} 做出调整：{out} 下场，{in} 替补登场。",
+  "{team} 注入新鲜血液，{in} 换下了体力不支的 {out}。",
+  "战术调整：{in} 披挂上阵，换下 {out}。",
+  "看来 {out} 受伤无法坚持，{in} 临危受命。",
+  "全场掌声雷动，{out} 被 {in} 换下。"
 ];
+
 
 // --- Core Helper Functions ---
 
@@ -97,6 +115,7 @@ const shuffleArray = <T>(array: T[]): T[] => {
 
 /**
  * Selects a player based on weights from a specific list (on-pitch players).
+ * Uses effectiveRating if available for better simulation accuracy.
  */
 const selectPlayer = (
     players: Player[], 
@@ -114,6 +133,7 @@ const selectPlayer = (
   
   const weightedList: { player: Player, weight: number }[] = candidates.map(p => {
     let weight = 1;
+    const rating = p.effectiveRating || p.rating;
     
     if (type === 'GOAL' || type === 'CHANCE') {
       if (p.position === 'GK') {
@@ -128,11 +148,11 @@ const selectPlayer = (
       } else {
           weight = 0.1;
       }
-      weight *= Math.pow(p.rating / 50, 3); 
+      weight *= Math.pow(rating / 50, 3); 
     } else if (type === 'CARD' || type === 'DEFENDER') {
-      if (p.position === 'DEF') weight = 10;
+      if (p.position === 'DEF') weight = 9;
       else if (p.position === 'MID') weight = 6;
-      else if (p.position === 'FWD') weight = 2;
+      else if (p.position === 'FWD') weight = 3;
       else weight = 0.5; // GK rarely gets yellow cards for fouls compared to defenders
     }
 
@@ -202,7 +222,19 @@ const selectSubOffCandidate = (
 // Helpers for lineup management
 export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[], formation: string } => {
     const availablePlayers = team.players.filter(p => !p.matchesBanned || p.matchesBanned <= 0);
-    const sortedPlayers = [...availablePlayers].sort((a, b) => b.rating - a.rating);
+    
+    // Add Match-Day Form Modifier (±3)
+    const playersWithForm = availablePlayers.map(p => {
+        const formMod = Math.floor(Math.random() * 7) - 3; // -3, -2, -1, 0, 1, 2, 3
+        return {
+            ...p,
+            effectiveRating: p.rating + formMod
+        };
+    });
+
+    // Sort by EFFECTIVE rating
+    const sortedPlayers = [...playersWithForm].sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating));
+    
     const formation = Math.random() > 0.5 ? '4-4-2' : '4-3-3';
 
     const gks = sortedPlayers.filter(p => p.position === 'GK');
@@ -254,7 +286,7 @@ export const getStartingLineup = (team: Team): { starting: Player[], bench: Play
         realBench = realBench.slice(1);
     }
 
-    realBench.sort((a, b) => b.rating - a.rating);
+    realBench.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating));
 
     return { starting, bench: realBench, formation };
 };
@@ -285,9 +317,17 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   const firstHalfStoppage = Math.floor(Math.random() * 3); 
   const secondHalfStoppage = Math.floor(Math.random() * 6); 
 
-  // Base Strengths
-  const homeStrength = Math.pow(home.mid, 2) + Math.pow(home.def, 1.5) + Math.pow(home.att, 1.5);
-  const awayStrength = Math.pow(away.mid, 2) + Math.pow(away.def, 1.5) + Math.pow(away.att, 1.5);
+  // Base Strengths - Use Effective Rating implicitly as players are selected by it
+  // But for team-wide strength calc, we can re-calculate using on-pitch effective ratings
+  
+  const calculateStrength = (players: Player[]) => {
+      return players.reduce((sum, p) => sum + (p.effectiveRating || p.rating), 0);
+  };
+
+  // This roughly approximates the original team-stat based logic but using the actual fielded players' form
+  const homeStrength = calculateStrength(homeOnPitch) / 11 * 3; // Approx scale back to 300-ish range
+  const awayStrength = calculateStrength(awayOnPitch) / 11 * 3;
+
   const homeAdvantage = 1.1; 
   const baseGoalChance = 0.020; 
 
@@ -308,7 +348,6 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     const awayActiveCount = awayOnPitch.filter(p => !sentOffPlayers.has(p.id)).length;
 
     // Calculate Strength Multiplier (1.0 if 11 players, drops significantly with reds)
-    // e.g. 10/11 = 0.909
     const homeMult = Math.max(0.1, homeActiveCount / 11);
     const awayMult = Math.max(0.1, awayActiveCount / 11);
 
@@ -322,15 +361,12 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         : 0.5;
 
     // Adjust Stats for Goal Probability
-    // Offense scales with own players
-    // Defense scales with own players
-    const currHomeAtt = home.att * homeMult;
+    const currHomeAtt = home.att * homeMult; // Keep using team stat for abstract Att/Def structure but scaled
     const currHomeDef = home.def * homeMult;
     const currAwayAtt = away.att * awayMult;
     const currAwayDef = away.def * awayMult;
 
-    // Goal Probability Ratio = My Attack / Opponent Defense
-    // If opponent has fewer defenders (low multiplier), my ratio goes up -> higher goal chance.
+    // Goal Probability Ratio
     const currHomeAttRatio = currHomeAtt / Math.max(1, currAwayDef);
     const currAwayAttRatio = currAwayAtt / Math.max(1, currHomeDef);
 
@@ -401,7 +437,6 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     const defendingPitch = isHomeAttacking ? awayOnPitch : homeOnPitch;
 
     // Desperate Mode: 90+ mins and losing by exactly 1 goal
-    // Allows GK to be selected for goals
     const isDesperate = (minute >= 90) && (isHomeAttacking ? (homeGoals === awayGoals - 1) : (awayGoals === homeGoals - 1));
 
     // Penalty Check
@@ -431,7 +466,6 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         if (isHomeAttacking) homeGoals++; else awayGoals++;
         
         let template = GOAL_TEMPLATES;
-        // Special template for GK goals
         if (scorer.position === 'GK') {
              template = GK_GOAL_TEMPLATES;
         }

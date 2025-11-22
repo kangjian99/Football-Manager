@@ -11,6 +11,7 @@ export interface Player {
   name: string;
   position: 'GK' | 'DEF' | 'MID' | 'FWD';
   rating: number; // 1-99
+  effectiveRating?: number; // Match-day rating with form modifier (±3)
   age: number;
   form?: number; // 1-10, affects match performance
   goals: number; // Season stats

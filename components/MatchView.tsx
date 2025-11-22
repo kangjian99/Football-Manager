@@ -286,7 +286,16 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                                 player.position === 'MID' ? 'bg-green-800 text-green-200' :
                                                 'bg-red-800 text-red-200'
                                              }`}>{player.position}</div>
-                                             <div className="font-medium text-white truncate">{player.name}</div>
+                                             <div className="flex flex-col min-w-0">
+                                                <div className="font-medium text-white truncate leading-none">{player.name}</div>
+                                                {player.effectiveRating !== undefined && (
+                                                    <div className="text-[10px] text-gray-400">
+                                                        {player.effectiveRating} <span className={player.effectiveRating >= player.rating ? "text-green-400" : "text-red-400"}>
+                                                            ({player.effectiveRating >= player.rating ? '+' : ''}{player.effectiveRating - player.rating})
+                                                        </span>
+                                                    </div>
+                                                )}
+                                             </div>
                                         </div>
                                     ))}
                                 </div>
@@ -307,7 +316,16 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                                 player.position === 'MID' ? 'bg-green-800 text-green-200' :
                                                 'bg-red-800 text-red-200'
                                              }`}>{player.position}</div>
-                                             <div className="font-medium text-white truncate text-right">{player.name}</div>
+                                             <div className="flex flex-col min-w-0 items-end">
+                                                <div className="font-medium text-white truncate leading-none">{player.name}</div>
+                                                {player.effectiveRating !== undefined && (
+                                                    <div className="text-[10px] text-gray-400">
+                                                        {player.effectiveRating} <span className={player.effectiveRating >= player.rating ? "text-green-400" : "text-red-400"}>
+                                                            ({player.effectiveRating >= player.rating ? '+' : ''}{player.effectiveRating - player.rating})
+                                                        </span>
+                                                    </div>
+                                                )}
+                                             </div>
                                         </div>
                                     ))}
                                 </div>
