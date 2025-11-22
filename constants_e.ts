@@ -183,7 +183,7 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Caoimhin Kelleher', position: 'GK', rating: 84, age: 27 },
     { name: 'Curtis Jones', position: 'MID', rating: 84, age: 24 }
   ]),
-  createTeam('ARS', 'Arsenal', LeagueLevel.PREMIER_LEAGUE, 93, 92, 92, 'bg-red-700', React.createElement(StripedLogo, { colors: ['#fff', '#ef0107', '#fff'], rotate: 90, vertical: false }), [
+  createTeam('ARS', 'Arsenal', LeagueLevel.PREMIER_LEAGUE, 93, 92, 92, 'bg-red-700', React.createElement(StripedLogo, { colors: ['#fff', '#EF0107', '#EF0107', '#fff'], vertical: true }), [
     { name: 'Bukayo Saka', position: 'FWD', rating: 92, age: 24 },
     { name: 'Martin Ødegaard', position: 'MID', rating: 91, age: 26 },
     { name: 'Declan Rice', position: 'MID', rating: 91, age: 26 },
@@ -316,11 +316,11 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Guido Rodríguez', position: 'MID', rating: 83, age: 31 },
     { name: 'Crysencio Summerville', position: 'FWD', rating: 84, age: 24 }
   ]),
-  createTeam('CRY', 'Crystal Palace', LeagueLevel.PREMIER_LEAGUE, 84, 84, 84, 'bg-blue-600 text-red-600', '💎', [
+  createTeam('CRY', 'Crystal Palace', LeagueLevel.PREMIER_LEAGUE, 84, 84, 84, 'bg-blue-600 text-red-600', React.createElement(StripedLogo, { colors: ['#1B458F', '#C4122E', '#1B458F', '#C4122E', '#1B458F'], vertical: true }), [
     { name: 'Eberechi Eze', position: 'FWD', rating: 87, age: 27 },
     { name: 'Marc Guéhi', position: 'DEF', rating: 86, age: 25 },
     { name: 'Adam Wharton', position: 'MID', rating: 83, age: 21 },
-    { name: 'Jean-Philippe Mateta', position: 'FWD', rating: 85, age: 28 },
+    { name: 'Jean-Philippe Mateta', position: 'FWD', rating: 86, age: 28 },
     { name: 'Dean Henderson', position: 'GK', rating: 84, age: 28 },
     { name: 'Tyrick Mitchell', position: 'DEF', rating: 83, age: 26 },
     { name: 'Will Hughes', position: 'MID', rating: 80, age: 30 },
@@ -328,6 +328,8 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Daichi Kamada', position: 'MID', rating: 85, age: 29 },
     { name: 'Chris Richards', position: 'DEF', rating: 82, age: 25 },
     { name: 'Jefferson Lerma', position: 'MID', rating: 83, age: 31 },
+    { name: 'Ismaïla Sarr', position: 'FWD', rating: 86, age: 27 },
+    { name: 'Eddie Nketiah', position: 'FWD', rating: 84, age: 26 },
     { name: 'Daniel Muñoz', position: 'DEF', rating: 84, age: 29 }
   ]),
   createTeam('NFO', 'Nottingham Forest', LeagueLevel.PREMIER_LEAGUE, 83, 83, 83, 'bg-red-700', '🌳', [
