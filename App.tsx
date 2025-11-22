@@ -183,16 +183,60 @@ const App: React.FC = () => {
               if (matchLineup) {
                   matchLineup.forEach(starter => {
                       const playerRecord = updatedPlayers.find(p => p.id === starter.id);
-                      if (playerRecord) playerRecord.matchesPlayed++;
+                      if (playerRecord) {
+                          // Check if subbed out
+                          const subOutEvent = match.events.find(e => e.type === 'sub' && e.subOff?.id === starter.id);
+                          let minutesPlayed = 0;
+                          
+                          if (subOutEvent) {
+                             minutesPlayed = subOutEvent.minute; // Started at 0
+                          } else {
+                             minutesPlayed = 90 + match.secondHalfStoppage; // Full match including stoppage
+                          }
+                          
+                          // Only count MP if played at least 5 minutes
+                          if (minutesPlayed >= 5) {
+                              playerRecord.matchesPlayed++;
+                          }
+                      }
                   });
               }
 
               match.events.forEach(evt => {
                   if (evt.teamId === team.id) {
+                      // Handle Substitutes
                       if (evt.type === 'sub' && evt.subOn) {
                           const sub = updatedPlayers.find(p => p.id === evt.subOn!.id);
-                          if (sub) sub.matchesPlayed++;
+                          if (sub) {
+                              const startMinute = evt.minute;
+                              const startExtra = evt.extraMinute || 0;
+                              
+                              // Check if subbed out later (rare but possible)
+                              const subOutEvent = match.events.find(e => 
+                                  e.type === 'sub' && 
+                                  e.subOff?.id === evt.subOn?.id && 
+                                  (e.minute > startMinute || (e.minute === startMinute && (e.extraMinute || 0) > startExtra))
+                              );
+
+                              let duration = 0;
+                              if (subOutEvent) {
+                                  duration = subOutEvent.minute - startMinute;
+                              } else {
+                                  // Played until end
+                                  if (startMinute >= 90) {
+                                      duration = Math.max(0, match.secondHalfStoppage - startExtra);
+                                  } else {
+                                      duration = (90 - startMinute) + match.secondHalfStoppage;
+                                  }
+                              }
+
+                              if (duration >= 5) {
+                                  sub.matchesPlayed++;
+                              }
+                          }
                       }
+                      
+                      // Handle Goals and Cards
                       if (evt.playerId) {
                            const player = updatedPlayers.find(p => p.id === evt.playerId);
                            if (player) {
@@ -425,7 +469,7 @@ const App: React.FC = () => {
                 <p className="text-gray-400 text-center mb-8">请输入您的 Google Gemini API 密钥，以激活球探助手和解说引擎</p>
                 
                 <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
-                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>只想试玩？</strong>您可以输入任意字符串（例如“demo”）跳过此页面，无需使用 AI 功能即可体验游戏</p>
+                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>只想试玩？</strong><span className="flex-1">您可以输入任意字符串（例如“demo”）跳过此页面，无需使用 AI 功能即可体验游戏</span></p>
                 </div>
 {/*
                 <p className="text-gray-400 text-center mb-8">Please enter your Google Gemini API Key to activate the scouting assistant and commentary engine.</p>
