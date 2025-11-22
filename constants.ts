@@ -409,14 +409,17 @@ export const SERIE_A_TEAMS: Team[] = [
     { name: 'Samuele Birindelli', position: 'DEF', rating: 76, age: 25 }
   ]),
   createTeam('LEC', 'Lecce', LeagueLevel.SERIE_A, 75, 75, 75, 'bg-yellow-500 text-black', '☀️', [
-    { name: 'Nikola Krstovic', position: 'FWD', rating: 78, age: 24 },
+    { name: 'Nikola Krstovic', position: 'FWD', rating: 79, age: 24 },
     { name: 'Federico Baschirotto', position: 'DEF', rating: 77, age: 27 },
-    { name: 'Wladimiro Falcone', position: 'GK', rating: 78, age: 29 },
-    { name: 'Patrick Dorgu', position: 'DEF', rating: 78, age: 19 },
+    { name: 'Wladimiro Falcone', position: 'GK', rating: 80, age: 29 },
+    { name: 'Medon Berisha', position: 'MID', rating: 73, age: 22  },
     { name: 'Ylber Ramadani', position: 'MID', rating: 76, age: 28 },
+    { name: 'Filip Marchwiński', position: 'MID', rating: 75, age: 23 }, 
     { name: 'Lameck Banda', position: 'FWD', rating: 76, age: 23 },
+    { name: 'Santiago Pierotti', position: 'FWD', rating: 77, age: 24 },
     { name: 'Antonin Gallo', position: 'DEF', rating: 75, age: 24 },
-    { name: 'Remi Oudin', position: 'MID', rating: 75, age: 27 },
+    { name: 'Lassana Coulibaly', position: 'MID', rating: 77, age: 29 },
+    { name: 'Þórir Jóhann Helgason', position: 'MID', rating: 75, age: 25 },
     { name: 'Kialonda Gaspar', position: 'DEF', rating: 75, age: 26 },
     { name: 'Tete Morente', position: 'FWD', rating: 74, age: 27 }
   ]),

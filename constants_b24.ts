@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Team, LeagueLevel, Player } from './types';
+import { SERIE_A_TEAMS as BASE_SERIE_A, SERIE_B_TEAMS as BASE_SERIE_B } from './constants';
 
 // --- Logo Components ---
 
@@ -141,10 +142,8 @@ const createTeam = (
   };
 };
 
-// --- SERIE A DATA (2024/25) ---
-
-export const SERIE_A_TEAMS: Team[] = [
-  // --- ADDED TEAMS TO REACH 24 FOR DEMONSTRATION ---
+// --- EXTRA TEAMS TO REACH 24 FOR DEMONSTRATION ---
+const EXTRA_TEAMS: Team[] = [
   createTeam('VIC', 'Vicenza', LeagueLevel.SERIE_B, 70, 69, 69, 'bg-red-600 text-white', '⚪', [
       { name: 'Franco Ferrari', position: 'FWD', rating: 71, age: 28 },
       { name: 'Filippo Costa', position: 'DEF', rating: 70, age: 28 },
@@ -167,5 +166,8 @@ export const SERIE_A_TEAMS: Team[] = [
       { name: 'Antonio Donnarumma', position: 'GK', rating: 69, age: 33 }
   ]),
 ];
+
+export const SERIE_A_TEAMS = BASE_SERIE_A;
+export const SERIE_B_TEAMS = [...BASE_SERIE_B, ...EXTRA_TEAMS];
 
 export const ALL_TEAMS = [...SERIE_A_TEAMS, ...SERIE_B_TEAMS];

@@ -8,9 +8,9 @@ import SquadView from './components/SquadView';
 import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
-import { ALL_TEAMS } from './constants';
+//import { ALL_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
-//import { ALL_TEAMS } from './constants_e';
+import { ALL_TEAMS } from './constants_e';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info, Menu } from 'lucide-react';
@@ -340,7 +340,16 @@ const App: React.FC = () => {
     processMatchResults(simulatedMatches);
   };
 
-  const handleStartNewSeason = () => {
+  // Wrapper to allow changing teams before season start
+  const handleSeasonTransition = (newTeamId?: string) => {
+      if (newTeamId) {
+          setUserTeamId(newTeamId);
+          // If the new team is in a different league, update the view logic implicitly by how teams are processed below
+      }
+      handleStartNewSeason(newTeamId);
+  };
+
+  const handleStartNewSeason = (forcedUserTeamId?: string) => {
     // 1. Identify Promotions and Relegations dynamically based on active leagues
     const tier1League = activeLeagues[0];
     const tier2League = activeLeagues[1];
@@ -452,6 +461,13 @@ const App: React.FC = () => {
     const [startYear, endYear] = seasonYear.split('/');
     setSeasonYear(`${parseInt(startYear) + 1}/${parseInt(endYear) + 1}`);
     
+    // Ensure view matches user team
+    const activeUserTeamId = forcedUserTeamId || userTeamId;
+    const activeUserTeam = nextTeams.find(t => t.id === activeUserTeamId);
+    if (activeUserTeam) {
+        setViewLeague(activeUserTeam.league);
+    }
+
     setCurrentView('DASHBOARD');
   };
 
@@ -693,8 +709,9 @@ const App: React.FC = () => {
             {currentView === 'SEASON_END' && (
                 <SeasonEndView 
                     teams={teams} 
-                    onStartNewSeason={handleStartNewSeason} 
+                    onTransitionSeason={handleSeasonTransition} 
                     seasonYear={seasonYear}
+                    userTeamId={userTeamId}
                 />
             )}
             {currentView === 'SETTINGS' && (
