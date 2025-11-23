@@ -356,7 +356,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
         </div>
 
         <div className="mx-6 md:mx-12 text-center z-10 min-w-[120px]">
-            <div className="text-4xl font-mono font-bold text-white tracking-wider bg-black/40 px-4 py-1 rounded-lg backdrop-blur-sm">
+            <div className="text-4xl font-mono font-bold text-white tracking-normal bg-black/40 px-2 py-1 rounded-lg backdrop-blur-sm">
                 {homeScore} - {awayScore}
             </div>
             <div className="text-green-400 font-mono mt-2 font-bold flex justify-center items-center gap-2">

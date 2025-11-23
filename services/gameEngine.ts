@@ -3,19 +3,30 @@ import { Team, Match, MatchEvent, Player } from '../types';
 
 // --- Constants & Templates ---
 
-const GOAL_TEMPLATES = [
-  "{player} 在25码外起脚怒射！世界波！球进了！",
-  "{player} 在后点高高跃起，头球破门！",
+const ATTACKER_GOAL_TEMPLATES = [
   "精彩的团队配合！{player} 门前冷静推射得手。",
-  "{player} 连过两人，将球送入球门死角！",
+  "{player} 连过两人，突入禁区将球送入球门死角！",
   "后防线出现失误，{player} 断球后轻松破门！",
   "{player} 凌空抽射！皮球直挂球门顶网！",
   "四两拨千斤！{player} 面对出击的门将轻巧吊射得分。",
-  "百步穿杨！{player} 禁区外一脚重炮轰门，门将鞭长莫及！",
   "{player} 接到直塞球形成单刀，晃过门将打空门得手！",
   "门前嗅觉灵敏！{player} 补射入网。",
   "教科书般的反击！{player} 完成致命一击。",
-  "{player} 低射远角，皮球擦着立柱钻入网窝！"
+  "{player} 低射远角，皮球擦着立柱钻入网窝！",
+  "{player} 在30码外起脚怒射！世界波！球进了！",
+  "百步穿杨！{player} 禁区外一脚重炮轰门，门将鞭长莫及！",
+  "乱战中 {player} 抢在对方解围前一脚捅射得分！",
+  "{player} 在禁区前沿横向盘带，突然起脚劲射破门！",
+  "{player} 禁区内接传中球，抢点垫射入网！"
+];
+
+const DEFENDER_GOAL_TEMPLATES = [
+  "角球机会 {player} 在人群中高高跃起，头球破门！",
+  "{player} 在30码外起脚怒射！世界波！球进了！",
+  "乱战中 {player} 抢在对方解围前一脚捅射得分！",
+  "{player} 插上助攻，接到回传球大力抽射破网！",
+  "{player} 利用定位球机会，前点甩头攻门得手！",
+  "不可思议！后卫 {player} 带球推进到前场，一脚冷射洞穿球门！"
 ];
 
 const GK_GOAL_TEMPLATES = [
@@ -380,8 +391,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         
         if (minute > 60) subProb = 0.05;  // Start tactical tweaks
         if (minute > 70) subProb = 0.08;  // Standard sub window
-        if (minute > 80) subProb = 0.12;  // Late changes
-        if (minute > 88) subProb = 0.2;  // Time wasting / desperation
+        if (minute > 75) subProb = 0.12;  // Late changes
+        if (minute > 88) subProb = 0.18;  // Time wasting / desperation
         if (extraMinute > 0) subProb = 0.40;
 
         // Home Sub
@@ -465,9 +476,11 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         
         if (isHomeAttacking) homeGoals++; else awayGoals++;
         
-        let template = GOAL_TEMPLATES;
+        let template = ATTACKER_GOAL_TEMPLATES; // Default to Attacker templates for MID/FWD
         if (scorer.position === 'GK') {
              template = GK_GOAL_TEMPLATES;
+        } else if (scorer.position === 'DEF') {
+             template = DEFENDER_GOAL_TEMPLATES;
         }
 
         events.push({
