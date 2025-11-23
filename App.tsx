@@ -146,10 +146,11 @@ const App: React.FC = () => {
   // Pure function to calculate stats updates
   const calculateTeamUpdates = (currentTeams: Team[], results: Match[]): Team[] => {
       return currentTeams.map(team => {
-          // Deep copy players, decrementing previous bans
+          // Deep copy players, decrementing previous bans and recovering injuries
           const updatedPlayers = team.players.map(p => ({
               ...p,
-              matchesBanned: Math.max(0, p.matchesBanned - 1)
+              matchesBanned: Math.max(0, p.matchesBanned - 1),
+              injury: Math.max(0, p.injury - 1) // Recover 1 week per match week
           }));
 
           // Check if this team played in this batch of results
@@ -236,11 +237,15 @@ const App: React.FC = () => {
                           }
                       }
                       
-                      // Handle Goals and Cards
+                      // Handle Goals, Cards, and INJURIES
                       if (evt.playerId) {
                            const player = updatedPlayers.find(p => p.id === evt.playerId);
                            if (player) {
                                if (evt.type === 'goal') player.goals++;
+                               if (evt.type === 'injury') {
+                                   // Random injury duration: 1 to 5 weeks
+                                   player.injury = Math.floor(Math.random() * 5) + 1;
+                               }
                                if (evt.type === 'card') {
                                    if (evt.cardType === 'red') {
                                        player.redCards++;
@@ -393,9 +398,22 @@ const App: React.FC = () => {
                 if (randomFactor > 0.2) newRating -= Math.floor(Math.random() * 3) + 1; // -1 to -3
             }
 
+            // --- APPEARANCE BASED ADJUSTMENTS ---
+            const totalMatches = t.played || 38; // Default fallback to typical season length if 0
+
+            // 1. Penalty: Age > 23 and Played < 20%
+            if (p.age > 23 && p.matchesPlayed < (totalMatches * 0.2)) {
+                newRating -= 1;
+            }
+
+            // 2. Bonus: Played > 95% and Rating < 80
+            if (p.matchesPlayed > (totalMatches * 0.95) && newRating < 80) {
+                newRating += 1;
+            }
+
             // Clamp rating
             if (newRating > 99) newRating = 99;
-            if (newRating < 50) newRating = 50;
+            if (newRating < 60) newRating = 60;
 
             return {
                 ...p,
@@ -403,6 +421,7 @@ const App: React.FC = () => {
                 rating: newRating,
                 // Reset seasonal stats
                 goals: 0, assists: 0, matchesPlayed: 0, yellowCards: 0, redCards: 0, matchesBanned: 0,
+                injury: 0, // Reset injuries for new season
                 form: 6 + Math.floor(Math.random() * 4)
             };
         });

@@ -23,7 +23,7 @@ const StripedLogo = ({ colors, rotate = 0, vertical = false }: { colors: string[
 };
 
 // --- Name Databases (British / Commonwealth names) ---
-const UK_FIRST_NAMES = ['James', 'Oliver', 'Jack', 'Harry', 'George', 'Noah', 'Charlie', 'Jacob', 'Alfie', 'Thomas', 'Joshua', 'William', 'Ethan', 'Henry', 'Oscar', 'Archie', 'Leo', 'Lucas', 'Logan', 'Muhammad', 'Alex', 'Daniel', 'Matthew', 'Liam', 'Callum'];
+const UK_FIRST_NAMES = ['James', 'Oliver', 'Jack', 'Harry', 'George', 'Noah', 'Charlie', 'Jacob', 'Alfie', 'Thomas', 'Joshua', 'William', 'Ethan', 'Henry', 'Oscar', 'Archie', 'Leo', 'Lucas', 'Logan', 'Alex', 'Daniel', 'Matthew', 'Liam', 'Callum'];
 const UK_LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Taylor', 'Wilson', 'Davies', 'Evans', 'Thomas', 'Roberts', 'Walker', 'Wright', 'Thompson', 'White', 'Harris', 'Martin', 'Jackson', 'Clarke', 'Lewis', 'Robinson', 'Hall', 'Clark', 'Turner', 'Hill'];
 
 // --- Player Generator ---
@@ -52,6 +52,7 @@ const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, 
     yellowCards: 0,
     redCards: 0,
     matchesBanned: 0, // Initialize
+    injury: 0,
     form: 6 + Math.floor(Math.random() * 4) // 6-10
   };
 };
@@ -109,6 +110,7 @@ const injectRealPlayers = (generatedSquad: Player[], realData: Partial<Player>[]
       yellowCards: 0,
       redCards: 0,
       matchesBanned: 0,
+      injury: 0,
       form: 8
     };
 
@@ -170,6 +172,8 @@ export const PREMIER_LEAGUE_TEAMS: Team[] = [
     { name: 'Virgil van Dijk', position: 'DEF', rating: 91, age: 34 },
     { name: 'Alisson', position: 'GK', rating: 90, age: 33 },
     { name: 'Trent Alexander-Arnold', position: 'DEF', rating: 90, age: 27 },
+    { name: 'Conor Bradley', position: 'DEF', rating: 84, age: 22 },
+    { name: 'Joe Gomez', position: 'DEF', rating: 82, age: 28 },
     { name: 'Luis Díaz', position: 'FWD', rating: 89, age: 28 },
     { name: 'Alexis Mac Allister', position: 'MID', rating: 89, age: 26 },
     { name: 'Wataru Endo', position: 'MID', rating: 82, age: 32 },
@@ -501,20 +505,22 @@ export const CHAMPIONSHIP_TEAMS: Team[] = [
     { name: 'Kieffer Moore', position: 'FWD', rating: 78, age: 33 }
   ]),
   createTeam('LEE', 'Leeds United', LeagueLevel.CHAMPIONSHIP, 85, 84, 83, 'bg-white', '🦚', [ // Promoted
-    { name: 'Crysencio Summerville', position: 'FWD', rating: 86, age: 24 },
+    { name: 'Daniel James', position: 'MID', rating: 83, age: 27 },
     { name: 'Wilfried Gnonto', position: 'FWD', rating: 84, age: 22 },
     { name: 'Patrick Bamford', position: 'FWD', rating: 80, age: 32 },
     { name: 'Joël Piroe', position: 'FWD', rating: 85, age: 26 },
-    { name: 'Ethan Ampadu', position: 'DEF', rating: 84, age: 25 },
-    { name: 'Pascal Struijk', position: 'DEF', rating: 83, age: 26 },
-    { name: 'Illia Gruev', position: 'MID', rating: 82, age: 25 },
+    { name: 'Ethan Ampadu', position: 'MID', rating: 84, age: 25 },
+    { name: 'Pascal Struijk', position: 'DEF', rating: 81, age: 26 },
+    { name: 'Jayden Bogle', position: 'DEF', rating: 83, age: 25 },
+    { name: 'Sam Byram', position: 'DEF', rating: 81, age: 32 },
+    { name: 'Illia Gruev', position: 'MID', rating: 79, age: 25 },
     { name: 'Joe Rodon', position: 'DEF', rating: 82, age: 28 },
     { name: 'Brenden Aaronson', position: 'MID', rating: 82, age: 25 },
     { name: 'Junior Firpo', position: 'DEF', rating: 81, age: 29 },
     { name: 'Manor Solomon', position: 'FWD', rating: 81, age: 26 },
     { name: 'Josko Mesic', position: 'GK', rating: 81, age: 25 },
-    { name: 'Ao Tanaka', position: 'MID', rating: 80, age: 27 },
-    { name: 'Max Wöber', position: 'DEF', rating: 80, age: 27 }
+    { name: 'Ao Tanaka', position: 'MID', rating: 81, age: 27 },
+    { name: 'Max Wöber', position: 'DEF', rating: 79, age: 27 }
   ]),
   createTeam('SUN', 'Sunderland', LeagueLevel.CHAMPIONSHIP, 83, 82, 81, 'bg-red-600 text-white', '🐈‍⬛', [ // Promoted
     { name: 'Jack Clarke', position: 'FWD', rating: 84, age: 25 },

@@ -420,6 +420,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                 event.type === 'goal' ? 'bg-gray-800 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.2)]' : 
                                 event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-900/20 border-red-600' : 'bg-yellow-900/10 border-yellow-600') : 
                                 event.type === 'sub' ? 'bg-gray-800 border-blue-500/50' :
+                                event.type === 'injury' ? 'bg-red-900/10 border-red-800 text-red-300' :
                                 event.type === 'penalty-award' ? 'bg-purple-900/20 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.2)]' :
                                 event.type === 'penalty-miss' ? 'bg-gray-800 border-red-800 text-gray-400' :
                                 event.type === 'whistle' ? 'bg-gray-800 border-gray-600 text-center italic w-full' :
@@ -432,12 +433,14 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                         event.type === 'goal' ? 'bg-green-600 text-white' : 
                                         event.type === 'card' ? (event.cardType === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-500 text-black') : 
                                         event.type === 'sub' ? 'bg-blue-600 text-white' :
+                                        event.type === 'injury' ? 'bg-red-600 text-white' :
                                         event.type === 'penalty-award' ? 'bg-purple-600 text-white' :
                                         event.type === 'penalty-miss' ? 'bg-red-800 text-white' :
                                         'bg-gray-600'
                                     }`}>
                                         {event.type === 'card' && event.cardType === 'red' ? 'RED CARD' : 
                                          event.type === 'sub' ? 'SUBSTITUTION' : 
+                                         event.type === 'injury' ? 'INJURY' : 
                                          event.type === 'penalty-award' ? 'PENALTY' :
                                          event.type === 'penalty-miss' ? 'MISSED PENALTY' :
                                          event.type}
@@ -454,6 +457,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                     {event.type === 'card' && <span className="mx-2">{event.cardType === 'red' ? '🟥' : '🟨'}</span>}
                                     {event.type === 'penalty-award' && <span className="mx-2">⚠️</span>}
                                     {event.type === 'penalty-miss' && <span className="mx-2">❌</span>}
+                                    {event.type === 'injury' && <span className="mx-2">🚑</span>}
                                     {renderEventText(event)}
                                 </div>
                             </div>
@@ -519,13 +523,6 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                 </button>
                 <button onClick={() => setSpeed(20)} className={`p-3 rounded-full transition-all ${speed === 20 ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}>
                     <FastForward size={20} fill="currentColor" />
-                </button>
-                <button 
-                    onClick={handleSkipMatch} 
-                    className="p-2 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 transition-all hover:text-white hover:scale-105"
-                    title="Skip to Result"
-                >
-                    <SkipForward size={20} fill="currentColor" />
                 </button>
           </div>
       )}

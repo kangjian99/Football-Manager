@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Team } from '../types';
-import { Shield, Zap, Target, User } from 'lucide-react';
+import { Shield, Zap, Target, User, Cross } from 'lucide-react';
 
 interface SquadViewProps {
   team: Team;
@@ -67,6 +67,7 @@ const SquadView: React.FC<SquadViewProps> = ({ team }) => {
                                 <th className="px-4 py-3 text-center w-12" title="Assists">A</th>
                                 <th className="px-4 py-3 text-center w-12" title="Yellow Cards">YC</th>
                                 <th className="px-4 py-3 text-center w-12" title="Red Cards">RC</th>
+                                <th className="px-4 py-3 text-center w-12" title="Injury Status">Inj</th>
                                 <th className="px-4 py-3 text-center w-12">Age</th>
                                 <th className="px-4 py-3 text-center w-16">OVR</th>
                             </tr>
@@ -91,6 +92,15 @@ const SquadView: React.FC<SquadViewProps> = ({ team }) => {
                                     <td className="px-4 py-2.5 text-center text-gray-500">{player.assists}</td>
                                     <td className={`px-4 py-2.5 text-center ${player.yellowCards > 0 ? 'text-yellow-500' : 'text-gray-600'}`}>{player.yellowCards}</td>
                                     <td className={`px-4 py-2.5 text-center ${player.redCards > 0 ? 'text-red-500 font-bold' : 'text-gray-600'}`}>{player.redCards}</td>
+                                    <td className="px-4 py-2.5 text-center">
+                                        {player.injury > 0 ? (
+                                            <div className="flex justify-center items-center text-red-500 font-bold" title={`${player.injury} weeks injured`}>
+                                                <Cross size={14} className="mr-1" /> {player.injury}w
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-700">-</span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-2.5 text-center text-gray-500">{player.age}</td>
                                     <td className="px-4 py-2.5 text-center">
                                         <div className={`font-bold inline-block w-8 text-center rounded ${

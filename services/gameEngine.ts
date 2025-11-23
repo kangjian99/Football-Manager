@@ -102,6 +102,14 @@ const SUB_TEMPLATES = [
   "全场掌声雷动，{out} 被 {in} 换下。"
 ];
 
+const INJURY_TEMPLATES = [
+  "{player} 痛苦地倒在草坪上，队医进场了。",
+  "{player} 捂着大腿肌肉，看来是拉伤了。",
+  "一次激烈的碰撞后，{player} 无法坚持比赛。",
+  "{player} 一瘸一拐地走向场边，无法继续比赛。",
+  "情况不妙，{player} 被担架抬出了场外。"
+];
+
 
 // --- Core Helper Functions ---
 
@@ -232,7 +240,10 @@ const selectSubOffCandidate = (
 
 // Helpers for lineup management
 export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[], formation: string } => {
-    const availablePlayers = team.players.filter(p => !p.matchesBanned || p.matchesBanned <= 0);
+    // Filter out banned OR injured players
+    const availablePlayers = team.players.filter(p => 
+        (!p.matchesBanned || p.matchesBanned <= 0) && (!p.injury || p.injury <= 0)
+    );
     
     // Add Match-Day Form Modifier (±3)
     const playersWithForm = availablePlayers.map(p => {
@@ -384,14 +395,71 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     const currHomeGoalProb = baseGoalChance * Math.pow(currHomeAttRatio, 2.5) * homeAdvantage;
     const currAwayGoalProb = baseGoalChance * Math.pow(currAwayAttRatio, 2.5);
 
-    // --- SUBSTITUTION LOGIC ---
+    // --- INJURY LOGIC ---
+    if (Math.random() < 0.002) { // 0.2% chance per minute per side approx
+        const isHomeInjury = Math.random() < 0.5;
+        let pitch = isHomeInjury ? homeOnPitch : awayOnPitch;
+        let bench = isHomeInjury ? homeBench : awayBench;
+        let subsUsed = isHomeInjury ? homeSubsUsed : awaySubsUsed;
+        const team = isHomeInjury ? home : away;
+        const sentOff = sentOffPlayers;
+
+        const injuredPlayer = selectPlayer(pitch, 'CHANCE', sentOff); // Use generic weighting
+
+        if (injuredPlayer) {
+             events.push({ 
+                 minute, 
+                 extraMinute, 
+                 type: 'injury', 
+                 text: getRandomTemplate(INJURY_TEMPLATES, injuredPlayer), 
+                 teamId: team.id, 
+                 playerId: injuredPlayer.id, 
+                 playerName: injuredPlayer.name, 
+                 isImportant: true 
+             });
+
+             // Forced Substitution
+             if (subsUsed < MAX_SUBS) {
+                 const candidatesOn = bench.filter(p => p.position === injuredPlayer.position);
+                 const subOn = candidatesOn.length > 0 ? candidatesOn[0] : bench[0];
+
+                 if (subOn) {
+                     // Perform sub
+                     if (isHomeInjury) {
+                         homeOnPitch = homeOnPitch.filter(p => p.id !== injuredPlayer.id);
+                         homeOnPitch.push(subOn);
+                         homeBench = homeBench.filter(p => p.id !== subOn.id);
+                         homeSubsUsed++;
+                         homeSubbedInIds.add(subOn.id);
+                     } else {
+                         awayOnPitch = awayOnPitch.filter(p => p.id !== injuredPlayer.id);
+                         awayOnPitch.push(subOn);
+                         awayBench = awayBench.filter(p => p.id !== subOn.id);
+                         awaySubsUsed++;
+                         awaySubbedInIds.add(subOn.id);
+                     }
+                     
+                     let t = SUB_TEMPLATES[Math.floor(Math.random() * SUB_TEMPLATES.length)];
+                     t = t.replace("{team}", team.name).replace("{in}", subOn.name).replace("{out}", injuredPlayer.name);
+                     events.push({ minute, extraMinute, type: 'sub', text: t, teamId: team.id, subOn: { id: subOn.id, name: subOn.name }, subOff: { id: injuredPlayer.id, name: injuredPlayer.name }, isImportant: false });
+                 }
+             } else {
+                 // No subs left - play with 10 men (treat like a red card effectively for simulation)
+                 sentOffPlayers.add(injuredPlayer.id); // Re-using sentOff set to exclude them from play selection
+                 events.push({ minute, extraMinute, type: 'commentary', text: `${team.name} have used all their substitutions and must continue with ten men as ${injuredPlayer.name} comes off injured.`, teamId: team.id, isImportant: true });
+             }
+             return; // Injury event takes up the minute
+        }
+    }
+
+    // --- SUBSTITUTION LOGIC (Tactical) ---
     if (minute >= 46) {
         // Increase probability gradually throughout the second half
         let subProb = 0.015; // Very small chance early 2nd half (injuries etc)
         
         if (minute > 60) subProb = 0.05;  // Start tactical tweaks
-        if (minute > 70) subProb = 0.08;  // Standard sub window
-        if (minute > 75) subProb = 0.12;  // Late changes
+        if (minute > 70) subProb = 0.10;  // Standard sub window
+        if (minute > 75) subProb = 0.15;  // Late changes
         if (minute > 88) subProb = 0.18;  // Time wasting / desperation
         if (extraMinute > 0) subProb = 0.40;
 

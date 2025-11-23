@@ -52,6 +52,7 @@ const generatePlayer = (role: 'GK' | 'DEF' | 'MID' | 'FWD', baseRating: number, 
     yellowCards: 0,
     redCards: 0,
     matchesBanned: 0, // Initialize
+    injury: 0,
     form: 6 + Math.floor(Math.random() * 4) // 6-10
   };
 };
@@ -109,6 +110,7 @@ const injectRealPlayers = (generatedSquad: Player[], realData: Partial<Player>[]
       yellowCards: 0,
       redCards: 0,
       matchesBanned: 0,
+      injury: 0,
       form: 8
     };
 

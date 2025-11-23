@@ -20,6 +20,7 @@ export interface Player {
   yellowCards: number;
   redCards: number;
   matchesBanned: number; // 0 = available, > 0 = suspended
+  injury: number; // 0 = healthy, > 0 = weeks remaining unable to play
 }
 
 export interface Team {
@@ -44,7 +45,7 @@ export interface Team {
 export interface MatchEvent {
   minute: number;
   extraMinute?: number; // For stoppage time (e.g., 45+1, 90+3)
-  type: 'goal' | 'card' | 'sub' | 'commentary' | 'whistle' | 'penalty-award' | 'penalty-miss';
+  type: 'goal' | 'card' | 'sub' | 'commentary' | 'whistle' | 'penalty-award' | 'penalty-miss' | 'injury';
   text: string;
   teamId?: string;
   playerId?: string;
