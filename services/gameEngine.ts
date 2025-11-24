@@ -351,7 +351,7 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   const awayStrength = calculateStrength(awayOnPitch) / 11 * 3;
 
   const homeAdvantage = 1.1; 
-  const baseGoalChance = 0.020; 
+  const baseGoalChance = 0.027; // Increased by approx 1/3 (from 0.020)
 
   // Inner function to simulate a single minute
   const simulateMinute = (minute: number, extraMinute: number = 0) => {

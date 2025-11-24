@@ -8,6 +8,7 @@ import SquadView from './components/SquadView';
 import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
+import RecordsView from './components/RecordsView';
 //import { ALL_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
 import { ALL_TEAMS } from './constants_e';
@@ -378,6 +379,7 @@ const App: React.FC = () => {
 
         // Update Player Ages and Ratings
         const updatedPlayers = t.players.map(p => {
+            // Normal Aging
             const newAge = p.age + 1;
             let newRating = p.rating;
             const randomFactor = Math.random();
@@ -414,6 +416,29 @@ const App: React.FC = () => {
             // Clamp rating
             if (newRating > 99) newRating = 99;
             if (newRating < 60) newRating = 60;
+
+            // --- REBIRTH SYSTEM ---
+            // Condition: Age > 36 AND Rating < 70
+            if (newAge > 36 && newRating < 70) {
+                 const ageBonus = Math.max(0, newAge - 37); // + (Current Age - 37)
+                 const variance = Math.floor(Math.random() * 7) - 3; // ±3
+                 let rebornRating = 70 + variance + ageBonus;
+                 
+                 // Clamp limits for sanity
+                 if (rebornRating > 90) rebornRating = 90;
+                 if (rebornRating < 60) rebornRating = 60;
+
+                 return {
+                    ...p,
+                    age: 17,
+                    rating: rebornRating,
+                    // Reset all stats
+                    goals: 0, assists: 0, matchesPlayed: 0, 
+                    yellowCards: 0, redCards: 0, matchesBanned: 0, 
+                    injury: 0,
+                    form: 6 + Math.floor(Math.random() * 4)
+                 };
+            }
 
             return {
                 ...p,
@@ -622,6 +647,7 @@ const App: React.FC = () => {
                     {currentView === 'MATCH' && 'Match Center'}
                     {currentView === 'SEASON_END' && 'End of Season Summary'}
                     {currentView === 'SETTINGS' && 'Application Settings'}
+                    {currentView === 'RECORDS' && 'Season Records'}
                 </h1>
             </div>
             <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
@@ -679,6 +705,9 @@ const App: React.FC = () => {
             )}
             {currentView === 'FIXTURES' && (
                 <FixturesView schedule={schedule} teams={teams} currentWeek={currentWeek > totalWeeks ? totalWeeks : currentWeek} />
+            )}
+             {currentView === 'RECORDS' && (
+                <RecordsView schedule={schedule} teams={teams} />
             )}
             {currentView === 'MATCH' && (
                 (homeTeamForMatch && awayTeamForMatch && userMatch && !isSeasonEnded) ? (

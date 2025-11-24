@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, Users, Trophy, Calendar, Settings, Shield, List, Flag, X } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, Calendar, Settings, Shield, List, Flag, X, ClipboardList } from 'lucide-react';
 import { ViewState, Team } from '../types';
 
 interface SidebarProps {
@@ -19,6 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, userTeam, disab
     { id: 'SQUAD', label: 'Squad & Tactics', icon: Users },
     { id: 'LEAGUE', label: 'League Table', icon: Trophy },
     { id: 'FIXTURES', label: 'Fixtures & Results', icon: List },
+    { id: 'RECORDS', label: 'Records', icon: ClipboardList },
     { 
         id: isSeasonEnded ? 'SEASON_END' : 'MATCH', 
         label: isSeasonEnded ? 'Season Summary' : 'Next Match', 

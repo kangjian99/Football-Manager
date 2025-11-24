@@ -73,4 +73,4 @@ export interface Match {
   awayFormation?: string;
 }
 
-export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END';
+export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END' | 'RECORDS';
