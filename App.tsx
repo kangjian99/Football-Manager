@@ -419,7 +419,7 @@ const App: React.FC = () => {
 
             // --- REBIRTH SYSTEM ---
             // Condition: Age > 36 AND Rating < 70
-            if (newAge > 36 && newRating < 70) {
+            if (newAge > 36 && newRating < 70 || newAge > 36 && p.matchesPlayed < (totalMatches * 0.1)) {
                  const ageBonus = Math.max(0, newAge - 37); // + (Current Age - 37)
                  const variance = Math.floor(Math.random() * 7) - 3; // ±3
                  let rebornRating = 70 + variance + ageBonus;

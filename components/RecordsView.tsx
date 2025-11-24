@@ -19,7 +19,7 @@ const RecordsView: React.FC<RecordsViewProps> = ({ schedule, teams }) => {
     const totalGoals = match.homeScore + match.awayScore;
     
     // Condition: Goal Difference > 4 OR Total Goals > 5
-    return diff > 4 || totalGoals > 5 && diff > 2;
+    return diff > 4 || totalGoals > 5 && diff > 2 || totalGoals > 6;
   });
 
   // Sort by total goals descending
