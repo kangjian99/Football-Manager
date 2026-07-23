@@ -9,6 +9,7 @@ import FixturesView from './components/FixturesView';
 import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
 import RecordsView from './components/RecordsView';
+import ApiKeyScreen from './components/ApiKeyScreen';
 //import { ALL_TEAMS } from './constants';
 // To switch to English leagues, uncomment the line below and comment out the line above.
 import { ALL_TEAMS } from './constants_e';
@@ -419,7 +420,7 @@ const App: React.FC = () => {
 
             // --- REBIRTH SYSTEM ---
             // Condition: Age > 36 AND Rating < 70
-            if (newAge > 36 && newRating < 70 || newAge > 36 && p.matchesPlayed < (totalMatches * 0.1)) {
+            if (newAge > 36 && newRating < 70 || newAge > 40 && newRating < 75 ||newAge > 36 && p.matchesPlayed < (totalMatches * 0.1)) {
                  const ageBonus = Math.max(0, newAge - 37); // + (Current Age - 37)
                  const variance = Math.floor(Math.random() * 7) - 3; // ±3
                  let rebornRating = 70 + variance + ageBonus;
@@ -518,47 +519,16 @@ const App: React.FC = () => {
   // --- API KEY SCREEN ---
   if (!apiKey && !process.env.API_KEY) {
     return (
-        <div className="h-screen bg-gray-900 flex items-center justify-center p-6">
-            <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-2xl max-w-md w-full animate-in zoom-in duration-300">
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500">
-                        <Key size={32} />
-                    </div>
-                </div>
-                <h1 className="text-2xl font-bold text-white text-center mb-2">Welcome Manager</h1>
-                <p className="text-gray-400 text-center mb-8">请输入您的 Google Gemini API 密钥，以激活球探助手和解说引擎</p>
-                
-                <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
-                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>只想试玩？</strong><span className="flex-1">您可以输入任意字符串（例如“demo”）跳过此页面，无需使用 AI 功能即可体验游戏</span></p>
-                </div>
-{/*
-                <p className="text-gray-400 text-center mb-8">Please enter your Google Gemini API Key to activate the scouting assistant and commentary engine.</p>
-                
-                <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-200">
-                    <p className="flex gap-2 mb-2"><ShieldCheck className="shrink-0" size={18} /> <strong>Privacy First:</strong> Your key is stored locally in your browser and is never sent to our servers.</p>
-                    <p className="flex gap-2"><Info className="shrink-0" size={18} /> <strong>Just playing?</strong> You can enter any random string (e.g. "demo") to bypass this screen and play without AI features.</p>
-                </div>
-*/}
-                <form onSubmit={handleSaveApiKey} className="space-y-4">
-                    <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                        <input 
-                            id="apiKeyInput"
-                            type="password" 
-                            placeholder="Paste your API Key here" 
-                            className="w-full bg-gray-900 border border-gray-600 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-900/30">
-                        Start Game
-                    </button>
-                </form>
-                <p className="text-xs text-gray-500 text-center mt-6">
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">Get an API key here</a>
-                </p>
-            </div>
-        </div>
+      <ApiKeyScreen 
+        onSaveApiKey={(key) => {
+          localStorage.setItem('gemini_api_key', key);
+          setApiKey(key);
+        }}
+        onSkip={() => {
+          localStorage.setItem('gemini_api_key', 'demo');
+          setApiKey('demo');
+        }}
+      />
     );
   }
 

@@ -1,5 +1,6 @@
 {
   "name": "Football Manager AI",
   "description": "A modern football manager simulation for Italian Serie A and Serie B, Premier/Championship League, featuring AI-powered tactical advice and live match simulation.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
