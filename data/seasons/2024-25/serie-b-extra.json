@@ -1,0 +1,111 @@
+{
+  "seasonId": "2024-25",
+  "leagueId": "serie-b-extra",
+  "movedFrom": "constants_b24.ts",
+  "note": "Moved from existing TypeScript rosters. Not a refreshed squad list.",
+  "sources": null,
+  "teams": [
+    {
+      "id": "VIC",
+      "name": "Vicenza",
+      "players": [
+        {
+          "name": "Franco Ferrari",
+          "position": "FWD",
+          "rating": 71,
+          "age": 28
+        },
+        {
+          "name": "Filippo Costa",
+          "position": "DEF",
+          "rating": 70,
+          "age": 28
+        },
+        {
+          "name": "Ronaldo",
+          "position": "MID",
+          "rating": 71,
+          "age": 34
+        },
+        {
+          "name": "Alessandro Confente",
+          "position": "GK",
+          "rating": 69,
+          "age": 25
+        }
+      ]
+    },
+    {
+      "id": "SPA",
+      "name": "SPAL",
+      "players": [
+        {
+          "name": "Mirco Antenucci",
+          "position": "FWD",
+          "rating": 71,
+          "age": 39
+        },
+        {
+          "name": "Marco Bertini",
+          "position": "MID",
+          "rating": 69,
+          "age": 21
+        },
+        {
+          "name": "Matteo Arena",
+          "position": "DEF",
+          "rating": 69,
+          "age": 25
+        }
+      ]
+    },
+    {
+      "id": "PER",
+      "name": "Perugia",
+      "players": [
+        {
+          "name": "Federico Ricci",
+          "position": "FWD",
+          "rating": 70,
+          "age": 30
+        },
+        {
+          "name": "Edoardo Iannoni",
+          "position": "MID",
+          "rating": 70,
+          "age": 22
+        },
+        {
+          "name": "Gabriele Angella",
+          "position": "DEF",
+          "rating": 69,
+          "age": 35
+        }
+      ]
+    },
+    {
+      "id": "PAD",
+      "name": "Padova",
+      "players": [
+        {
+          "name": "Micheal Liguori",
+          "position": "FWD",
+          "rating": 71,
+          "age": 24
+        },
+        {
+          "name": "Simone Palombi",
+          "position": "FWD",
+          "rating": 70,
+          "age": 28
+        },
+        {
+          "name": "Antonio Donnarumma",
+          "position": "GK",
+          "rating": 69,
+          "age": 33
+        }
+      ]
+    }
+  ]
+}

@@ -10,25 +10,46 @@ import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
 import RecordsView from './components/RecordsView';
 import ApiKeyScreen from './components/ApiKeyScreen';
-//import { ALL_TEAMS } from './constants';
-// To switch to English leagues, uncomment the line below and comment out the line above.
-import { ALL_TEAMS } from './constants_e';
+import { seasonYearLabel } from './data/snapshots';
+// Italian leagues: import { ALL_TEAMS, SEASON_ID, buildAllTeams } from './constants';
+// English leagues are the active data set. Both read the bundled season snapshot.
+import { ALL_TEAMS, SEASON_ID, buildAllTeams } from './constants_e';
+import { readCareerSeason, writeCareerSeason } from './services/careerSave';
 import { Team, ViewState, Match, LeagueLevel } from './types';
 import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info, Menu } from 'lucide-react';
 
+function loadInitialCareer(): { seasonId: string; teams: Team[]; error: string | null } {
+  try {
+    const savedSeasonId = readCareerSeason(localStorage);
+    const seasonId = savedSeasonId ?? SEASON_ID;
+    const teams = seasonId === SEASON_ID ? ALL_TEAMS : buildAllTeams(seasonId);
+    if (!savedSeasonId) writeCareerSeason(localStorage, seasonId);
+    return { seasonId, teams, error: null };
+  } catch (err) {
+    return {
+      seasonId: '',
+      teams: [],
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
 const App: React.FC = () => {
   // State
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
-  // Default to Italian leagues as per initial configuration. 
-  // To change data source, swap the imports above.
-  const [teams, setTeams] = useState<Team[]>(ALL_TEAMS);
+  // Squads come from the season id recorded on the career save.
+  // A saved id is never replaced by a newer snapshot.
+  const [careerBoot] = useState(loadInitialCareer);
+  const [teams, setTeams] = useState<Team[]>(careerBoot.teams);
   const [userTeamId, setUserTeamId] = useState<string | null>(null);
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [schedule, setSchedule] = useState<Match[][]>([]);
   const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A); // Default, will update on load
-  const [seasonYear, setSeasonYear] = useState("2024/2025");
+  const [seasonYear, setSeasonYear] = useState(() =>
+    careerBoot.error ? '' : seasonYearLabel(careerBoot.seasonId)
+  );
   const [isMatchInProgress, setIsMatchInProgress] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -503,6 +524,8 @@ const App: React.FC = () => {
     setSchedule(combinedSchedule);
     setCurrentWeek(1);
     
+    // The career year moves forward in memory. Squads are the ones already
+    // loaded for careerBoot.seasonId; this does not open another snapshot.
     const [startYear, endYear] = seasonYear.split('/');
     setSeasonYear(`${parseInt(startYear) + 1}/${parseInt(endYear) + 1}`);
     
@@ -515,6 +538,17 @@ const App: React.FC = () => {
 
     setCurrentView('DASHBOARD');
   };
+
+  if (careerBoot.error) {
+    return (
+      <div className="h-screen bg-gray-900 text-white flex items-center justify-center p-8">
+        <div className="max-w-xl text-center space-y-4">
+          <h1 className="text-2xl font-bold">Season snapshot was not loaded</h1>
+          <p className="text-gray-300">{careerBoot.error}</p>
+        </div>
+      </div>
+    );
+  }
 
   // --- API KEY SCREEN ---
   if (!apiKey && !process.env.API_KEY) {

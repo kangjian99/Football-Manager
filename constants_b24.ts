@@ -2,6 +2,9 @@
 import React from 'react';
 import { Team, LeagueLevel, Player } from './types';
 import { SERIE_A_TEAMS as BASE_SERIE_A, SERIE_B_TEAMS as BASE_SERIE_B } from './constants';
+import { CURRENT_SEASON_ID, loadLeague } from './data/snapshots';
+import { roster } from './data/roster';
+
 
 // --- Logo Components ---
 
@@ -145,31 +148,21 @@ const createTeam = (
 };
 
 // --- EXTRA TEAMS TO REACH 24 FOR DEMONSTRATION ---
-const EXTRA_TEAMS: Team[] = [
-  createTeam('VIC', 'Vicenza', LeagueLevel.SERIE_B, 70, 69, 69, 'bg-red-600 text-white', '⚪', [
-      { name: 'Franco Ferrari', position: 'FWD', rating: 71, age: 28 },
-      { name: 'Filippo Costa', position: 'DEF', rating: 70, age: 28 },
-      { name: 'Ronaldo', position: 'MID', rating: 71, age: 34 },
-      { name: 'Alessandro Confente', position: 'GK', rating: 69, age: 25 }
-  ]),
-  createTeam('SPA', 'SPAL', LeagueLevel.SERIE_B, 69, 68, 68, 'bg-blue-300 text-white', '⚪', [
-      { name: 'Mirco Antenucci', position: 'FWD', rating: 71, age: 39 },
-      { name: 'Marco Bertini', position: 'MID', rating: 69, age: 21 },
-      { name: 'Matteo Arena', position: 'DEF', rating: 69, age: 25 }
-  ]),
-  createTeam('PER', 'Perugia', LeagueLevel.SERIE_B, 68, 69, 69, 'bg-red-700 text-white', '🦁', [
-      { name: 'Federico Ricci', position: 'FWD', rating: 70, age: 30 },
-      { name: 'Edoardo Iannoni', position: 'MID', rating: 70, age: 22 },
-      { name: 'Gabriele Angella', position: 'DEF', rating: 69, age: 35 }
-  ]),
-  createTeam('PAD', 'Padova', LeagueLevel.SERIE_B, 70, 69, 68, 'bg-white text-red-600', '🛡️', [
-      { name: 'Micheal Liguori', position: 'FWD', rating: 71, age: 24 },
-      { name: 'Simone Palombi', position: 'FWD', rating: 70, age: 28 },
-      { name: 'Antonio Donnarumma', position: 'GK', rating: 69, age: 33 }
-  ]),
+function buildExtraTeams(seasonId: string = CURRENT_SEASON_ID): Team[] {
+  const serieBExtra = loadLeague(seasonId, 'serie-b-extra');
+  return [
+  createTeam('VIC', 'Vicenza', LeagueLevel.SERIE_B, 70, 69, 69, 'bg-red-600 text-white', '⚪', roster(serieBExtra, 'VIC')),
+  createTeam('SPA', 'SPAL', LeagueLevel.SERIE_B, 69, 68, 68, 'bg-blue-300 text-white', '⚪', roster(serieBExtra, 'SPA')),
+  createTeam('PER', 'Perugia', LeagueLevel.SERIE_B, 68, 69, 69, 'bg-red-700 text-white', '🦁', roster(serieBExtra, 'PER')),
+  createTeam('PAD', 'Padova', LeagueLevel.SERIE_B, 70, 69, 68, 'bg-white text-red-600', '🛡️', roster(serieBExtra, 'PAD')),
 ];
+}
+const EXTRA_TEAMS: Team[] = buildExtraTeams();
+
 
 export const SERIE_A_TEAMS = BASE_SERIE_A;
 export const SERIE_B_TEAMS = [...BASE_SERIE_B, ...EXTRA_TEAMS];
 
 export const ALL_TEAMS = [...SERIE_A_TEAMS, ...SERIE_B_TEAMS];
+
+export const SEASON_ID = CURRENT_SEASON_ID;

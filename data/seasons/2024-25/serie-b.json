@@ -1,0 +1,754 @@
+{
+  "seasonId": "2024-25",
+  "leagueId": "serie-b",
+  "movedFrom": "constants.ts",
+  "note": "Moved from existing TypeScript rosters. Not a refreshed squad list.",
+  "sources": {
+    "footballData": {
+      "competition": "SB"
+    },
+    "apiFootball": {
+      "league": 136
+    }
+  },
+  "teams": [
+    {
+      "id": "SAS",
+      "name": "Sassuolo",
+      "players": [
+        {
+          "name": "Domenico Berardi",
+          "position": "FWD",
+          "rating": 83,
+          "age": 30
+        },
+        {
+          "name": "Armand Lauriente",
+          "position": "FWD",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Kristian Thorstvedt",
+          "position": "MID",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Samuele Mulattieri",
+          "position": "FWD",
+          "rating": 75,
+          "age": 23
+        },
+        {
+          "name": "Daniel Boloca",
+          "position": "MID",
+          "rating": 75,
+          "age": 25
+        },
+        {
+          "name": "Josh Doig",
+          "position": "DEF",
+          "rating": 74,
+          "age": 22
+        },
+        {
+          "name": "Horatiu Moldovan",
+          "position": "GK",
+          "rating": 75,
+          "age": 26
+        },
+        {
+          "name": "Pedro Obiang",
+          "position": "MID",
+          "rating": 74,
+          "age": 32
+        }
+      ]
+    },
+    {
+      "id": "SAM",
+      "name": "Sampdoria",
+      "players": [
+        {
+          "name": "Gennaro Tutino",
+          "position": "FWD",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Massimo Coda",
+          "position": "FWD",
+          "rating": 78,
+          "age": 35
+        },
+        {
+          "name": "Pajtim Kasami",
+          "position": "MID",
+          "rating": 75,
+          "age": 32
+        },
+        {
+          "name": "Bartosz Bereszynski",
+          "position": "DEF",
+          "rating": 74,
+          "age": 32
+        },
+        {
+          "name": "Fabio Borini",
+          "position": "FWD",
+          "rating": 74,
+          "age": 33
+        },
+        {
+          "name": "Marco Silvestri",
+          "position": "GK",
+          "rating": 75,
+          "age": 33
+        },
+        {
+          "name": "Leonardo Benedetti",
+          "position": "MID",
+          "rating": 73,
+          "age": 24
+        },
+        {
+          "name": "Simone Romagnoli",
+          "position": "DEF",
+          "rating": 73,
+          "age": 34
+        }
+      ]
+    },
+    {
+      "id": "PAL",
+      "name": "Palermo",
+      "players": [
+        {
+          "name": "Matteo Brunori",
+          "position": "FWD",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Roberto Insigne",
+          "position": "FWD",
+          "rating": 75,
+          "age": 30
+        },
+        {
+          "name": "Jacopo Segre",
+          "position": "MID",
+          "rating": 75,
+          "age": 27
+        },
+        {
+          "name": "Sebastiano Desplanches",
+          "position": "GK",
+          "rating": 73,
+          "age": 21
+        },
+        {
+          "name": "Francesco Di Mariano",
+          "position": "FWD",
+          "rating": 74,
+          "age": 28
+        },
+        {
+          "name": "Thomas Henry",
+          "position": "FWD",
+          "rating": 74,
+          "age": 29
+        },
+        {
+          "name": "Federico Di Francesco",
+          "position": "FWD",
+          "rating": 74,
+          "age": 30
+        },
+        {
+          "name": "Claudio Gomes",
+          "position": "MID",
+          "rating": 74,
+          "age": 24
+        }
+      ]
+    },
+    {
+      "id": "CRE",
+      "name": "Cremonese",
+      "players": [
+        {
+          "name": "Franco Vazquez",
+          "position": "MID",
+          "rating": 76,
+          "age": 35
+        },
+        {
+          "name": "Jari Vandeputte",
+          "position": "MID",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Federico Bonazzoli",
+          "position": "FWD",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Andrea Fulignati",
+          "position": "GK",
+          "rating": 74,
+          "age": 29
+        },
+        {
+          "name": "Luca Zanimacchia",
+          "position": "MID",
+          "rating": 75,
+          "age": 26
+        },
+        {
+          "name": "Michele Castagnetti",
+          "position": "MID",
+          "rating": 74,
+          "age": 34
+        },
+        {
+          "name": "Manuel De Luca",
+          "position": "FWD",
+          "rating": 74,
+          "age": 26
+        }
+      ]
+    },
+    {
+      "id": "PIS",
+      "name": "Pisa",
+      "players": [
+        {
+          "name": "Matteo Tramoni",
+          "position": "MID",
+          "rating": 77,
+          "age": 24
+        },
+        {
+          "name": "Nicholas Bonfanti",
+          "position": "FWD",
+          "rating": 74,
+          "age": 22
+        },
+        {
+          "name": "Marius Marin",
+          "position": "MID",
+          "rating": 73,
+          "age": 26
+        },
+        {
+          "name": "Adrian Semper",
+          "position": "GK",
+          "rating": 74,
+          "age": 26
+        },
+        {
+          "name": "Stefano Moreo",
+          "position": "FWD",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "Antonio Caracciolo",
+          "position": "DEF",
+          "rating": 72,
+          "age": 34
+        }
+      ]
+    },
+    {
+      "id": "SPE",
+      "name": "Spezia",
+      "players": [
+        {
+          "name": "Salvatore Esposito",
+          "position": "MID",
+          "rating": 75,
+          "age": 23
+        },
+        {
+          "name": "Francesco Pio Esposito",
+          "position": "FWD",
+          "rating": 76,
+          "age": 19
+        },
+        {
+          "name": "Edoardo Soleri",
+          "position": "FWD",
+          "rating": 73,
+          "age": 26
+        },
+        {
+          "name": "Filippo Bandinelli",
+          "position": "MID",
+          "rating": 73,
+          "age": 29
+        },
+        {
+          "name": "Arkadiusz Reca",
+          "position": "DEF",
+          "rating": 72,
+          "age": 29
+        }
+      ]
+    },
+    {
+      "id": "BRE",
+      "name": "Brescia",
+      "players": [
+        {
+          "name": "Dimitri Bisoli",
+          "position": "MID",
+          "rating": 74,
+          "age": 30
+        },
+        {
+          "name": "Gennaro Borrelli",
+          "position": "FWD",
+          "rating": 73,
+          "age": 24
+        },
+        {
+          "name": "Andrea Cistana",
+          "position": "DEF",
+          "rating": 74,
+          "age": 27
+        },
+        {
+          "name": "Nicolas Galazzi",
+          "position": "FWD",
+          "rating": 72,
+          "age": 23
+        },
+        {
+          "name": "Luca Lezzerini",
+          "position": "GK",
+          "rating": 72,
+          "age": 29
+        }
+      ]
+    },
+    {
+      "id": "BAR",
+      "name": "Bari",
+      "players": [
+        {
+          "name": "Kevin Lasagna",
+          "position": "FWD",
+          "rating": 73,
+          "age": 32
+        },
+        {
+          "name": "Giuseppe Sibilli",
+          "position": "FWD",
+          "rating": 73,
+          "age": 28
+        },
+        {
+          "name": "Mattia Maita",
+          "position": "MID",
+          "rating": 71,
+          "age": 30
+        },
+        {
+          "name": "Boris Radunovic",
+          "position": "GK",
+          "rating": 72,
+          "age": 28
+        },
+        {
+          "name": "Valerio Di Cesare",
+          "position": "DEF",
+          "rating": 70,
+          "age": 41
+        }
+      ]
+    },
+    {
+      "id": "SAL",
+      "name": "Salernitana",
+      "players": [
+        {
+          "name": "Simy",
+          "position": "FWD",
+          "rating": 73,
+          "age": 32
+        },
+        {
+          "name": "Daniele Verde",
+          "position": "FWD",
+          "rating": 74,
+          "age": 28
+        },
+        {
+          "name": "Luigi Sepe",
+          "position": "GK",
+          "rating": 73,
+          "age": 33
+        },
+        {
+          "name": "Giulio Maggiore",
+          "position": "MID",
+          "rating": 73,
+          "age": 26
+        },
+        {
+          "name": "Franco Tongya",
+          "position": "MID",
+          "rating": 72,
+          "age": 22
+        }
+      ]
+    },
+    {
+      "id": "MOD",
+      "name": "Modena",
+      "players": [
+        {
+          "name": "Pedro Mendes",
+          "position": "FWD",
+          "rating": 73,
+          "age": 25
+        },
+        {
+          "name": "Antonio Palumbo",
+          "position": "MID",
+          "rating": 73,
+          "age": 28
+        },
+        {
+          "name": "Gregoire Defrel",
+          "position": "FWD",
+          "rating": 74,
+          "age": 33
+        },
+        {
+          "name": "Riccardo Gagno",
+          "position": "GK",
+          "rating": 72,
+          "age": 26
+        },
+        {
+          "name": "Thomas Battistella",
+          "position": "MID",
+          "rating": 71,
+          "age": 22
+        }
+      ]
+    },
+    {
+      "id": "CAT",
+      "name": "Catanzaro",
+      "players": [
+        {
+          "name": "Pietro Iemmello",
+          "position": "FWD",
+          "rating": 76,
+          "age": 32
+        },
+        {
+          "name": "Tommaso Biasci",
+          "position": "FWD",
+          "rating": 71,
+          "age": 29
+        },
+        {
+          "name": "Mirko Pigliacelli",
+          "position": "GK",
+          "rating": 71,
+          "age": 31
+        },
+        {
+          "name": "Jacopo Petriccione",
+          "position": "MID",
+          "rating": 71,
+          "age": 29
+        }
+      ]
+    },
+    {
+      "id": "FRO",
+      "name": "Frosinone",
+      "players": [
+        {
+          "name": "Giuseppe Ambrosino",
+          "position": "FWD",
+          "rating": 71,
+          "age": 20
+        },
+        {
+          "name": "Luca Garritano",
+          "position": "MID",
+          "rating": 72,
+          "age": 30
+        },
+        {
+          "name": "Riccardo Marchizza",
+          "position": "DEF",
+          "rating": 73,
+          "age": 26
+        },
+        {
+          "name": "Anthony Partipilo",
+          "position": "FWD",
+          "rating": 73,
+          "age": 29
+        },
+        {
+          "name": "Ebrima Darboe",
+          "position": "MID",
+          "rating": 71,
+          "age": 23
+        }
+      ]
+    },
+    {
+      "id": "SUD",
+      "name": "Sudtirol",
+      "players": [
+        {
+          "name": "Daniele Casiraghi",
+          "position": "MID",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "Raphael Odogwu",
+          "position": "FWD",
+          "rating": 70,
+          "age": 33
+        },
+        {
+          "name": "Jasmin Kurtic",
+          "position": "MID",
+          "rating": 71,
+          "age": 35
+        },
+        {
+          "name": "Giacomo Poluzzi",
+          "position": "GK",
+          "rating": 70,
+          "age": 36
+        }
+      ]
+    },
+    {
+      "id": "REG",
+      "name": "Reggiana",
+      "players": [
+        {
+          "name": "Cedric Gondo",
+          "position": "FWD",
+          "rating": 71,
+          "age": 27
+        },
+        {
+          "name": "Luca Vido",
+          "position": "FWD",
+          "rating": 70,
+          "age": 27
+        },
+        {
+          "name": "Francesco Bardi",
+          "position": "GK",
+          "rating": 71,
+          "age": 32
+        },
+        {
+          "name": "Manuel Portanova",
+          "position": "MID",
+          "rating": 76,
+          "age": 24
+        }
+      ]
+    },
+    {
+      "id": "COS",
+      "name": "Cosenza",
+      "players": [
+        {
+          "name": "Tommaso Fumagalli",
+          "position": "FWD",
+          "rating": 70,
+          "age": 24
+        },
+        {
+          "name": "Christian Dalle Mura",
+          "position": "DEF",
+          "rating": 70,
+          "age": 22
+        },
+        {
+          "name": "Manuel Ricciardi",
+          "position": "MID",
+          "rating": 69,
+          "age": 24
+        },
+        {
+          "name": "Alessandro Micai",
+          "position": "GK",
+          "rating": 71,
+          "age": 31
+        }
+      ]
+    },
+    {
+      "id": "CIT",
+      "name": "Cittadella",
+      "players": [
+        {
+          "name": "Simone Branca",
+          "position": "MID",
+          "rating": 71,
+          "age": 32
+        },
+        {
+          "name": "Elhan Kastrati",
+          "position": "GK",
+          "rating": 70,
+          "age": 27
+        },
+        {
+          "name": "Luca Pandolfi",
+          "position": "FWD",
+          "rating": 70,
+          "age": 26
+        },
+        {
+          "name": "Alessio Vita",
+          "position": "MID",
+          "rating": 70,
+          "age": 31
+        }
+      ]
+    },
+    {
+      "id": "CES",
+      "name": "Cesena",
+      "players": [
+        {
+          "name": "Cristian Shpendi",
+          "position": "FWD",
+          "rating": 74,
+          "age": 21
+        },
+        {
+          "name": "Augustus Kargbo",
+          "position": "FWD",
+          "rating": 71,
+          "age": 25
+        },
+        {
+          "name": "Simone Bastoni",
+          "position": "MID",
+          "rating": 75,
+          "age": 27
+        },
+        {
+          "name": "Mirko Antonucci",
+          "position": "FWD",
+          "rating": 72,
+          "age": 25
+        }
+      ]
+    },
+    {
+      "id": "MAN",
+      "name": "Mantova",
+      "players": [
+        {
+          "name": "Leonardo Mancuso",
+          "position": "FWD",
+          "rating": 71,
+          "age": 32
+        },
+        {
+          "name": "Mattia Aramu",
+          "position": "MID",
+          "rating": 72,
+          "age": 29
+        },
+        {
+          "name": "Marco Festa",
+          "position": "GK",
+          "rating": 70,
+          "age": 32
+        },
+        {
+          "name": "Davide Bragantini",
+          "position": "FWD",
+          "rating": 69,
+          "age": 21
+        }
+      ]
+    },
+    {
+      "id": "JUVN",
+      "name": "Juve Stabia",
+      "players": [
+        {
+          "name": "Andrea Adorante",
+          "position": "FWD",
+          "rating": 69,
+          "age": 24
+        },
+        {
+          "name": "Demba Thiam",
+          "position": "GK",
+          "rating": 70,
+          "age": 26
+        },
+        {
+          "name": "Kevin Piscopo",
+          "position": "FWD",
+          "rating": 69,
+          "age": 26
+        },
+        {
+          "name": "Nicola Mosti",
+          "position": "MID",
+          "rating": 68,
+          "age": 26
+        }
+      ]
+    },
+    {
+      "id": "CAR",
+      "name": "Carrarese",
+      "players": [
+        {
+          "name": "Leonardo Cerri",
+          "position": "FWD",
+          "rating": 68,
+          "age": 21
+        },
+        {
+          "name": "Mattia Finotto",
+          "position": "FWD",
+          "rating": 69,
+          "age": 31
+        },
+        {
+          "name": "Marco Bleve",
+          "position": "GK",
+          "rating": 69,
+          "age": 28
+        },
+        {
+          "name": "Simone Panico",
+          "position": "FWD",
+          "rating": 68,
+          "age": 22
+        }
+      ]
+    }
+  ]
+}

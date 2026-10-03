@@ -1,0 +1,1822 @@
+{
+  "seasonId": "2024-25",
+  "leagueId": "championship",
+  "movedFrom": "constants_e.ts",
+  "note": "Moved from existing TypeScript rosters. Not a refreshed squad list.",
+  "sources": {
+    "footballData": {
+      "competition": "ELC"
+    },
+    "apiFootball": {
+      "league": 40
+    }
+  },
+  "teams": [
+    {
+      "id": "BUR",
+      "name": "Burnley",
+      "players": [
+        {
+          "name": "James Trafford",
+          "position": "GK",
+          "rating": 85,
+          "age": 23
+        },
+        {
+          "name": "Josh Brownhill",
+          "position": "MID",
+          "rating": 83,
+          "age": 29
+        },
+        {
+          "name": "Luca Koleosho",
+          "position": "FWD",
+          "rating": 80,
+          "age": 21
+        },
+        {
+          "name": "Dara O'Shea",
+          "position": "DEF",
+          "rating": 82,
+          "age": 26
+        },
+        {
+          "name": "Connor Roberts",
+          "position": "DEF",
+          "rating": 81,
+          "age": 30
+        },
+        {
+          "name": "Jordan Beyer",
+          "position": "DEF",
+          "rating": 81,
+          "age": 25
+        },
+        {
+          "name": "Han-Noah Massengo",
+          "position": "MID",
+          "rating": 78,
+          "age": 24
+        },
+        {
+          "name": "Josh Laurent",
+          "position": "MID",
+          "rating": 81,
+          "age": 30
+        },
+        {
+          "name": "Jaidon Anthony",
+          "position": "FWD",
+          "rating": 81,
+          "age": 25
+        },
+        {
+          "name": "Mike Trésor",
+          "position": "FWD",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Josh Cullen",
+          "position": "MID",
+          "rating": 80,
+          "age": 29
+        },
+        {
+          "name": "Hannibal Mejbri",
+          "position": "MID",
+          "rating": 78,
+          "age": 22
+        },
+        {
+          "name": "Zian Flemming",
+          "position": "FWD",
+          "rating": 81,
+          "age": 27
+        },
+        {
+          "name": "Marcus Edwards",
+          "position": "FWD",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Nathan Redmond",
+          "position": "MID",
+          "rating": 79,
+          "age": 31
+        }
+      ]
+    },
+    {
+      "id": "SHU",
+      "name": "Sheffield United",
+      "players": [
+        {
+          "name": "Anel Ahmedhodzic",
+          "position": "DEF",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Vini Souza",
+          "position": "MID",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Gustavo Hamer",
+          "position": "MID",
+          "rating": 83,
+          "age": 28
+        },
+        {
+          "name": "Ollie Arblaster",
+          "position": "MID",
+          "rating": 80,
+          "age": 21
+        },
+        {
+          "name": "Rhian Brewster",
+          "position": "FWD",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Ben Brereton Diaz",
+          "position": "FWD",
+          "rating": 80,
+          "age": 26
+        },
+        {
+          "name": "Jack Robinson",
+          "position": "DEF",
+          "rating": 79,
+          "age": 32
+        },
+        {
+          "name": "Wes Foderingham",
+          "position": "GK",
+          "rating": 79,
+          "age": 34
+        },
+        {
+          "name": "Sydie Peck",
+          "position": "MID",
+          "rating": 78,
+          "age": 21
+        },
+        {
+          "name": "Andre Brooks",
+          "position": "MID",
+          "rating": 78,
+          "age": 22
+        },
+        {
+          "name": "Jamie Shackleton",
+          "position": "MID",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Kieffer Moore",
+          "position": "FWD",
+          "rating": 80,
+          "age": 33
+        }
+      ]
+    },
+    {
+      "id": "LEE",
+      "name": "Leeds United",
+      "players": [
+        {
+          "name": "Daniel James",
+          "position": "MID",
+          "rating": 83,
+          "age": 27
+        },
+        {
+          "name": "Wilfried Gnonto",
+          "position": "FWD",
+          "rating": 84,
+          "age": 22
+        },
+        {
+          "name": "Patrick Bamford",
+          "position": "FWD",
+          "rating": 80,
+          "age": 32
+        },
+        {
+          "name": "Joël Piroe",
+          "position": "FWD",
+          "rating": 85,
+          "age": 26
+        },
+        {
+          "name": "Ethan Ampadu",
+          "position": "MID",
+          "rating": 84,
+          "age": 25
+        },
+        {
+          "name": "Pascal Struijk",
+          "position": "DEF",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Jayden Bogle",
+          "position": "DEF",
+          "rating": 83,
+          "age": 25
+        },
+        {
+          "name": "Sam Byram",
+          "position": "DEF",
+          "rating": 81,
+          "age": 32
+        },
+        {
+          "name": "Illia Gruev",
+          "position": "MID",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Joe Rodon",
+          "position": "DEF",
+          "rating": 82,
+          "age": 28
+        },
+        {
+          "name": "Brenden Aaronson",
+          "position": "MID",
+          "rating": 82,
+          "age": 25
+        },
+        {
+          "name": "Junior Firpo",
+          "position": "DEF",
+          "rating": 80,
+          "age": 29
+        },
+        {
+          "name": "Manor Solomon",
+          "position": "FWD",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Josko Mesic",
+          "position": "GK",
+          "rating": 81,
+          "age": 25
+        },
+        {
+          "name": "Ao Tanaka",
+          "position": "MID",
+          "rating": 81,
+          "age": 27
+        },
+        {
+          "name": "Max Wöber",
+          "position": "DEF",
+          "rating": 79,
+          "age": 27
+        }
+      ]
+    },
+    {
+      "id": "SUN",
+      "name": "Sunderland",
+      "players": [
+        {
+          "name": "Wilson Isidor",
+          "position": "FWD",
+          "rating": 80,
+          "age": 25
+        },
+        {
+          "name": "Dan Neil",
+          "position": "MID",
+          "rating": 83,
+          "age": 24
+        },
+        {
+          "name": "Jobe Bellingham",
+          "position": "MID",
+          "rating": 82,
+          "age": 20
+        },
+        {
+          "name": "Anthony Patterson",
+          "position": "GK",
+          "rating": 82,
+          "age": 25
+        },
+        {
+          "name": "Trai Hume",
+          "position": "DEF",
+          "rating": 81,
+          "age": 23
+        },
+        {
+          "name": "Daniel Ballard",
+          "position": "DEF",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Chris Mepham",
+          "position": "DEF",
+          "rating": 81,
+          "age": 27
+        },
+        {
+          "name": "Chris Rigg",
+          "position": "MID",
+          "rating": 78,
+          "age": 18
+        },
+        {
+          "name": "Luke O'Nien",
+          "position": "MID",
+          "rating": 80,
+          "age": 30
+        },
+        {
+          "name": "Eliezer Mayenda",
+          "position": "FWD",
+          "rating": 77,
+          "age": 20
+        },
+        {
+          "name": "Aji Alese",
+          "position": "DEF",
+          "rating": 79,
+          "age": 24
+        },
+        {
+          "name": "Patrick Roberts",
+          "position": "FWD",
+          "rating": 80,
+          "age": 28
+        },
+        {
+          "name": "Alan Browne",
+          "position": "MID",
+          "rating": 78,
+          "age": 30
+        }
+      ]
+    },
+    {
+      "id": "COV",
+      "name": "Coventry City",
+      "players": [
+        {
+          "name": "Haji Wright",
+          "position": "FWD",
+          "rating": 81,
+          "age": 27
+        },
+        {
+          "name": "Ellis Simms",
+          "position": "FWD",
+          "rating": 80,
+          "age": 24
+        },
+        {
+          "name": "Ben Sheaf",
+          "position": "MID",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Milan van Ewijk",
+          "position": "DEF",
+          "rating": 80,
+          "age": 25
+        },
+        {
+          "name": "Josh Eccles",
+          "position": "MID",
+          "rating": 78,
+          "age": 25
+        },
+        {
+          "name": "Callum O'Hare",
+          "position": "MID",
+          "rating": 81,
+          "age": 27
+        },
+        {
+          "name": "Bobby Thomas",
+          "position": "DEF",
+          "rating": 79,
+          "age": 24
+        },
+        {
+          "name": "Brad Collins",
+          "position": "GK",
+          "rating": 78,
+          "age": 28
+        },
+        {
+          "name": "Joel Latibeaudiere",
+          "position": "DEF",
+          "rating": 78,
+          "age": 25
+        },
+        {
+          "name": "Tatsuhiro Sakamoto",
+          "position": "MID",
+          "rating": 79,
+          "age": 29
+        },
+        {
+          "name": "Jamie Allen",
+          "position": "MID",
+          "rating": 77,
+          "age": 30
+        }
+      ]
+    },
+    {
+      "id": "MID",
+      "name": "Middlesbrough",
+      "players": [
+        {
+          "name": "Tommy Conway",
+          "position": "FWD",
+          "rating": 81,
+          "age": 23
+        },
+        {
+          "name": "Hayden Hackney",
+          "position": "MID",
+          "rating": 81,
+          "age": 23
+        },
+        {
+          "name": "Finn Azaz",
+          "position": "MID",
+          "rating": 80,
+          "age": 25
+        },
+        {
+          "name": "Rav van den Berg",
+          "position": "DEF",
+          "rating": 80,
+          "age": 21
+        },
+        {
+          "name": "Matt Clarke",
+          "position": "DEF",
+          "rating": 79,
+          "age": 29
+        },
+        {
+          "name": "Isaiah Jones",
+          "position": "FWD",
+          "rating": 79,
+          "age": 26
+        },
+        {
+          "name": "Delano Burgzorg",
+          "position": "FWD",
+          "rating": 79,
+          "age": 27
+        },
+        {
+          "name": "Seny Dieng",
+          "position": "GK",
+          "rating": 79,
+          "age": 31
+        },
+        {
+          "name": "Jonny Howson",
+          "position": "MID",
+          "rating": 78,
+          "age": 37
+        },
+        {
+          "name": "Lukas Engel",
+          "position": "DEF",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "George Edmundson",
+          "position": "DEF",
+          "rating": 78,
+          "age": 28
+        }
+      ]
+    },
+    {
+      "id": "WBA",
+      "name": "West Brom",
+      "players": [
+        {
+          "name": "Josh Maja",
+          "position": "FWD",
+          "rating": 80,
+          "age": 26
+        },
+        {
+          "name": "Jayson Molumby",
+          "position": "MID",
+          "rating": 79,
+          "age": 26
+        },
+        {
+          "name": "Alex Mowatt",
+          "position": "MID",
+          "rating": 79,
+          "age": 30
+        },
+        {
+          "name": "Darnell Furlong",
+          "position": "DEF",
+          "rating": 79,
+          "age": 30
+        },
+        {
+          "name": "Kyle Bartley",
+          "position": "DEF",
+          "rating": 78,
+          "age": 34
+        },
+        {
+          "name": "Jed Wallace",
+          "position": "FWD",
+          "rating": 79,
+          "age": 31
+        },
+        {
+          "name": "Alex Palmer",
+          "position": "GK",
+          "rating": 79,
+          "age": 29
+        },
+        {
+          "name": "Okay Yokuslu",
+          "position": "MID",
+          "rating": 79,
+          "age": 31
+        },
+        {
+          "name": "Torbjørn Heggem",
+          "position": "DEF",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Grady Diangana",
+          "position": "FWD",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "Karlan Grant",
+          "position": "FWD",
+          "rating": 78,
+          "age": 28
+        }
+      ]
+    },
+    {
+      "id": "NOR",
+      "name": "Norwich City",
+      "players": [
+        {
+          "name": "Josh Sargent",
+          "position": "FWD",
+          "rating": 81,
+          "age": 25
+        },
+        {
+          "name": "Gabriel Sara",
+          "position": "MID",
+          "rating": 81,
+          "age": 26
+        },
+        {
+          "name": "Marcelino Nunez",
+          "position": "MID",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Jack Stacey",
+          "position": "DEF",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Shane Duffy",
+          "position": "DEF",
+          "rating": 78,
+          "age": 33
+        },
+        {
+          "name": "Angus Gunn",
+          "position": "GK",
+          "rating": 79,
+          "age": 29
+        },
+        {
+          "name": "Kenny McLean",
+          "position": "MID",
+          "rating": 79,
+          "age": 33
+        },
+        {
+          "name": "Borja Sainz",
+          "position": "FWD",
+          "rating": 79,
+          "age": 24
+        },
+        {
+          "name": "Adam Idah",
+          "position": "FWD",
+          "rating": 78,
+          "age": 24
+        },
+        {
+          "name": "Christian Fassnacht",
+          "position": "MID",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Ben Gibson",
+          "position": "DEF",
+          "rating": 77,
+          "age": 32
+        }
+      ]
+    },
+    {
+      "id": "HUL",
+      "name": "Hull City",
+      "players": [
+        {
+          "name": "Abdulkadir Omur",
+          "position": "MID",
+          "rating": 79,
+          "age": 26
+        },
+        {
+          "name": "Alfie Jones",
+          "position": "DEF",
+          "rating": 78,
+          "age": 28
+        },
+        {
+          "name": "Oli McBurnie",
+          "position": "FWD",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Jacob Greaves",
+          "position": "DEF",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Ryan Giles",
+          "position": "DEF",
+          "rating": 78,
+          "age": 25
+        },
+        {
+          "name": "Ivor Pandur",
+          "position": "GK",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Regan Slater",
+          "position": "MID",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Jean Michael Seri",
+          "position": "MID",
+          "rating": 79,
+          "age": 34
+        },
+        {
+          "name": "Joe Gelhardt",
+          "position": "FWD",
+          "rating": 77,
+          "age": 23
+        },
+        {
+          "name": "Tyler Morton",
+          "position": "MID",
+          "rating": 78,
+          "age": 23
+        }
+      ]
+    },
+    {
+      "id": "MIL",
+      "name": "Millwall",
+      "players": [
+        {
+          "name": "Japhet Tanganga",
+          "position": "DEF",
+          "rating": 79,
+          "age": 26
+        },
+        {
+          "name": "Jake Cooper",
+          "position": "DEF",
+          "rating": 79,
+          "age": 30
+        },
+        {
+          "name": "Duncan Watmore",
+          "position": "FWD",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "George Saville",
+          "position": "MID",
+          "rating": 78,
+          "age": 32
+        },
+        {
+          "name": "Romain Esse",
+          "position": "MID",
+          "rating": 78,
+          "age": 20
+        },
+        {
+          "name": "Lukas Jensen",
+          "position": "GK",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Ryan Leonard",
+          "position": "MID",
+          "rating": 77,
+          "age": 33
+        },
+        {
+          "name": "Joe Bryan",
+          "position": "DEF",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Mihailo Ivanovic",
+          "position": "FWD",
+          "rating": 77,
+          "age": 20
+        },
+        {
+          "name": "Macaulay Langstaff",
+          "position": "FWD",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Aaron Connolly",
+          "position": "FWD",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Wes Harding",
+          "position": "DEF",
+          "rating": 76,
+          "age": 29
+        }
+      ]
+    },
+    {
+      "id": "SWA",
+      "name": "Swansea City",
+      "players": [
+        {
+          "name": "Ronald",
+          "position": "FWD",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Josh Tymon",
+          "position": "DEF",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Matt Grimes",
+          "position": "MID",
+          "rating": 79,
+          "age": 30
+        },
+        {
+          "name": "Harry Darling",
+          "position": "DEF",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Zan Vipotnik",
+          "position": "FWD",
+          "rating": 78,
+          "age": 23
+        },
+        {
+          "name": "Lawrence Vigouroux",
+          "position": "GK",
+          "rating": 78,
+          "age": 32
+        },
+        {
+          "name": "Jay Fulton",
+          "position": "MID",
+          "rating": 77,
+          "age": 31
+        },
+        {
+          "name": "Ben Cabango",
+          "position": "DEF",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Goncalo Franco",
+          "position": "MID",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Liam Cullen",
+          "position": "FWD",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Eom Ji-sung",
+          "position": "FWD",
+          "rating": 77,
+          "age": 23
+        }
+      ]
+    },
+    {
+      "id": "QPR",
+      "name": "Queens Park Rangers",
+      "players": [
+        {
+          "name": "Ilias Chair",
+          "position": "MID",
+          "rating": 80,
+          "age": 28
+        },
+        {
+          "name": "Sinclair Armstrong",
+          "position": "FWD",
+          "rating": 78,
+          "age": 22
+        },
+        {
+          "name": "Jake Clarke-Salter",
+          "position": "DEF",
+          "rating": 78,
+          "age": 28
+        },
+        {
+          "name": "Kenneth Paal",
+          "position": "DEF",
+          "rating": 78,
+          "age": 28
+        },
+        {
+          "name": "Paul Smyth",
+          "position": "FWD",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Asmir Begovic",
+          "position": "GK",
+          "rating": 78,
+          "age": 38
+        },
+        {
+          "name": "Steve Cook",
+          "position": "DEF",
+          "rating": 77,
+          "age": 34
+        },
+        {
+          "name": "Sam Field",
+          "position": "MID",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Jimmy Dunne",
+          "position": "DEF",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Jack Colback",
+          "position": "MID",
+          "rating": 76,
+          "age": 36
+        },
+        {
+          "name": "Koki Saito",
+          "position": "MID",
+          "rating": 76,
+          "age": 24
+        },
+        {
+          "name": "Michael Frey",
+          "position": "FWD",
+          "rating": 76,
+          "age": 31
+        }
+      ]
+    },
+    {
+      "id": "BIR",
+      "name": "Birmingham City",
+      "players": [
+        {
+          "name": "Kyogo Furuhashi",
+          "position": "FWD",
+          "rating": 77,
+          "age": 30
+        },
+        {
+          "name": "Marvin Ducksch",
+          "position": "FWD",
+          "rating": 79,
+          "age": 31
+        },
+        {
+          "name": "Jay Stansfield",
+          "position": "FWD",
+          "rating": 78,
+          "age": 23
+        },
+        {
+          "name": "Bright Osayi-Samuel",
+          "position": "DEF",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "Demarai Gray",
+          "position": "MID",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Paik Seung-ho",
+          "position": "MID",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Christoph Klarer",
+          "position": "DEF",
+          "rating": 76,
+          "age": 25
+        },
+        {
+          "name": "Tomoki Iwata",
+          "position": "MID",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Alex Cochrane",
+          "position": "DEF",
+          "rating": 75,
+          "age": 25
+        },
+        {
+          "name": "Ethan Laird",
+          "position": "DEF",
+          "rating": 75,
+          "age": 24
+        },
+        {
+          "name": "Ryan Allsop",
+          "position": "GK",
+          "rating": 74,
+          "age": 33
+        }
+      ]
+    },
+    {
+      "id": "BRC",
+      "name": "Bristol City",
+      "players": [
+        {
+          "name": "Jason Knight",
+          "position": "MID",
+          "rating": 79,
+          "age": 24
+        },
+        {
+          "name": "Yu Hirakawa",
+          "position": "FWD",
+          "rating": 77,
+          "age": 24
+        },
+        {
+          "name": "Ross McCrorie",
+          "position": "DEF",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "Max O'Leary",
+          "position": "GK",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Rob Dickie",
+          "position": "DEF",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Sam Bell",
+          "position": "FWD",
+          "rating": 77,
+          "age": 23
+        },
+        {
+          "name": "Zak Vyner",
+          "position": "DEF",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Joe Williams",
+          "position": "MID",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Mark Sykes",
+          "position": "MID",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Haydon Roberts",
+          "position": "DEF",
+          "rating": 76,
+          "age": 23
+        },
+        {
+          "name": "Scott Twine",
+          "position": "MID",
+          "rating": 78,
+          "age": 26
+        }
+      ]
+    },
+    {
+      "id": "PLY",
+      "name": "Plymouth Argyle",
+      "players": [
+        {
+          "name": "Morgan Whittaker",
+          "position": "FWD",
+          "rating": 79,
+          "age": 24
+        },
+        {
+          "name": "Ryan Hardie",
+          "position": "FWD",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Adam Randell",
+          "position": "MID",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Michael Cooper",
+          "position": "GK",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Brendan Galloway",
+          "position": "DEF",
+          "rating": 76,
+          "age": 29
+        },
+        {
+          "name": "Bali Mumba",
+          "position": "DEF",
+          "rating": 77,
+          "age": 24
+        },
+        {
+          "name": "Joe Edwards",
+          "position": "DEF",
+          "rating": 76,
+          "age": 35
+        },
+        {
+          "name": "Darko Gyabi",
+          "position": "MID",
+          "rating": 76,
+          "age": 21
+        },
+        {
+          "name": "Julio Pleguezuelo",
+          "position": "DEF",
+          "rating": 75,
+          "age": 28
+        },
+        {
+          "name": "Mickel Miller",
+          "position": "FWD",
+          "rating": 75,
+          "age": 29
+        },
+        {
+          "name": "Adam Forshaw",
+          "position": "MID",
+          "rating": 75,
+          "age": 34
+        }
+      ]
+    },
+    {
+      "id": "STO",
+      "name": "Stoke City",
+      "players": [
+        {
+          "name": "Million Manhoef",
+          "position": "FWD",
+          "rating": 78,
+          "age": 23
+        },
+        {
+          "name": "Ben Wilmot",
+          "position": "DEF",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Wouter Burger",
+          "position": "MID",
+          "rating": 78,
+          "age": 24
+        },
+        {
+          "name": "Viktor Johansson",
+          "position": "GK",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "Lewis Koumas",
+          "position": "FWD",
+          "rating": 77,
+          "age": 20
+        },
+        {
+          "name": "Enda Stevens",
+          "position": "DEF",
+          "rating": 76,
+          "age": 35
+        },
+        {
+          "name": "Ryan Mmaee",
+          "position": "FWD",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Ben Pearson",
+          "position": "MID",
+          "rating": 76,
+          "age": 30
+        },
+        {
+          "name": "Michael Rose",
+          "position": "DEF",
+          "rating": 76,
+          "age": 30
+        },
+        {
+          "name": "Bae Junho",
+          "position": "MID",
+          "rating": 77,
+          "age": 22
+        },
+        {
+          "name": "Daniel Johnson",
+          "position": "MID",
+          "rating": 76,
+          "age": 33
+        }
+      ]
+    },
+    {
+      "id": "DER",
+      "name": "Derby County",
+      "players": [
+        {
+          "name": "Ebou Adams",
+          "position": "MID",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Nathaniel Mendez-Laing",
+          "position": "FWD",
+          "rating": 78,
+          "age": 33
+        },
+        {
+          "name": "Curtis Nelson",
+          "position": "DEF",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Jerry Yates",
+          "position": "FWD",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Ben Osborn",
+          "position": "MID",
+          "rating": 77,
+          "age": 31
+        },
+        {
+          "name": "Eiran Cashin",
+          "position": "DEF",
+          "rating": 77,
+          "age": 24
+        },
+        {
+          "name": "Jacob Widell Zetterstrom",
+          "position": "GK",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Kenzo Goudmijn",
+          "position": "MID",
+          "rating": 76,
+          "age": 23
+        },
+        {
+          "name": "Craig Forsyth",
+          "position": "DEF",
+          "rating": 75,
+          "age": 36
+        },
+        {
+          "name": "David Ozoh",
+          "position": "MID",
+          "rating": 76,
+          "age": 20
+        },
+        {
+          "name": "Corey Blackett-Taylor",
+          "position": "FWD",
+          "rating": 76,
+          "age": 28
+        }
+      ]
+    },
+    {
+      "id": "SHW",
+      "name": "Sheffield Wednesday",
+      "players": [
+        {
+          "name": "Barry Bannan",
+          "position": "MID",
+          "rating": 79,
+          "age": 35
+        },
+        {
+          "name": "Anthony Musaba",
+          "position": "FWD",
+          "rating": 78,
+          "age": 25
+        },
+        {
+          "name": "Di'Shon Bernard",
+          "position": "DEF",
+          "rating": 77,
+          "age": 25
+        },
+        {
+          "name": "Josh Windass",
+          "position": "FWD",
+          "rating": 78,
+          "age": 31
+        },
+        {
+          "name": "Yan Valery",
+          "position": "DEF",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Svante Ingelsson",
+          "position": "MID",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "James Beadle",
+          "position": "GK",
+          "rating": 77,
+          "age": 21
+        },
+        {
+          "name": "Dominic Iorfa",
+          "position": "DEF",
+          "rating": 76,
+          "age": 30
+        },
+        {
+          "name": "Liam Palmer",
+          "position": "DEF",
+          "rating": 76,
+          "age": 34
+        },
+        {
+          "name": "Marvin Johnson",
+          "position": "DEF",
+          "rating": 76,
+          "age": 35
+        },
+        {
+          "name": "Michael Smith",
+          "position": "FWD",
+          "rating": 76,
+          "age": 34
+        }
+      ]
+    },
+    {
+      "id": "WAT",
+      "name": "Watford",
+      "players": [
+        {
+          "name": "Yaser Asprilla",
+          "position": "MID",
+          "rating": 80,
+          "age": 22
+        },
+        {
+          "name": "Edo Kayembe",
+          "position": "MID",
+          "rating": 79,
+          "age": 27
+        },
+        {
+          "name": "Jamal Lewis",
+          "position": "DEF",
+          "rating": 78,
+          "age": 27
+        },
+        {
+          "name": "Moussa Sissoko",
+          "position": "MID",
+          "rating": 78,
+          "age": 36
+        },
+        {
+          "name": "Daniel Bachmann",
+          "position": "GK",
+          "rating": 78,
+          "age": 31
+        },
+        {
+          "name": "Ryan Porteous",
+          "position": "DEF",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Mileta Rajovic",
+          "position": "FWD",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Imran Louza",
+          "position": "MID",
+          "rating": 78,
+          "age": 26
+        },
+        {
+          "name": "Giorgio Sitti",
+          "position": "MID",
+          "rating": 76,
+          "age": 21
+        },
+        {
+          "name": "Angelo Ogbonna",
+          "position": "DEF",
+          "rating": 77,
+          "age": 37
+        },
+        {
+          "name": "Kwadwo Baah",
+          "position": "FWD",
+          "rating": 76,
+          "age": 22
+        }
+      ]
+    },
+    {
+      "id": "BLA",
+      "name": "Blackburn Rovers",
+      "players": [
+        {
+          "name": "Tyrhys Dolan",
+          "position": "FWD",
+          "rating": 80,
+          "age": 23
+        },
+        {
+          "name": "Makhtar Gueye",
+          "position": "FWD",
+          "rating": 75,
+          "age": 27
+        },
+        {
+          "name": "Yuki Ohashi",
+          "position": "FWD",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Hayden Carter",
+          "position": "DEF",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Aynsley Pears",
+          "position": "GK",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Callum Brittain",
+          "position": "DEF",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Sondre Tronstad",
+          "position": "MID",
+          "rating": 77,
+          "age": 30
+        },
+        {
+          "name": "Todd Cantwell",
+          "position": "MID",
+          "rating": 80,
+          "age": 27
+        },
+        {
+          "name": "Dominic Hyam",
+          "position": "DEF",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Andreas Weimann",
+          "position": "FWD",
+          "rating": 76,
+          "age": 34
+        },
+        {
+          "name": "John Buckley",
+          "position": "MID",
+          "rating": 76,
+          "age": 26
+        },
+        {
+          "name": "Harry Pickering",
+          "position": "DEF",
+          "rating": 76,
+          "age": 26
+        }
+      ]
+    },
+    {
+      "id": "OXF",
+      "name": "Oxford United",
+      "players": [
+        {
+          "name": "Cameron Brannagan",
+          "position": "MID",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Mark Harris",
+          "position": "FWD",
+          "rating": 77,
+          "age": 26
+        },
+        {
+          "name": "Ciaron Brown",
+          "position": "DEF",
+          "rating": 76,
+          "age": 27
+        },
+        {
+          "name": "Ruben Rodrigues",
+          "position": "MID",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Jamie Cumming",
+          "position": "GK",
+          "rating": 76,
+          "age": 26
+        },
+        {
+          "name": "Tyler Goodrham",
+          "position": "MID",
+          "rating": 76,
+          "age": 22
+        },
+        {
+          "name": "Greg Leigh",
+          "position": "DEF",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "Elliott Moore",
+          "position": "DEF",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Josh McEachran",
+          "position": "MID",
+          "rating": 75,
+          "age": 32
+        },
+        {
+          "name": "Dane Scarlett",
+          "position": "FWD",
+          "rating": 75,
+          "age": 21
+        },
+        {
+          "name": "Joe Bennett",
+          "position": "DEF",
+          "rating": 75,
+          "age": 35
+        }
+      ]
+    },
+    {
+      "id": "POR",
+      "name": "Portsmouth",
+      "players": [
+        {
+          "name": "Colby Bishop",
+          "position": "FWD",
+          "rating": 78,
+          "age": 29
+        },
+        {
+          "name": "Marlon Pack",
+          "position": "MID",
+          "rating": 77,
+          "age": 34
+        },
+        {
+          "name": "Conor Shaughnessy",
+          "position": "DEF",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Will Norris",
+          "position": "GK",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Paddy Lane",
+          "position": "FWD",
+          "rating": 77,
+          "age": 24
+        },
+        {
+          "name": "Callum Lang",
+          "position": "FWD",
+          "rating": 76,
+          "age": 27
+        },
+        {
+          "name": "Jack Sparkes",
+          "position": "DEF",
+          "rating": 76,
+          "age": 25
+        },
+        {
+          "name": "Owen Moxon",
+          "position": "MID",
+          "rating": 76,
+          "age": 27
+        },
+        {
+          "name": "Regan Poole",
+          "position": "DEF",
+          "rating": 76,
+          "age": 27
+        },
+        {
+          "name": "Jordan Williams",
+          "position": "DEF",
+          "rating": 75,
+          "age": 26
+        },
+        {
+          "name": "Tom McIntyre",
+          "position": "DEF",
+          "rating": 75,
+          "age": 27
+        }
+      ]
+    },
+    {
+      "id": "LUT",
+      "name": "Luton Town",
+      "players": [
+        {
+          "name": "Alfie Doughty",
+          "position": "DEF",
+          "rating": 79,
+          "age": 25
+        },
+        {
+          "name": "Carlton Morris",
+          "position": "FWD",
+          "rating": 79,
+          "age": 29
+        },
+        {
+          "name": "Teden Mengi",
+          "position": "DEF",
+          "rating": 78,
+          "age": 23
+        },
+        {
+          "name": "Thomas Kaminski",
+          "position": "GK",
+          "rating": 79,
+          "age": 33
+        },
+        {
+          "name": "Reece Burke",
+          "position": "DEF",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Alfie Adeyemo",
+          "position": "FWD",
+          "rating": 77,
+          "age": 20
+        },
+        {
+          "name": "Marvelous Nakamba",
+          "position": "MID",
+          "rating": 78,
+          "age": 31
+        },
+        {
+          "name": "Jordan Clark",
+          "position": "MID",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Amari'i Bell",
+          "position": "DEF",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "Liam Walsh",
+          "position": "MID",
+          "rating": 76,
+          "age": 28
+        }
+      ]
+    },
+    {
+      "id": "PRE",
+      "name": "Preston North End",
+      "players": [
+        {
+          "name": "Will Keane",
+          "position": "FWD",
+          "rating": 77,
+          "age": 32
+        },
+        {
+          "name": "Ben Whiteman",
+          "position": "MID",
+          "rating": 77,
+          "age": 29
+        },
+        {
+          "name": "Ali McCann",
+          "position": "MID",
+          "rating": 76,
+          "age": 25
+        },
+        {
+          "name": "Jordan Storey",
+          "position": "DEF",
+          "rating": 76,
+          "age": 28
+        },
+        {
+          "name": "Freddie Woodman",
+          "position": "GK",
+          "rating": 77,
+          "age": 28
+        },
+        {
+          "name": "Liam Lindsay",
+          "position": "DEF",
+          "rating": 76,
+          "age": 30
+        },
+        {
+          "name": "Brad Potts",
+          "position": "DEF",
+          "rating": 76,
+          "age": 31
+        },
+        {
+          "name": "Mads Frokjaer-Jensen",
+          "position": "MID",
+          "rating": 76,
+          "age": 26
+        },
+        {
+          "name": "Duane Holmes",
+          "position": "MID",
+          "rating": 75,
+          "age": 31
+        },
+        {
+          "name": "Emil Riis",
+          "position": "FWD",
+          "rating": 77,
+          "age": 27
+        },
+        {
+          "name": "Andrew Hughes",
+          "position": "DEF",
+          "rating": 75,
+          "age": 33
+        }
+      ]
+    }
+  ]
+}
