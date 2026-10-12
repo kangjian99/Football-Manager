@@ -14,10 +14,23 @@ interface DashboardProps {
   isSeasonEnded: boolean;
   onViewSeasonEnd: () => void;
   onSimulateWeek: () => void;
+  onNavigateToTactics?: () => void;
   userHasFutureMatches?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, opponent, isHome, onPlayMatch, isSeasonEnded, onViewSeasonEnd, onSimulateWeek, userHasFutureMatches = true }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+  userTeam, 
+  rank, 
+  nextMatch, 
+  opponent, 
+  isHome, 
+  onPlayMatch, 
+  isSeasonEnded, 
+  onViewSeasonEnd, 
+  onSimulateWeek, 
+  onNavigateToTactics,
+  userHasFutureMatches = true 
+}) => {
   const [analysis, setAnalysis] = useState<string>('Loading assistant report...');
 
   useEffect(() => {
@@ -176,8 +189,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userTeam, rank, nextMatch, oppone
                 "{analysis}"
             </div>
             <div className="mt-4 pt-4 border-t border-gray-700 flex gap-2">
-                <button className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs font-medium">Adjust Tactics</button>
-                <button className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs font-medium">Team Talk</button>
+                <button 
+                  onClick={onNavigateToTactics}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-xs font-semibold transition-colors"
+                >
+                  Adjust Tactics (调整战术)
+                </button>
             </div>
         </div>
       </div>

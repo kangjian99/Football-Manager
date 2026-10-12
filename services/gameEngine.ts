@@ -1,5 +1,73 @@
 
-import { Team, Match, MatchEvent, Player } from '../types';
+import { Team, Match, MatchEvent, Player, TacticsConfig, FormationType, MentalityType } from '../types';
+
+export const FORMATION_SLOTS: Record<FormationType, { def: number, mid: number, fwd: number }> = {
+  '4-3-3': { def: 4, mid: 3, fwd: 3 },
+  '4-4-2': { def: 4, mid: 4, fwd: 2 },
+  '4-2-3-1': { def: 4, mid: 5, fwd: 1 },
+  '3-5-2': { def: 3, mid: 5, fwd: 2 },
+  '5-3-2': { def: 5, mid: 3, fwd: 2 },
+};
+
+// Generate standard or optimized tactics for a team
+export const getDefaultTactics = (
+  team: Team, 
+  formation: FormationType = '4-3-3', 
+  mentality: MentalityType = 'BALANCED'
+): TacticsConfig => {
+  const availablePlayers = [...team.players].filter(p => 
+    (!p.matchesBanned || p.matchesBanned <= 0) && (!p.injury || p.injury <= 0)
+  ).sort((a, b) => b.rating - a.rating);
+
+  const gks = availablePlayers.filter(p => p.position === 'GK');
+  const defs = availablePlayers.filter(p => p.position === 'DEF');
+  const mids = availablePlayers.filter(p => p.position === 'MID');
+  const fwds = availablePlayers.filter(p => p.position === 'FWD');
+
+  const slots = FORMATION_SLOTS[formation] || FORMATION_SLOTS['4-3-3'];
+  const starters: Player[] = [];
+
+  // Pick GK
+  if (gks.length > 0) starters.push(gks[0]);
+  else if (availablePlayers.length > 0) starters.push(availablePlayers[0]);
+
+  // Pick DEF
+  for (let i = 0; i < slots.def && defs[i]; i++) {
+    starters.push(defs[i]);
+  }
+
+  // Pick MID
+  for (let i = 0; i < slots.mid && mids[i]; i++) {
+    starters.push(mids[i]);
+  }
+
+  // Pick FWD
+  for (let i = 0; i < slots.fwd && fwds[i]; i++) {
+    starters.push(fwds[i]);
+  }
+
+  // Backfill up to 11 if position count is short
+  const starterIds = new Set(starters.map(p => p.id));
+  const remainingAvailable = availablePlayers.filter(p => !starterIds.has(p.id));
+  while (starters.length < 11 && remainingAvailable.length > 0) {
+    const nextPlayer = remainingAvailable.shift()!;
+    starters.push(nextPlayer);
+    starterIds.add(nextPlayer.id);
+  }
+
+  const benchIds = team.players
+    .filter(p => !starterIds.has(p.id))
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 9)
+    .map(p => p.id);
+
+  return {
+    formation,
+    mentality,
+    startingIds: starters.map(p => p.id),
+    benchIds,
+  };
+};
 
 // --- Constants & Templates ---
 
@@ -103,11 +171,12 @@ const SUB_TEMPLATES = [
 ];
 
 const INJURY_TEMPLATES = [
-  "{player} 痛苦地倒在草坪上，队医进场了。",
-  "{player} 捂着大腿肌肉，看来是拉伤了。",
-  "一次激烈的碰撞后，{player} 无法坚持比赛。",
-  "{player} 一瘸一拐地走向场边，无法继续比赛。",
-  "情况不妙，{player} 被担架抬出了场外。"
+  "{player} 痛苦地倒在草坪上，队医进场进行冰敷处理。",
+  "{player} 捂着大腿肌肉，看来是轻微拉伤，预计伤停 1-2 周。",
+  "一次激烈的拼抢后，{player} 脚踝轻微扭伤，无法坚持比赛。",
+  "{player} 一瘸一拐地走向场边，初判为轻度硬伤（预计缺席 1-2 周）。",
+  "{player} 感觉肌肉不适主动示意换人，队医建议休养避免加重。",
+  "情况不妙，{player} 遭遇严重冲撞，被担架抬出了场外。"
 ];
 
 
@@ -171,7 +240,7 @@ const selectPlayer = (
     } else if (type === 'CARD' || type === 'DEFENDER') {
       if (p.position === 'DEF') weight = 9;
       else if (p.position === 'MID') weight = 6;
-      else if (p.position === 'FWD') weight = 3;
+      else if (p.position === 'FWD') weight = 5;
       else weight = 0.5; // GK rarely gets yellow cards for fouls compared to defenders
     }
 
@@ -237,9 +306,62 @@ const selectSubOffCandidate = (
     return candidates[0];
 };
 
+/**
+ * Selects an appropriate substitute from the bench to replace a player leaving the pitch.
+ * Strictly guarantees that Goalkeepers NEVER replace outfield players (and vice versa) unless no valid outfield players exist.
+ */
+const selectSubOnCandidate = (
+    bench: Player[], 
+    targetPosition: 'GK' | 'DEF' | 'MID' | 'FWD'
+): Player | null => {
+    if (bench.length === 0) return null;
+
+    if (targetPosition === 'GK') {
+        // Goalkeeper replaced: look for another GK first
+        const gkBench = bench.filter(p => p.position === 'GK');
+        if (gkBench.length > 0) {
+            return gkBench.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+        }
+        // Emergency outfield player acting as goalie if no backup GK
+        return [...bench].sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+    }
+
+    // Outfield player replaced: MUST ONLY pick from outfield players (position !== 'GK')
+    const outfieldBench = bench.filter(p => p.position !== 'GK');
+    if (outfieldBench.length === 0) {
+        // Only return GK if literally zero outfield players exist on bench
+        return bench[0];
+    }
+
+    // 1. Same position
+    const samePosition = outfieldBench.filter(p => p.position === targetPosition);
+    if (samePosition.length > 0) {
+        return samePosition.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+    }
+
+    // 2. Compatible outfield position (never GK)
+    if (targetPosition === 'DEF') {
+        const mids = outfieldBench.filter(p => p.position === 'MID');
+        if (mids.length > 0) return mids.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+        const fwds = outfieldBench.filter(p => p.position === 'FWD');
+        if (fwds.length > 0) return fwds.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+    } else if (targetPosition === 'FWD') {
+        const mids = outfieldBench.filter(p => p.position === 'MID');
+        if (mids.length > 0) return mids.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+        const defs = outfieldBench.filter(p => p.position === 'DEF');
+        if (defs.length > 0) return defs.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+    } else { // MID
+        const fwds = outfieldBench.filter(p => p.position === 'FWD');
+        if (fwds.length > 0) return fwds.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+        const defs = outfieldBench.filter(p => p.position === 'DEF');
+        if (defs.length > 0) return defs.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+    }
+
+    return outfieldBench.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating))[0];
+};
 
 // Helpers for lineup management
-export const getStartingLineup = (team: Team): { starting: Player[], bench: Player[], formation: string } => {
+export const getStartingLineup = (team: Team, tactics?: TacticsConfig): { starting: Player[], bench: Player[], formation: string } => {
     // Filter out banned OR injured players
     const availablePlayers = team.players.filter(p => 
         (!p.matchesBanned || p.matchesBanned <= 0) && (!p.injury || p.injury <= 0)
@@ -254,10 +376,83 @@ export const getStartingLineup = (team: Team): { starting: Player[], bench: Play
         };
     });
 
+    const playerMap = new Map(playersWithForm.map(p => [p.id, p]));
+    const formation = tactics?.formation || (Math.random() > 0.5 ? '4-4-2' : '4-3-3');
+
+    // If custom tactics provided with startingIds
+    if (tactics && tactics.startingIds && tactics.startingIds.length > 0) {
+        const starting: Player[] = [];
+        const chosenSet = new Set<string>();
+
+        // 1. Pick players chosen who are available
+        for (const id of tactics.startingIds) {
+            const player = playerMap.get(id);
+            if (player) {
+                starting.push(player);
+                chosenSet.add(player.id);
+            }
+        }
+
+        // 2. Pick bench players who were designated
+        const bench: Player[] = [];
+        if (tactics.benchIds) {
+            for (const id of tactics.benchIds) {
+                const player = playerMap.get(id);
+                if (player && !chosenSet.has(player.id)) {
+                    bench.push(player);
+                    chosenSet.add(player.id);
+                }
+            }
+        }
+
+        // 3. Any remaining available players go to bench
+        const remainingPlayers = playersWithForm
+            .filter(p => !chosenSet.has(p.id))
+            .sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating));
+
+        // 4. If starting has fewer than 11 (due to injury or suspension), backfill from bench/remaining
+        // Strictly ensure goalkeepers do NOT backfill outfield positions if starting already has a GK!
+        while (starting.length < 11 && (bench.length > 0 || remainingPlayers.length > 0)) {
+            const hasGk = starting.some(p => p.position === 'GK');
+            let replacement: Player | undefined;
+
+            if (!hasGk) {
+                // Must find a goalkeeper first
+                const bGkIdx = bench.findIndex(p => p.position === 'GK');
+                if (bGkIdx !== -1) replacement = bench.splice(bGkIdx, 1)[0];
+                else {
+                    const rGkIdx = remainingPlayers.findIndex(p => p.position === 'GK');
+                    if (rGkIdx !== -1) replacement = remainingPlayers.splice(rGkIdx, 1)[0];
+                }
+            }
+
+            if (!replacement) {
+                // Backfill outfield player (avoid GK!)
+                const bOutIdx = bench.findIndex(p => p.position !== 'GK');
+                if (bOutIdx !== -1) replacement = bench.splice(bOutIdx, 1)[0];
+                else {
+                    const rOutIdx = remainingPlayers.findIndex(p => p.position !== 'GK');
+                    if (rOutIdx !== -1) replacement = remainingPlayers.splice(rOutIdx, 1)[0];
+                }
+            }
+
+            // Fallback only if no outfield players left
+            if (!replacement) {
+                replacement = bench.length > 0 ? bench.shift()! : remainingPlayers.shift()!;
+            }
+
+            if (replacement) {
+                starting.push(replacement);
+                chosenSet.add(replacement.id);
+            }
+        }
+
+        bench.push(...remainingPlayers);
+        return { starting, bench, formation };
+    }
+
     // Sort by EFFECTIVE rating
     const sortedPlayers = [...playersWithForm].sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating));
-    
-    const formation = Math.random() > 0.5 ? '4-4-2' : '4-3-3';
 
     const gks = sortedPlayers.filter(p => p.position === 'GK');
     const defs = sortedPlayers.filter(p => p.position === 'DEF');
@@ -303,9 +498,19 @@ export const getStartingLineup = (team: Team): { starting: Player[], bench: Play
     const starterIds = new Set(starting.map(p => p.id));
     let realBench = sortedPlayers.filter(p => !starterIds.has(p.id));
 
+    // Backfill if starting < 11: strictly prefer outfield players if GK already present!
     while (starting.length < 11 && realBench.length > 0) {
-        starting.push(realBench[0]);
-        realBench = realBench.slice(1);
+        const hasGk = starting.some(p => p.position === 'GK');
+        let pickIdx = -1;
+        if (!hasGk) {
+            pickIdx = realBench.findIndex(p => p.position === 'GK');
+        } else {
+            pickIdx = realBench.findIndex(p => p.position !== 'GK');
+        }
+        if (pickIdx === -1) pickIdx = 0; // Emergency fallback
+        
+        starting.push(realBench[pickIdx]);
+        realBench.splice(pickIdx, 1);
     }
 
     realBench.sort((a, b) => (b.effectiveRating || b.rating) - (a.effectiveRating || a.rating));
@@ -315,17 +520,26 @@ export const getStartingLineup = (team: Team): { starting: Player[], bench: Play
 
 // --- Main Simulation Logic ---
 
-export const simulateMatch = (home: Team, away: Team, week: number, existingId?: string): Match => {
+export const simulateMatch = (
+  home: Team, 
+  away: Team, 
+  week: number, 
+  existingId?: string,
+  homeTactics?: TacticsConfig,
+  awayTactics?: TacticsConfig
+): Match => {
   const events: MatchEvent[] = [];
   let homeGoals = 0;
   let awayGoals = 0;
+  let halfTimeHomeGoals = 0;
+  let halfTimeAwayGoals = 0;
   const sentOffPlayers = new Set<string>(); 
   const matchYellowCards = new Set<string>(); 
   const homeSubbedInIds = new Set<string>();
   const awaySubbedInIds = new Set<string>();
 
-  const homeSquad = getStartingLineup(home);
-  const awaySquad = getStartingLineup(away);
+  const homeSquad = getStartingLineup(home, homeTactics);
+  const awaySquad = getStartingLineup(away, awayTactics);
 
   let homeOnPitch = [...homeSquad.starting];
   let homeBench = [...homeSquad.bench];
@@ -336,8 +550,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
   let awaySubsUsed = 0;
 
   const MAX_SUBS = Math.floor(3 + Math.random() * 3); 
-  const firstHalfStoppage = Math.floor(Math.random() * 3); 
-  const secondHalfStoppage = Math.floor(Math.random() * 6); 
+  const firstHalfStoppage = Math.floor(1 + Math.random() * 3); // 1 ~ 3 minutes
+  const secondHalfStoppage = Math.floor(2 + Math.random() * 7); // 2 ~ 8 minutes 
 
   // Base Strengths - Use Effective Rating implicitly as players are selected by it
   // But for team-wide strength calc, we can re-calculate using on-pitch effective ratings
@@ -346,9 +560,36 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       return players.reduce((sum, p) => sum + (p.effectiveRating || p.rating), 0);
   };
 
+  // Mentality multipliers
+  let homeAttMod = 1.0;
+  let homeDefMod = 1.0;
+  if (homeTactics?.mentality === 'ATTACKING') {
+      homeAttMod = 1.10;
+      homeDefMod = 0.92;
+  } else if (homeTactics?.mentality === 'DEFENSIVE') {
+      homeAttMod = 0.88;
+      homeDefMod = 1.12;
+  } else if (homeTactics?.mentality === 'COUNTER') {
+      homeAttMod = 1.04;
+      homeDefMod = 1.04;
+  }
+
+  let awayAttMod = 1.0;
+  let awayDefMod = 1.0;
+  if (awayTactics?.mentality === 'ATTACKING') {
+      awayAttMod = 1.10;
+      awayDefMod = 0.92;
+  } else if (awayTactics?.mentality === 'DEFENSIVE') {
+      awayAttMod = 0.88;
+      awayDefMod = 1.12;
+  } else if (awayTactics?.mentality === 'COUNTER') {
+      awayAttMod = 1.04;
+      awayDefMod = 1.04;
+  }
+
   // This roughly approximates the original team-stat based logic but using the actual fielded players' form
-  const homeStrength = calculateStrength(homeOnPitch) / 11 * 3; // Approx scale back to 300-ish range
-  const awayStrength = calculateStrength(awayOnPitch) / 11 * 3;
+  const homeStrength = (calculateStrength(homeOnPitch) / 11 * 3) * (homeAttMod * 0.5 + homeDefMod * 0.5);
+  const awayStrength = (calculateStrength(awayOnPitch) / 11 * 3) * (awayAttMod * 0.5 + awayDefMod * 0.5);
 
   const homeAdvantage = 1.1; 
   const baseGoalChance = 0.027; // Increased by approx 1/3 (from 0.020)
@@ -396,7 +637,8 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
     const currAwayGoalProb = baseGoalChance * Math.pow(currAwayAttRatio, 2.5);
 
     // --- INJURY LOGIC ---
-    if (Math.random() < 0.002) { // 0.2% chance per minute per side approx
+    // Increased probability for match injuries, heavily weighted towards minor 1-2 week injuries
+    if (Math.random() < 0.0035) { // ~25% chance of an injury event in a full match
         const isHomeInjury = Math.random() < 0.5;
         let pitch = isHomeInjury ? homeOnPitch : awayOnPitch;
         let bench = isHomeInjury ? homeBench : awayBench;
@@ -407,6 +649,21 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         const injuredPlayer = selectPlayer(pitch, 'CHANCE', sentOff); // Use generic weighting
 
         if (injuredPlayer) {
+             // Calculate injury duration: ~80% chance for 1~2 weeks (minor knocks/strains)
+             const roll = Math.random();
+             let injuryWeeks = 1;
+             if (roll < 0.45) {
+                 injuryWeeks = 1; // 45% chance: 1 week (mild knock/bruise)
+             } else if (roll < 0.80) {
+                 injuryWeeks = 2; // 35% chance: 2 weeks (minor muscle strain / sprain)
+             } else if (roll < 0.92) {
+                 injuryWeeks = 3; // 12% chance: 3 weeks
+             } else if (roll < 0.97) {
+                 injuryWeeks = 4; // 5% chance: 4 weeks
+             } else {
+                 injuryWeeks = 5; // 3% chance: 5 weeks (serious injury)
+             }
+
              events.push({ 
                  minute, 
                  extraMinute, 
@@ -415,13 +672,13 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
                  teamId: team.id, 
                  playerId: injuredPlayer.id, 
                  playerName: injuredPlayer.name, 
+                 injuryWeeks,
                  isImportant: true 
              });
 
              // Forced Substitution
              if (subsUsed < MAX_SUBS) {
-                 const candidatesOn = bench.filter(p => p.position === injuredPlayer.position);
-                 const subOn = candidatesOn.length > 0 ? candidatesOn[0] : bench[0];
+                 const subOn = selectSubOnCandidate(bench, injuredPlayer.position);
 
                  if (subOn) {
                      // Perform sub
@@ -463,12 +720,18 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         if (minute > 88) subProb = 0.18;  // Time wasting / desperation
         if (extraMinute > 0) subProb = 0.40;
 
+        // If a team trailed by 2 or more goals in the first half (half time), double its substitution probability
+        const homeTrailingTwoAtHalf = (halfTimeAwayGoals - halfTimeHomeGoals) >= 2;
+        const awayTrailingTwoAtHalf = (halfTimeHomeGoals - halfTimeAwayGoals) >= 2;
+
+        const homeSubProb = homeTrailingTwoAtHalf ? Math.min(1.0, subProb * 2) : subProb;
+        const awaySubProb = awayTrailingTwoAtHalf ? Math.min(1.0, subProb * 2) : subProb;
+
         // Home Sub
-        if (homeSubsUsed < MAX_SUBS && Math.random() < subProb) {
+        if (homeSubsUsed < MAX_SUBS && Math.random() < homeSubProb) {
             const subOff = selectSubOffCandidate(homeOnPitch, matchYellowCards, homeSubbedInIds, sentOffPlayers);
             if (subOff) {
-                const candidatesOn = homeBench.filter(p => p.position === subOff.position);
-                const subOn = candidatesOn.length > 0 ? candidatesOn[0] : homeBench[0];
+                const subOn = selectSubOnCandidate(homeBench, subOff.position);
 
                 if (subOn) {
                     homeOnPitch = homeOnPitch.filter(p => p.id !== subOff.id);
@@ -486,11 +749,10 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
         }
 
         // Away Sub
-        if (awaySubsUsed < MAX_SUBS && Math.random() < subProb) {
+        if (awaySubsUsed < MAX_SUBS && Math.random() < awaySubProb) {
             const subOff = selectSubOffCandidate(awayOnPitch, matchYellowCards, awaySubbedInIds, sentOffPlayers);
             if (subOff) {
-                const candidatesOn = awayBench.filter(p => p.position === subOff.position);
-                const subOn = candidatesOn.length > 0 ? candidatesOn[0] : awayBench[0];
+                const subOn = selectSubOnCandidate(awayBench, subOff.position);
 
                 if (subOn) {
                     awayOnPitch = awayOnPitch.filter(p => p.id !== subOff.id);
@@ -612,6 +874,10 @@ export const simulateMatch = (home: Team, away: Team, week: number, existingId?:
       for (let em = 1; em <= firstHalfStoppage; em++) simulateMinute(45, em);
   }
   events.push({ minute: 45, extraMinute: firstHalfStoppage, type: 'whistle', text: "Half Time whistle blows.", isImportant: false });
+
+  // Record half-time score to determine if either team trailed by 2+ goals in the first half
+  halfTimeHomeGoals = homeGoals;
+  halfTimeAwayGoals = awayGoals;
 
   // --- Phase 3: Second Half ---
   for (let m = 46; m <= 90; m++) simulateMinute(m);

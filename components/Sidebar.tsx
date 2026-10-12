@@ -16,7 +16,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, userTeam, disabled = false, isSeasonEnded = false, isOpen = false, onClose }) => {
   const menuItems = [
     { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'SQUAD', label: 'Squad & Tactics', icon: Users },
+    { id: 'TACTICS', label: 'Tactics & Lineup', icon: Shield },
+    { id: 'SQUAD', label: 'Squad Roster', icon: Users },
     { id: 'LEAGUE', label: 'League Table', icon: Trophy },
     { id: 'FIXTURES', label: 'Fixtures & Results', icon: List },
     { id: 'RECORDS', label: 'Records', icon: ClipboardList },
@@ -25,7 +26,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, userTeam, disab
         label: isSeasonEnded ? 'Season Summary' : 'Next Match', 
         icon: isSeasonEnded ? Flag : Calendar 
     },
-    { id: 'TACTICS', label: 'Training', icon: Shield },
   ];
 
   const handleSetView = (id: ViewState) => {

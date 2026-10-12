@@ -1,25 +1,102 @@
 
-import React from 'react';
-import { Trash2, ShieldCheck, Info, Volume2, VolumeX } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, ShieldCheck, Info, Volume2, VolumeX, Users, FileSpreadsheet, RefreshCw, Download } from 'lucide-react';
+import { Team } from '../types';
+import { RosterImporterModal } from './RosterImporterModal';
 
 interface SettingsViewProps {
   onClearApiKey: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  teams?: Team[];
+  onApplyRoster?: (updatedTeams: Team[]) => void;
+  onResetToDefaults?: () => void;
 }
 
-const SettingsView: React.FC<SettingsViewProps> = ({ onClearApiKey, soundEnabled, onToggleSound }) => {
+const SettingsView: React.FC<SettingsViewProps> = ({ 
+  onClearApiKey, 
+  soundEnabled, 
+  onToggleSound,
+  teams = [],
+  onApplyRoster,
+  onResetToDefaults
+}) => {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  // Export current squad data as CSV
+  const handleExportAllTeams = () => {
+    let csv = '\uFEFF球队,联赛,姓名,位置,评分,年龄,进球,助攻,出场\n';
+    teams.forEach(t => {
+      t.players.forEach(p => {
+        csv += `"${t.name}","${t.league}","${p.name}","${p.position}",${p.rating},${p.age},${p.goals},${p.assists},${p.matchesPlayed}\n`;
+      });
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `football_manager_rosters_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">Settings</h2>
-        <p className="text-gray-400">Manage your application preferences.</p>
+        <p className="text-gray-400">Manage your application preferences and squad database.</p>
       </div>
       
       <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 space-y-8">
+
+        {/* SQUAD & ROSTER SECTION */}
+        {onApplyRoster && onResetToDefaults && (
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-blue-900/30 p-3 rounded-full text-blue-400">
+                <Users size={24} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white mb-1">Squad & Roster Database</h3>
+                <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                  Import updated player rosters from spreadsheets (.xlsx, .xls, .csv, .json) or paste data directly from Excel / WPS.
+                  Changes are stored locally in your browser.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => setIsImportModalOpen(true)}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md shadow-blue-900/20"
+                  >
+                    <FileSpreadsheet size={16} />
+                    导入 / 更新名单
+                  </button>
+                  <button
+                    onClick={handleExportAllTeams}
+                    className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <Download size={16} />
+                    导出全部球员名单 (CSV)
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('确定要恢复所有球队的预设默认名单吗？已导入的自定义数据将被清除。')) {
+                        onResetToDefaults();
+                      }
+                    }}
+                    className="flex items-center gap-2 bg-gray-900/60 hover:bg-red-950/40 text-gray-400 hover:text-red-400 border border-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <RefreshCw size={15} />
+                    重置为初始名单
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* API KEY SECTION */}
-        <div className="flex items-start gap-4">
+        <div className="pt-6 border-t border-gray-700 flex items-start gap-4">
             <div className="bg-blue-900/30 p-3 rounded-full text-blue-400">
                 <ShieldCheck size={24} />
             </div>
@@ -77,6 +154,16 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onClearApiKey, soundEnabled
             </div>
         </div>
       </div>
+
+      {onApplyRoster && onResetToDefaults && (
+        <RosterImporterModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          teams={teams}
+          onApplyRoster={onApplyRoster}
+          onResetToDefaults={onResetToDefaults}
+        />
+      )}
     </div>
   );
 };

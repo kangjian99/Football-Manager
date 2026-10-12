@@ -1,13 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Team } from '../types';
-import { Shield, Zap, Target, User, Cross } from 'lucide-react';
+import { Shield, Zap, Target, User, Cross, FileSpreadsheet, Upload, Download } from 'lucide-react';
+import { RosterImporterModal } from './RosterImporterModal';
 
 interface SquadViewProps {
   team: Team;
+  allTeams?: Team[];
+  onApplyRoster?: (updatedTeams: Team[]) => void;
+  onResetToDefaults?: () => void;
 }
 
-const SquadView: React.FC<SquadViewProps> = ({ team }) => {
+const SquadView: React.FC<SquadViewProps> = ({ team, allTeams, onApplyRoster, onResetToDefaults }) => {
+  const [isImportOpen, setIsImportOpen] = useState(false);
+
   // Sort players: GK -> DEF -> MID -> FWD, then by Rating descending
   const sortedPlayers = [...team.players].sort((a, b) => {
     const posOrder = { 'GK': 0, 'DEF': 1, 'MID': 2, 'FWD': 3 };
@@ -29,7 +35,7 @@ const SquadView: React.FC<SquadViewProps> = ({ team }) => {
   return (
     <div className="space-y-6">
       <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg ${team.color}`}>{team.logo}</div>
                 <div>
@@ -37,19 +43,33 @@ const SquadView: React.FC<SquadViewProps> = ({ team }) => {
                     <p className="text-gray-400 text-sm">Squad Depth: {team.players.length} Players</p>
                 </div>
             </div>
-            <div className="flex gap-4">
-                <div className="text-center">
-                    <div className="text-xs text-gray-500 uppercase">ATT</div>
-                    <div className="text-xl font-bold text-white">{team.att}</div>
+            
+            <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex gap-4 bg-gray-900/60 px-4 py-2 rounded-lg border border-gray-700/60">
+                    <div className="text-center">
+                        <div className="text-[10px] text-gray-500 uppercase font-semibold">ATT</div>
+                        <div className="text-lg font-bold text-white">{team.att}</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-[10px] text-gray-500 uppercase font-semibold">MID</div>
+                        <div className="text-lg font-bold text-white">{team.mid}</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-[10px] text-gray-500 uppercase font-semibold">DEF</div>
+                        <div className="text-lg font-bold text-white">{team.def}</div>
+                    </div>
                 </div>
-                <div className="text-center">
-                    <div className="text-xs text-gray-500 uppercase">MID</div>
-                    <div className="text-xl font-bold text-white">{team.mid}</div>
-                </div>
-                <div className="text-center">
-                    <div className="text-xs text-gray-500 uppercase">DEF</div>
-                    <div className="text-xl font-bold text-white">{team.def}</div>
-                </div>
+
+                {onApplyRoster && (
+                    <button
+                        onClick={() => setIsImportOpen(true)}
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md shadow-blue-900/20"
+                        title="上传或粘贴更新球队名单 (支持 .xlsx, .xls, .csv 等)"
+                    >
+                        <FileSpreadsheet size={16} />
+                        <span>更新/导入名单</span>
+                    </button>
+                )}
             </div>
         </div>
 
@@ -163,6 +183,17 @@ const SquadView: React.FC<SquadViewProps> = ({ team }) => {
             </div>
         </div>
       </div>
+
+      {onApplyRoster && onResetToDefaults && (
+        <RosterImporterModal
+          isOpen={isImportOpen}
+          onClose={() => setIsImportOpen(false)}
+          teams={allTeams || [team]}
+          currentTeamId={team.id}
+          onApplyRoster={onApplyRoster}
+          onResetToDefaults={onResetToDefaults}
+        />
+      )}
     </div>
   );
 };

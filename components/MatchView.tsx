@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Team, Match, MatchEvent, Player } from '../types';
+import { Team, Match, MatchEvent, Player, TacticsConfig } from '../types';
 import { Play, FastForward, SkipForward, Timer, Volume2, VolumeX, RefreshCcw, ArrowLeftRight, Shirt } from 'lucide-react';
 import { simulateMatch } from '../services/gameEngine';
 import { playWhistle, playGoalSound, resumeAudio } from '../services/audioService';
@@ -14,9 +14,12 @@ interface MatchViewProps {
   onMatchStart: () => void;
   onMatchComplete: (matchResult: Match) => void;
   initialSoundEnabled: boolean;
+  userTactics?: TacticsConfig;
+  homeRank?: number;
+  awayRank?: number;
 }
 
-const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchStart, onMatchComplete, initialSoundEnabled }) => {
+const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId, userTeamId, onMatchStart, onMatchComplete, initialSoundEnabled, userTactics, homeRank, awayRank }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [minute, setMinute] = useState(0);
   const [extraMinute, setExtraMinute] = useState(0); // For stoppage time
@@ -32,7 +35,10 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
   // Simulate immediately on mount (calculation), but don't show result yet
   useEffect(() => {
     // We must simulate using homeTeam and awayTeam in that order
-    const result = simulateMatch(homeTeam, awayTeam, week, matchId);
+    const isUserHome = homeTeam.id === userTeamId;
+    const homeTactics = isUserHome ? userTactics : undefined;
+    const awayTactics = !isUserHome ? userTactics : undefined;
+    const result = simulateMatch(homeTeam, awayTeam, week, matchId, homeTactics, awayTactics);
     setMatchResult(result);
     
     // Use the lineups generated during simulation
@@ -44,7 +50,7 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
             awayFormation: result.awayFormation
         });
     }
-  }, [homeTeam, awayTeam, week, matchId]);
+  }, [homeTeam, awayTeam, week, matchId, userTeamId, userTactics]);
 
   const handleStartMatch = () => {
     onMatchStart(); // Lock navigation
@@ -232,6 +238,13 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                 {homeTeam.id === userTeamId && <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">YOU</div>}
                             </div>
                             <h2 className="text-xl md:text-2xl font-bold text-white text-center leading-tight">{homeTeam.name}</h2>
+                            {homeRank !== undefined && homeRank > 0 && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-800 border border-gray-700 text-gray-300 shadow">
+                                    <span className="text-amber-400 font-bold">第 {homeRank} 名</span>
+                                    <span className="text-gray-500">•</span>
+                                    <span>{homeTeam.points} 分</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* VS SECTION - Compact & Small */}
@@ -247,6 +260,13 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
                                 {awayTeam.id === userTeamId && <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">YOU</div>}
                             </div>
                             <h2 className="text-xl md:text-2xl font-bold text-white text-center leading-tight">{awayTeam.name}</h2>
+                            {awayRank !== undefined && awayRank > 0 && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-800 border border-gray-700 text-gray-300 shadow">
+                                    <span className="text-amber-400 font-bold">第 {awayRank} 名</span>
+                                    <span className="text-gray-500">•</span>
+                                    <span>{awayTeam.points} 分</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     
@@ -345,21 +365,30 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-red-900/20 pointer-events-none"></div>
         
         {/* LEFT: HOME TEAM */}
-        <div className="flex-1 flex items-center justify-end gap-4 z-10">
-            <div className="text-right hidden md:block">
-                <div className="text-2xl font-bold text-white leading-none">{homeTeam.name}</div>
-                <div className="text-xs text-gray-400 mt-1">HOME</div>
+        <div className="flex-1 flex items-center justify-end gap-3 md:gap-4 z-10 min-w-0">
+            <div className="text-right min-w-0">
+                <div className="text-base sm:text-xl md:text-2xl font-bold text-white leading-tight truncate">{homeTeam.name}</div>
+                <div className="flex items-center justify-end gap-1.5 text-xs text-gray-400 mt-0.5">
+                    {homeRank !== undefined && homeRank > 0 && (
+                        <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded text-[11px]">
+                            第 {homeRank} 名
+                        </span>
+                    )}
+                    <span className="hidden sm:inline text-gray-300">{homeTeam.points}分</span>
+                    <span className="text-gray-500 hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">HOME</span>
+                </div>
             </div>
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl ${homeTeam.color} shadow-lg border-2 border-gray-700`}>
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl md:text-3xl ${homeTeam.color} shadow-lg border-2 border-gray-700 shrink-0`}>
                 {homeTeam.logo}
             </div>
         </div>
 
-        <div className="mx-6 md:mx-12 text-center z-10 min-w-[120px]">
-            <div className="text-4xl font-mono font-bold text-white tracking-normal bg-black/40 px-2 py-1 rounded-lg backdrop-blur-sm">
+        <div className="mx-4 md:mx-12 text-center z-10 min-w-[110px] shrink-0">
+            <div className="text-3xl md:text-4xl font-mono font-bold text-white tracking-normal bg-black/40 px-3 py-1 rounded-lg backdrop-blur-sm">
                 {homeScore} - {awayScore}
             </div>
-            <div className="text-green-400 font-mono mt-2 font-bold flex justify-center items-center gap-2">
+            <div className="text-green-400 font-mono mt-1.5 font-bold flex justify-center items-center gap-2 text-sm">
                 {!isFinished && !isPaused && <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>}
                 {isPaused && <span className="text-xs text-yellow-400 uppercase">Event</span>}
                 {formatTime()}
@@ -367,13 +396,22 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
         </div>
 
         {/* RIGHT: AWAY TEAM */}
-        <div className="flex-1 flex items-center justify-start gap-4 z-10">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl ${awayTeam.color} shadow-lg border-2 border-gray-700`}>
+        <div className="flex-1 flex items-center justify-start gap-3 md:gap-4 z-10 min-w-0">
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl md:text-3xl ${awayTeam.color} shadow-lg border-2 border-gray-700 shrink-0`}>
                 {awayTeam.logo}
             </div>
-            <div className="text-left hidden md:block">
-                <div className="text-2xl font-bold text-white leading-none">{awayTeam.name}</div>
-                <div className="text-xs text-gray-400 mt-1">AWAY</div>
+            <div className="text-left min-w-0">
+                <div className="text-base sm:text-xl md:text-2xl font-bold text-white leading-tight truncate">{awayTeam.name}</div>
+                <div className="flex items-center justify-start gap-1.5 text-xs text-gray-400 mt-0.5">
+                    <span className="hidden sm:inline">AWAY</span>
+                    <span className="text-gray-500 hidden sm:inline">•</span>
+                    <span className="hidden sm:inline text-gray-300">{awayTeam.points}分</span>
+                    {awayRank !== undefined && awayRank > 0 && (
+                        <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded text-[11px]">
+                            第 {awayRank} 名
+                        </span>
+                    )}
+                </div>
             </div>
         </div>
       </div>
@@ -469,8 +507,35 @@ const MatchView: React.FC<MatchViewProps> = ({ homeTeam, awayTeam, week, matchId
 
           {/* Right Stats Column (Desktop) */}
           <div className="w-80 bg-gray-850 border-l border-gray-700 p-6 hidden lg:block shrink-0">
-             <h3 className="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest">Live Match Stats</h3>
+             <h3 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Live Match Stats</h3>
              
+             {/* League Standing Summary */}
+             {(homeRank !== undefined || awayRank !== undefined) && (
+                 <div className="bg-gray-800 p-3.5 rounded-lg border border-gray-700 mb-6">
+                     <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2.5 text-center">联赛即时排名</div>
+                     <div className="space-y-2">
+                         <div className="flex items-center justify-between text-xs">
+                             <div className="flex items-center gap-2 truncate">
+                                 <span className="w-6 text-center font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded py-0.5 text-[10px]">
+                                     #{homeRank || '-'}
+                                 </span>
+                                 <span className="text-white font-medium truncate">{homeTeam.name}</span>
+                             </div>
+                             <span className="text-gray-400 text-xs shrink-0">{homeTeam.points} 分 ({homeTeam.played}场)</span>
+                         </div>
+                         <div className="flex items-center justify-between text-xs">
+                             <div className="flex items-center gap-2 truncate">
+                                 <span className="w-6 text-center font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded py-0.5 text-[10px]">
+                                     #{awayRank || '-'}
+                                 </span>
+                                 <span className="text-white font-medium truncate">{awayTeam.name}</span>
+                             </div>
+                             <span className="text-gray-400 text-xs shrink-0">{awayTeam.points} 分 ({awayTeam.played}场)</span>
+                         </div>
+                     </div>
+                 </div>
+             )}
+
              <div className="space-y-8">
                  {/* Possession Bar */}
                  <div>

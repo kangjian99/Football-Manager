@@ -54,6 +54,7 @@ export interface MatchEvent {
   subOff?: { id: string, name: string }; // Player leaving
   isImportant: boolean;
   cardType?: 'yellow' | 'red';
+  injuryWeeks?: number;
 }
 
 export interface Match {
@@ -71,6 +72,17 @@ export interface Match {
   awayLineup?: Player[];
   homeFormation?: string;
   awayFormation?: string;
+}
+
+export type FormationType = '4-3-3' | '4-4-2' | '4-2-3-1' | '3-5-2' | '5-3-2';
+
+export type MentalityType = 'ATTACKING' | 'BALANCED' | 'DEFENSIVE' | 'COUNTER';
+
+export interface TacticsConfig {
+  formation: FormationType;
+  mentality: MentalityType;
+  startingIds: string[]; // Exactly 11 player IDs
+  benchIds: string[];    // Bench player IDs
 }
 
 export type ViewState = 'DASHBOARD' | 'SQUAD' | 'LEAGUE' | 'MATCH' | 'SETTINGS' | 'TACTICS' | 'FIXTURES' | 'SEASON_END' | 'RECORDS';

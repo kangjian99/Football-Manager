@@ -10,11 +10,11 @@ import SeasonEndView from './components/SeasonEndView';
 import SettingsView from './components/SettingsView';
 import RecordsView from './components/RecordsView';
 import ApiKeyScreen from './components/ApiKeyScreen';
-//import { ALL_TEAMS } from './constants';
-// To switch to English leagues, uncomment the line below and comment out the line above.
-import { ALL_TEAMS } from './constants_e';
-import { Team, ViewState, Match, LeagueLevel } from './types';
-import { generateSchedule, simulateMatch, getStartingLineup } from './services/gameEngine';
+import TacticsView from './components/TacticsView';
+import { ALL_TEAMS } from './constants';
+// constants.ts and constants_e.ts both contain the updated 2026/27 Premier League and Championship squads
+import { Team, ViewState, Match, LeagueLevel, TacticsConfig } from './types';
+import { generateSchedule, simulateMatch, getStartingLineup, getDefaultTactics } from './services/gameEngine';
 import { Key, Lock, ShieldCheck, Info, Menu } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -27,11 +27,22 @@ const App: React.FC = () => {
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [schedule, setSchedule] = useState<Match[][]>([]);
-  const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.SERIE_A); // Default, will update on load
-  const [seasonYear, setSeasonYear] = useState("2024/2025");
+  const [viewLeague, setViewLeague] = useState<LeagueLevel>(LeagueLevel.PREMIER_LEAGUE); // Default to Premier League 2026/27
+  const [seasonYear, setSeasonYear] = useState("2026/2027");
   const [isMatchInProgress, setIsMatchInProgress] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
+  // Tactical configuration for user's team
+  const [userTactics, setUserTactics] = useState<TacticsConfig | null>(() => {
+    try {
+      const saved = localStorage.getItem('user_tactics');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  });
+
   // Sound Settings
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
     const stored = localStorage.getItem('sound_enabled');
@@ -42,6 +53,14 @@ const App: React.FC = () => {
     const newVal = !soundEnabled;
     setSoundEnabled(newVal);
     localStorage.setItem('sound_enabled', String(newVal));
+  };
+
+  const handleApplyRoster = (updatedTeams: Team[]) => {
+    setTeams(updatedTeams);
+  };
+
+  const handleResetToDefaults = () => {
+    setTeams(ALL_TEAMS);
   };
 
   // Computed: Identify active leagues dynamically
@@ -117,6 +136,24 @@ const App: React.FC = () => {
     }
   }, []); // Run once on mount
 
+  // Ensure user team has valid tactics
+  useEffect(() => {
+    if (userTeam) {
+      const teamPlayerIds = new Set(userTeam.players.map(p => p.id));
+      const hasValidStarters = userTactics && userTactics.startingIds.length === 11 && userTactics.startingIds.every(id => teamPlayerIds.has(id));
+      if (!hasValidStarters) {
+        const def = getDefaultTactics(userTeam, '4-3-3', 'BALANCED');
+        setUserTactics(def);
+        localStorage.setItem('user_tactics', JSON.stringify(def));
+      }
+    }
+  }, [userTeamId, teams]);
+
+  const handleUpdateTactics = (newTactics: TacticsConfig) => {
+    setUserTactics(newTactics);
+    localStorage.setItem('user_tactics', JSON.stringify(newTactics));
+  };
+
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
     const input = (document.getElementById('apiKeyInput') as HTMLInputElement).value;
@@ -149,11 +186,18 @@ const App: React.FC = () => {
   const calculateTeamUpdates = (currentTeams: Team[], results: Match[]): Team[] => {
       return currentTeams.map(team => {
           // Deep copy players, decrementing previous bans and recovering injuries
-          const updatedPlayers = team.players.map(p => ({
-              ...p,
-              matchesBanned: Math.max(0, p.matchesBanned - 1),
-              injury: Math.max(0, p.injury - 1) // Recover 1 week per match week
-          }));
+          const updatedPlayers = team.players.map(p => {
+              let nextInjury = Math.max(0, p.injury - 1); // Recover 1 week per match week
+              // Slight realistic chance (~0.8%) of picking up a minor 1~2 week knock during training
+              if (nextInjury === 0 && Math.random() < 0.008) {
+                  nextInjury = Math.random() < 0.65 ? 1 : 2;
+              }
+              return {
+                  ...p,
+                  matchesBanned: Math.max(0, p.matchesBanned - 1),
+                  injury: nextInjury
+              };
+          });
 
           // Check if this team played in this batch of results
           const match = results.find(m => m.homeTeamId === team.id || m.awayTeamId === team.id);
@@ -245,8 +289,17 @@ const App: React.FC = () => {
                            if (player) {
                                if (evt.type === 'goal') player.goals++;
                                if (evt.type === 'injury') {
-                                   // Random injury duration: 1 to 5 weeks
-                                   player.injury = Math.floor(Math.random() * 5) + 1;
+                                   // Weighted heavily towards minor 1~2 week injuries (~80% chance)
+                                   if (evt.injuryWeeks) {
+                                       player.injury = evt.injuryWeeks;
+                                   } else {
+                                       const roll = Math.random();
+                                       if (roll < 0.45) player.injury = 1;
+                                       else if (roll < 0.80) player.injury = 2;
+                                       else if (roll < 0.92) player.injury = 3;
+                                       else if (roll < 0.97) player.injury = 4;
+                                       else player.injury = 5;
+                                   }
                                }
                                if (evt.type === 'card') {
                                    if (evt.cardType === 'red') {
@@ -320,8 +373,9 @@ const App: React.FC = () => {
             const results = weekMatches.map(m => {
                const home = tempTeams.find(t => t.id === m.homeTeamId)!;
                const away = tempTeams.find(t => t.id === m.awayTeamId)!;
-               // Simulate logic
-               return simulateMatch(home, away, w, m.id);
+               const homeTac = m.homeTeamId === userTeamId ? (userTactics || undefined) : undefined;
+               const awayTac = m.awayTeamId === userTeamId ? (userTactics || undefined) : undefined;
+               return simulateMatch(home, away, w, m.id, homeTac, awayTac);
             });
             
             // Update schedule for this week
@@ -342,7 +396,9 @@ const App: React.FC = () => {
     const simulatedMatches = currentWeekMatches.map(m => {
         const home = teams.find(t => t.id === m.homeTeamId)!;
         const away = teams.find(t => t.id === m.awayTeamId)!;
-        return simulateMatch(home, away, currentWeek, m.id);
+        const homeTac = m.homeTeamId === userTeamId ? (userTactics || undefined) : undefined;
+        const awayTac = m.awayTeamId === userTeamId ? (userTactics || undefined) : undefined;
+        return simulateMatch(home, away, currentWeek, m.id, homeTac, awayTac);
     });
     processMatchResults(simulatedMatches);
   };
@@ -588,6 +644,22 @@ const App: React.FC = () => {
   const homeTeamForMatch = userMatch ? teams.find(t => t.id === userMatch.homeTeamId) : null;
   const awayTeamForMatch = userMatch ? teams.find(t => t.id === userMatch.awayTeamId) : null;
 
+  const getTeamRank = (team: Team | null): number => {
+    if (!team) return 0;
+    const leagueTeams = teams.filter(t => t.league === team.league);
+    const sorted = [...leagueTeams].sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const gdA = a.gf - a.ga;
+      const gdB = b.gf - b.ga;
+      if (gdB !== gdA) return gdB - gdA;
+      return b.gf - a.gf;
+    });
+    return sorted.findIndex(t => t.id === team.id) + 1;
+  };
+
+  const homeRankForMatch = homeTeamForMatch ? getTeamRank(homeTeamForMatch) : 0;
+  const awayRankForMatch = awayTeamForMatch ? getTeamRank(awayTeamForMatch) : 0;
+
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans">
       <Sidebar 
@@ -647,6 +719,7 @@ const App: React.FC = () => {
                     isSeasonEnded={isSeasonEnded}
                     onViewSeasonEnd={() => setCurrentView('SEASON_END')}
                     onSimulateWeek={handleSimulateWeek}
+                    onNavigateToTactics={() => setCurrentView('TACTICS')}
                     userHasFutureMatches={userHasFutureMatches}
                 />
             )}
@@ -671,7 +744,12 @@ const App: React.FC = () => {
                 </div>
             )}
             {currentView === 'SQUAD' && (
-                <SquadView team={userTeam!} />
+                <SquadView 
+                    team={userTeam!} 
+                    allTeams={teams}
+                    onApplyRoster={handleApplyRoster}
+                    onResetToDefaults={handleResetToDefaults}
+                />
             )}
             {currentView === 'FIXTURES' && (
                 <FixturesView schedule={schedule} teams={teams} currentWeek={currentWeek > totalWeeks ? totalWeeks : currentWeek} />
@@ -690,6 +768,9 @@ const App: React.FC = () => {
                         onMatchStart={() => setIsMatchInProgress(true)}
                         onMatchComplete={handleMatchComplete}
                         initialSoundEnabled={soundEnabled}
+                        userTactics={userTactics || undefined}
+                        homeRank={homeRankForMatch}
+                        awayRank={awayRankForMatch}
                     />
                 ) : (
                     // Fallback UI if in MATCH view but no match exists (e.g. Season End or Bye Week)
@@ -711,8 +792,8 @@ const App: React.FC = () => {
                                 {!isSeasonEnded && (
                                     <button 
                                         onClick={() => {
-                                            handleSimulateWeek();
-                                            setCurrentView('DASHBOARD');
+                                             handleSimulateWeek();
+                                             setCurrentView('DASHBOARD');
                                         }}
                                         className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold transition-colors"
                                     >
@@ -737,13 +818,23 @@ const App: React.FC = () => {
                     onClearApiKey={handleClearApiKey} 
                     soundEnabled={soundEnabled}
                     onToggleSound={handleToggleSound}
+                    teams={teams}
+                    onApplyRoster={handleApplyRoster}
+                    onResetToDefaults={handleResetToDefaults}
                 />
             )}
              {currentView === 'TACTICS' && (
-                <div className="text-center py-20 text-gray-500">
-                    <h2 className="text-2xl font-bold mb-4">Training Ground</h2>
-                    <p>Training features coming in next update.</p>
-                </div>
+                userTeam && userTactics ? (
+                    <TacticsView 
+                        team={userTeam} 
+                        tactics={userTactics} 
+                        onUpdateTactics={handleUpdateTactics} 
+                    />
+                ) : (
+                    <div className="text-center py-20 text-gray-400">
+                        <p className="text-lg">Please select a club first.</p>
+                    </div>
+                )
             )}
         </div>
       </main>
